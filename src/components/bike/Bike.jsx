@@ -2,21 +2,26 @@ import React, { Suspense, useEffect } from 'react'
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Api from '../../api/Api'
-import { useNavigate } from 'react-router-dom'
-function Profile(props) {
+import { useNavigate, useParams } from 'react-router-dom'
+function Bike() {
   const location = useLocation()
+  const { id } = useParams()
   const navigate = useNavigate()
   const type = location?.state
-
+  const [bike, setBike] = useState({})
   const [user, setUser] = useState({})
 
   const getUserData = async () => {
-    let userId = type === 'info'? localStorage.getItem('userProfileId'):localStorage.getItem('userId')
+    let userId =
+      type === 'info'
+        ? localStorage.getItem('userProfileId')
+        : localStorage.getItem('userId')
     const responseUser = await Api.call({}, `users/${userId}`, 'get', userId)
-   
     if (responseUser.data) {
       let userData = responseUser.data.data
+      let selectedBike = id ? userData.bikes.find((a) => a.id == id) : {}
       setUser(userData)
+      setBike(selectedBike)
     }
   }
 
@@ -25,14 +30,14 @@ function Profile(props) {
   }, [])
 
   const handleChange = (value, field) => {
-    setUser({ ...user, [field]: value })
+    setBike({ ...bike, [field]: value })
   }
 
-  const updateUser = async () => {
-    let userId = type === 'info'? localStorage.getItem('userProfileId'):localStorage.getItem('userId')
+  const updateBike = async () => {
+    let path = id ? `bikes/${id}` : `bikes`
     const response = await Api.call(
-      user,
-      `users/${userId}`,
+      bike,
+      path,
       'put',
       localStorage.getItem('userId')
     )
@@ -50,61 +55,68 @@ function Profile(props) {
     <div className='edit-card'>
       <div className='card'>
         <div className='card-header p-3'>
-          <h4>ユーザーデータ</h4>
+          <h4>バイクデータ</h4>
         </div>
         <form className='p-4'>
           <div class='mb-3 row'>
-            <label for='name1' class='col-sm-4 col-form-label'>
-              苗字
+            <label for='name' class='col-sm-4 col-form-label'>
+              バイク名
             </label>
             <div class='col-sm-8'>
               <input
                 class='form-control'
-                id='name1'
-                value={user?.name1}
-                onChange={(event) => handleChange(event.target.value, 'name1')}
+                id='name'
+                value={bike?.name}
+                onChange={(event) => handleChange(event.target.value, 'name')}
               />
             </div>
           </div>
           <div class='mb-3 row'>
-            <label for='name2' class='col-sm-4 col-form-label'>
-              名前
+            <label for='type' class='col-sm-4 col-form-label'>
+              バイク車種
+            </label>
+            <div class='col-sm-8'>
+              <select
+                class='form-select'
+                aria-label='Default select example'
+                id='type'
+              >
+                <option selected value='1'>
+                  GSX-R1100
+                </option>
+                <option value='2'> 車種未登録 </option>
+              </select>
+            </div>
+          </div>
+          <div class='mb-3 row'>
+            <label for='sortNo' class='col-sm-4 col-form-label'>
+              ソートNo
             </label>
             <div class='col-sm-8'>
               <input
                 class='form-control'
-                id='name2'
-                value={user?.name2}
-                onChange={(event) => handleChange(event.target.value, 'name2')}
+                id='sortNo'
+                type={'number'}
+                value={bike?.sortNo}
+                onChange={(event) => handleChange(event.target.value, 'sortNo')}
               />
             </div>
           </div>
           <div class='mb-3 row'>
-            <label for='nickname' class='col-sm-4 col-form-label'>
-              ニックネーム
+            <label for='role' class='col-sm-4 col-form-label'>
+              停止フラグ
             </label>
             <div class='col-sm-8'>
-              <input
-                class='form-control'
-                id='nickname'
-                value={user?.nickname}
-                onChange={(event) =>
-                  handleChange(event.target.value, 'nickname')
-                }
-              />
-            </div>
-          </div>
-          <div class='mb-3 row'>
-            <label for='email' class='col-sm-4 col-form-label'>
-              E-Mail
-            </label>
-            <div class='col-sm-8'>
-              <input
-                class='form-control'
-                id='email'
-                value={user?.email}
-                onChange={(event) => handleChange(event.target.value, 'email')}
-              />
+              <select
+                class='form-select'
+                aria-label='Default select example'
+                id='role'
+                disabled
+              >
+                <option selected value='0'>
+                  有効
+                </option>
+              </select>
             </div>
           </div>
 
@@ -116,14 +128,22 @@ function Profile(props) {
             >
               戻る
             </button>
-            <button
-              type='button'
-              class='btn btn-primary'
-              data-bs-toggle='modal'
-              data-bs-target='#exampleModal'
-            >
-              更新
-            </button>
+            <div className='d-flex justify-content-between'>
+              {id && (
+                <button type='button' class='btn btn-danger btn-sm mx-3 px-2'>
+                  削除
+                </button>
+              )}
+
+              <button
+                type='button'
+                class='btn btn-primary'
+                data-bs-toggle='modal'
+                data-bs-target='#exampleModal'
+              >
+                更新
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -138,7 +158,7 @@ function Profile(props) {
           <div class='modal-content'>
             <div class='modal-header'>
               <h1 class='modal-title fs-5' id='exampleModalLabel'>
-                ユーザーデータ
+                Modal Title
               </h1>
               <button
                 type='button'
@@ -161,7 +181,7 @@ function Profile(props) {
               <button
                 type='button'
                 className='btn btn-primary'
-                onClick={() => updateUser()}
+                onClick={() => updateBike()}
               >
                 更新
               </button>
@@ -173,4 +193,4 @@ function Profile(props) {
   )
 }
 
-export default Profile
+export default Bike

@@ -1,9 +1,11 @@
 import axios from 'axios'
-import * as https from 'https'
 
-const apiUrl = process.env.API_URL
+const apiUrl = import.meta.env.VITE_API_URL 
 
-export default class AxiosApi {
+console.log("apiUrl: ", apiUrl)
+
+
+export default class Api {
   static ApiURL = apiUrl
 
   static call = async (requestBody, path, method, header) => {
@@ -35,14 +37,13 @@ export default class AxiosApi {
         {
           headers: headers,
           timeout: 1200000,
-          httpsAgent: httpsAgent,
         }
         // , {crossDomain: true}
       )
-      return getResponseData(response)
+      return response
     } catch (e) {
       if (e.response) {
-        return getResponseData(e.response)
+        return e.response
       } else return e
     }
   }

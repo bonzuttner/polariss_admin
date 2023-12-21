@@ -1,5 +1,349 @@
-.main-layout .logo-image{
-    width: 15rem;
-    padding: 1rem 2rem;
-    height: auto;
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #f5f7fa !important;
+}
+.btn,
+button {
+  font-size: 0.8rem !important;
+}
+.main-layout .navbar {
+  background: #fff;
+  border-bottom: 1px solid #cbd0dd;
+}
+.main-layout .logo-image {
+  width: 15rem;
+  padding: 1rem 2rem;
+  height: auto;
+}
+.main-layout .user-dropdown::after {
+  display: none;
+}
+
+.main-layout .user-dropdown {
+  height: 3rem;
+  width: 3rem;
+  padding: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-right: 30px;
+}
+
+.main-layout .user-dropdown #user-name {
+  width: 100%;
+  height: 100%;
+  border-radius: 50% !important;
+  background-color: #dddddd;
+  line-height: 3rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 0.2rem;
+  font-size: 0.7rem;
+}
+
+.main-layout .user-dropdown #user-name:hover {
+  background-color: #b6b3b3;
+}
+
+.main-layout .profile-menu {
+  left: auto !important;
+  min-width: 18.3125rem;
+  right: 1.8rem;
+  margin-top: 10px !important;
+}
+.main-layout .profile-menu::after {
+  content: '';
+  position: absolute;
+  right: 0.9rem;
+  left: auto;
+  z-index: -1;
+  width: 1.2rem;
+  height: 1.2rem;
+  top: -10px;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  background: inherit;
+  border-top-left-radius: 0.25rem;
+  border-width: 1px 0 0 1px;
+  border-style: solid;
+  border-color: #cbd0dd;
+}
+.main-layout .logout-item {
+  border-top: 1px solid #e3e6ed;
+  text-align: center;
+  padding: 1rem 0 0.4rem;
+}
+.main-layout .logout-item .log-out-btn {
+  background-color: #f5f7fa;
+  border: 1px solid #e3e6ed;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  color: #31374a;
+  width: 85%;
+  padding: 0.6rem 0;
+}
+
+.main-layout .alert {
+  color: #003cc7;
+  background-color: #e5edff;
+  text-align: center;
+  padding: 2rem 0;
+}
+.main-layout .alert p {
+  margin-bottom: 0.2rem;
+}
+
+.main-layout .setting-page {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.main-layout .setting-page .tabs-section {
+  width: 40%;
+  margin: 4rem auto 0;
+}
+.main-layout .setting-page .tabs-section .tab-content {
+  margin-top: 20px;
+  border-color: #e3e6ed;
+}
+.main-layout .setting-page .tabs-section .tab-content .card-header {
+  background-color: #e5edff;
+  border-color: #e3e6ed;
+  padding: 2px 15px;
+}
+.main-layout .setting-page .tabs-section .tab-content .card-header button {
+  float: right;
+  padding: 5px 15px;
+}
+.main-layout .setting-page .tabs-section .nav-item .nav-link {
+  color: #31374a;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+}
+.main-layout .setting-page .tabs-section .nav-item .nav-link.active {
+  color: #3874ff;
+  border-bottom: 2px solid #3874ff;
+}
+.main-layout .setting-page .tab-content .list-group-item {
+  background: #f5f7fa;
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+}
+
+.main-layout .setting-page .tab-content .list-group-item p {
+  color: #313749;
+  margin-bottom: 0;
+}
+.main-layout .setting-page .tab-content .list-group-item p:first-child {
+  width: 30%;
+  text-align: left;
+  padding-left: 4rem;
+}
+.main-layout .setting-page .tab-content .list-group-item p:last-child {
+  text-align: center;
+  width: 70%;
+}
+
+.main-layout .setting-page .list-btn {
+  font-size: 0.8rem;
+}
+
+.main-layout .card .detail-list {
+  display: flex;
+  align-items: baseline;
+  background: #f5f7fa;
+}
+
+.main-layout .card .detail-list p:first-child {
+  text-align: left;
+  padding-left: 1rem;
+}
+.main-layout .card .detail-list .right-side {
+  display: flex;
+  align-items: baseline;
+  width: 60%;
+  justify-content: right;
+}
+
+.main-layout .card .detail-list .right-side p {
+  margin: 0 1rem;
+}
+.main-layout .card .detail-list .right-side button {
+  margin-right: 1rem;
+}
+.edit-card {
+  width: 40%;
+  margin: 4rem auto;
+}
+.edit-card .card .card-header {
+  background-color: #f5f7fa;
+  border-color: #e3e6ed;
+}
+.edit-card .card .card-header h4 {
+  font-size: 1.25rem;
+}
+.edit-card form {
+  width: 90%;
+  margin: auto;
+}
+.edit-card form label {
+  color: #525b75;
+  font-weight: 700;
+}
+.edit-card form input,
+.edit-card form .form-select {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  line-height: 1.49;
+  color: #31374a;
+}
+.list-page {
+  text-align: center;
+}
+.list-page .back-section {
+  text-align: right;
+}
+.list-page .back-section .clear-btn {
+  margin-right: 15px;
+}
+
+.list-page .table {
+  width: 100%;
+  margin: 2rem auto;
+}
+
+.list-page .table thead tr th {
+  background: #f4f7fa;
+  font-size: medium;
+  font-weight: 500;
+  border: 1px solid #e3e6ed;
+}
+
+.list-page .table tbody tr td {
+  font-size: 0.9rem;
+  padding: 0.5rem !important;
+  vertical-align: middle;
+  color: #313749;
+  border: 1px solid #e3e6ed;
+}
+.list-page .levels-section {
+  width: 80%;
+  margin: 2rem auto;
+}
+.list-page .levels-section .level button {
+  width: 90%;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.8rem 10px;
+  margin-bottom: 15px;
+}
+.list-page .levels-section .first.level {
+  width: 40%;
+}
+.list-page .levels-section .second.level {
+  width: 60%;
+}
+
+.list-page .levels-section-table {
+  width: 100%;
+}
+
+.list-page .levels-section-table .first.level {
+  width: 15%;
+  margin-top: 2rem;
+}
+
+.list-page .levels-section-table .first.level button {
+  width: 90%;
+}
+
+.list-page .levels-section-table .second.level {
+  width: 85%;
+}
+
+.list-page .show-all-section {
+  text-align: left;
+}
+
+.list-page .show-all {
+  color: #0d6efd;
+  text-decoration: underline;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.list-page .show-all:hover {
+  color: #135bc8;
+}
+
+@media (max-width: 768px) {
+  .user-name-circle.mb-2 {
+    margin-bottom: 0 !important;
+  }
+
+  .main-layout .logo-image {
+    width: 13rem;
+  }
+
+  .main-layout .setting-page .tabs-section {
+    width: 90%;
+  }
+  .main-layout .setting-page .tab-content .list-group-item {
+    padding: 1rem 0.2rem;
+  }
+  .main-layout .setting-page .tab-content .list-group-item p:first-child {
+    padding-left: 0.5rem;
+  }
+
+  .edit-card {
+    width: 90%;
+  }
+
+  .list-page .levels-section {
+    width: 100%;
+  }
+
+  .list-page .table thead tr th {
+    font-size: 0.8rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .list-page .table tbody tr td {
+    font-size: 0.7rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .list-page .table tbody tr td .btn {
+    padding: 0.2rem !important;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-layout .logo-image {
+    width: 12rem;
+    padding: 1rem 0.8rem;
+  }
+
+  .main-layout .user-dropdown {
+    margin-right: 10px;
+  }
+
+  .main-layout .setting-page .tabs-section {
+    width: 95%;
+  }
+
+  .edit-card {
+    width: 95%;
+  }
+
+  .edit-card form {
+    width: 100%;
+  }
 }
