@@ -7,9 +7,9 @@ function MainLayout(props) {
     <div className='main-layout'>
       <nav className='navbar navbar-expand-lg p-0'>
         <div className='container-fluid d-flex justify-content-between'>
-          <a className='navbar-brand polaris' href='https://polarissdevapp.azurewebsites.net/'>
+          <a className='navbar-brand polaris' href='https://polarissprodapp.azurewebsites.net/'>
             <img className='logo-image'
-             src='https://polarissdevapp.azurewebsites.net/img/logo/polariss_logo01.png'
+             src='https://polarissprodapp.azurewebsites.net/img/logo/polariss_logo01.png'
              />
           </a>
           <ul className='navbar-nav mb-2 mb-lg-0 user-name-circle'>
