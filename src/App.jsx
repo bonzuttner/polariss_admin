@@ -12,21 +12,21 @@ function App() {
   useEffect(() => {}, [])
 
   return (
-    <Router>
-      <MainLayout>
-        <Routes>
-          <Route exact path='/setting/:id' element={<Settings />} />
-          <Route exact path='/setting' element={<Settings />} />
-          <Route exact path='/setting/user-info' element={<Settings type={'info'}/>} />
-          <Route exact path='/setting/profile' element={<Profile />} />
-          <Route exact path='/setting/bike/:id' element={<Bike />} />
-          <Route exact path='/setting/bike' element={<Bike />} />
-          <Route exact path='/setting/device/:id' element={<Device />} />
-          <Route exact path='/setting/device' element={<Device />} />
-          <Route exact path='/setting/list' element={<List />} />
-        </Routes>
-      </MainLayout>
-    </Router>
+      <Router>
+        <MainLayout>
+          <Routes>
+            <Route exact path='/setting/:id' element={<Settings />} />
+            <Route exact path='/setting' element={<Settings />} />
+            <Route exact path='/setting/user-info' element={<Settings type={'info'}/>} />
+            <Route exact path='/setting/profile' element={<Profile />} />
+            <Route exact path='/setting/bike/:id' element={<Bike />} />
+            <Route exact path='/setting/bike' element={<Bike />} />
+            <Route exact path='/setting/device/:id' element={<Device />} />
+            <Route exact path='/setting/device' element={<Device />} />
+            <Route exact path='/setting/list' element={<List />} />
+          </Routes>
+        </MainLayout>
+      </Router>
   )
 }
 
