@@ -125,7 +125,7 @@ function Device() {
                 >
                   <option value='SKB001'> SKB001 </option>
                   <option value='SKG001'> SKG001 </option>
-                  <option value='SKGM01' selected='' >SKGM01</option>
+                  <option value='SKGM01' selected >SKGM01</option>
                   <option value='SKGTL01'> SKGTL01 </option>
                 </select>
               </div>
