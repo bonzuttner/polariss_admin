@@ -35,10 +35,11 @@ function Bike() {
 
   const updateBike = async () => {
     let path = id ? `bikes/${id}` : `bikes`
+    let request_type = id ? `put` : `post`
     const response = await Api.call(
       bike,
       path,
-      'post',
+      request_type,
       localStorage.getItem('userId')
     )
     if (response.data) {

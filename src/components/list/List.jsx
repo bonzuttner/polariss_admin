@@ -120,7 +120,7 @@ function List() {
             <button
               className='btn show-all'
               onClick={() => setShowAll(!showAll)}
-            >{`${showAll ? 'Hide All Users' : 'Show All Users'}`}</button>
+            >{`${showAll ? 'Hide All Users' : 'Show Users Pool'}`}</button>
           </div>
           {showAll && renderTable(usersList)}
         </>
@@ -133,7 +133,7 @@ function List() {
             <button
               className='btn show-all'
               onClick={() => setShowAll(!showAll)}
-            >{`${showAll ? 'Hide All Users' : 'Show All Users'}`}</button>
+            >{`${showAll ? 'Hide All Users' : 'Show Users Pool'}`}</button>
           </div>
           {showAll && renderTable(usersList)}
         </>
