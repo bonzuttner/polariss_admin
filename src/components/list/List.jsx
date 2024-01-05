@@ -7,10 +7,14 @@ function List() {
   const navigate = useNavigate()
   const [list, setList] = useState([])
   const [usersList, setUsersList] = useState([])
+  const [poolList, setpoolList] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedFirstLevel, setSelectedFirstLevel] = useState('')
   const [selectedSecondLevel, setSelectedSecondLevel] = useState('')
   const [showAll, setShowAll] = useState(false)
+  const [showPool, setShowPool] = useState(false)
+
+  
 
   let userId = localStorage.getItem('userId')
   let role = localStorage.getItem('role')
@@ -31,6 +35,13 @@ function List() {
           let allUsers = response.data.data
           setUsersList(allUsers)
         }
+        const poolresponse = await Api.call({}, 'users/pool', 'get', userId)
+        if (poolresponse.data) {
+          let allUsers = poolresponse.data.data
+          setpoolList(allUsers)
+        }
+
+        
       } else if (role === 'admin1' || role === 'admin2') {
         const response = await Api.call({}, 'users/pool', 'get', userId)
         if (response.data) {
@@ -80,6 +91,16 @@ function List() {
             <div className='first level'> {firstLevel}</div>
             <div className='second level'> {secondtLevel}</div>
           </div>
+
+          <div className='show-all-section'>
+            <button
+              className='btn show-all'
+              onClick={() => setShowPool(!showPool)}
+            >{`${showPool ? 'Hide Users Pool' : 'Show Users Pool'}`}</button>
+          </div>
+          {showPool && renderTable(poolList)}
+
+
           <div className='show-all-section'>
             <button
               className='btn show-all'

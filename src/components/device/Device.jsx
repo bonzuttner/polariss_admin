@@ -121,10 +121,11 @@ function Device() {
                   id='type'
                   onChange={(event) => handleChange(event.target.value, 'type')}
                   value={device?.type}
+                  disabled
                 >
                   <option value='SKB001'> SKB001 </option>
                   <option value='SKG001'> SKG001 </option>
-                  <option value='SKGM01'>SKGM01</option>
+                  <option value='SKGM01' selected='' >SKGM01</option>
                   <option value='SKGTL01'> SKGTL01 </option>
                 </select>
               </div>
