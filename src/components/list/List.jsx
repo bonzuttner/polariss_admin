@@ -31,6 +31,12 @@ function List() {
           let allUsers = response.data.data
           setUsersList(allUsers)
         }
+      } else if (role === 'admin1' || role === 'admin2') {
+        const response = await Api.call({}, 'users/pool', 'get', userId)
+        if (response.data) {
+          let allUsers = response.data.data
+          setUsersList(allUsers)
+        }
       }
       setLoading(false)
     }
@@ -75,10 +81,10 @@ function List() {
             <div className='second level'> {secondtLevel}</div>
           </div>
           <div className='show-all-section'>
-          <button
-            className='btn show-all'
-            onClick={() => setShowAll(!showAll)}
-          >{`${showAll ? 'Hide All Users' : 'Show All Users'}`}</button>
+            <button
+              className='btn show-all'
+              onClick={() => setShowAll(!showAll)}
+            >{`${showAll ? 'Hide All Users' : 'Show All Users'}`}</button>
           </div>
           {showAll && renderTable(usersList)}
         </>
@@ -102,13 +108,36 @@ function List() {
         }
       })
       return (
-        <div className='d-flex levels-section-table'>
-          <div className='first level'> {firstLevel}</div>
-          <div className='second level'> {renderTable(secondtLevel, true)}</div>
-        </div>
+        <>
+          <div className='d-flex levels-section-table'>
+            <div className='first level'> {firstLevel}</div>
+            <div className='second level'>
+              {' '}
+              {renderTable(secondtLevel, true)}
+            </div>
+          </div>
+          <div className='show-all-section'>
+            <button
+              className='btn show-all'
+              onClick={() => setShowAll(!showAll)}
+            >{`${showAll ? 'Hide All Users' : 'Show All Users'}`}</button>
+          </div>
+          {showAll && renderTable(usersList)}
+        </>
       )
     } else {
-      return renderTable()
+      return (
+        <>
+          {renderTable()}
+          <div className='show-all-section'>
+            <button
+              className='btn show-all'
+              onClick={() => setShowAll(!showAll)}
+            >{`${showAll ? 'Hide All Users' : 'Show All Users'}`}</button>
+          </div>
+          {showAll && renderTable(usersList)}
+        </>
+      )
     }
   }
 
@@ -214,7 +243,7 @@ function List() {
           <span class='visually-hidden'>Loading...</span>
         </div>
       ) : role === 'admin2' ? (
-        renderTable()
+        renderUserTree()
       ) : (
         renderUserTree()
       )}

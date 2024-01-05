@@ -11,14 +11,18 @@ function Device() {
   const [device, setDevice] = useState({})
   const [user, setUser] = useState({})
   const [loading, setLoading] = useState(true)
-  
 
   const getUserData = async () => {
     let userId =
-    type === 'info'
-      ? localStorage.getItem('userProfileId')
-      : localStorage.getItem('userId')
-    const responseUser = await Api.call({}, `users/${userId}`, 'get', localStorage.getItem('userId'))
+      type === 'info'
+        ? localStorage.getItem('userProfileId')
+        : localStorage.getItem('userId')
+    const responseUser = await Api.call(
+      {},
+      `users/${userId}`,
+      'get',
+      localStorage.getItem('userId')
+    )
 
     if (responseUser.data) {
       let userData = responseUser.data.data
@@ -87,19 +91,25 @@ function Device() {
                 />
               </div>
             </div>
-            <div class='mb-3 row'>
-              <label for='sortNo' class='col-sm-4 col-form-label'>
-                imsi
-              </label>
-              <div class='col-sm-8'>
-                <input
-                  class='form-control'
-                  id='imsi'
-                  value={device?.imsi}
-                  onChange={(event) => handleChange(event.target.value, 'imsi')}
-                />
+            {id && (
+              <div class='mb-3 row'>
+                <label for='sortNo' class='col-sm-4 col-form-label'>
+                  imsi
+                </label>
+                <div class='col-sm-8'>
+                  <input
+                    class='form-control'
+                    id='imsi'
+                    disabled
+                    value={device?.imsi}
+                    onChange={(event) =>
+                      handleChange(event.target.value, 'imsi')
+                    }
+                  />
+                </div>
               </div>
-            </div>
+            )}
+
             <div class='mb-3 row'>
               <label for='type' class='col-sm-4 col-form-label'>
                 deviceType
@@ -165,7 +175,11 @@ function Device() {
               <button
                 type='button'
                 className='btn btn-outline-primary btn-sm px-3'
-                onClick={() => navigate(`${type === 'info'? '/setting/user-info': '/setting'}`)}
+                onClick={() =>
+                  navigate(
+                    `${type === 'info' ? '/setting/user-info' : '/setting'}`
+                  )
+                }
               >
                 戻る
               </button>
