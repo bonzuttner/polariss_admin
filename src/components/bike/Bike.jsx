@@ -38,7 +38,7 @@ function Bike() {
     const response = await Api.call(
       bike,
       path,
-      'put',
+      'post',
       localStorage.getItem('userId')
     )
     if (response.data) {
