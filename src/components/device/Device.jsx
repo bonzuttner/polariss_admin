@@ -80,7 +80,7 @@ function Device() {
             </div>
             <div class='mb-3 row'>
               <label for='name' class='col-sm-4 col-form-label'>
-                deviceName
+                Sim Number
               </label>
               <div class='col-sm-8'>
                 <input
