@@ -14,6 +14,8 @@ function Settings(props) {
   let componentType = props.type
   let userProfileId =
     componentType === 'info' ? localStorage.getItem('userProfileId') : userId
+
+  let logedInRole = localStorage.getItem("role")
   const [userDetail, setUserDetail] = useState({})
   const [selectedTab, setSelectedTab] = useState('profile')
   const getDetails = async () => {
@@ -42,6 +44,7 @@ function Settings(props) {
   const getUserList = async () => {
     let path = 'users/tree'
     const response = await Api.call({}, path, 'get', userId)
+    console.log("response: ", response)
     if (response.data) {
       let list = response.data.data
       list?.splice(0, 0, {
@@ -60,7 +63,7 @@ function Settings(props) {
     if (id || localStorage.getItem('userId')) {
       getDetails()
     }
-    if (localStorage.getItem('role') === 'master' && componentType === 'info') {
+    if (logedInRole !== 'user' && componentType === 'info') {
       getUserList()
     }
   }, [])
@@ -120,7 +123,7 @@ function Settings(props) {
             <div className='card-header'>
               <button
                 className='btn btn-primary btn-sm my-2'
-                onClick={() => navigate('/setting/bike')}
+                onClick={() => navigate('/setting/bike', { state: componentType })}
               >
                 新規登録
               </button>
@@ -155,7 +158,7 @@ function Settings(props) {
             <div className='card-header'>
               <button
                 className='btn btn-primary btn-sm my-2'
-                onClick={() => navigate('/setting/device')}
+                onClick={() => navigate('/setting/device', { state: componentType })}
               >
                 新規登録
               </button>
@@ -327,7 +330,7 @@ function Settings(props) {
     )
     if (response?.data?.code === 200) {
       localStorage.setItem('userProfileRole', response?.data.data.role)
-      window.location.reload(false)
+      //window.location.reload(false)
     } else {
       const modal = document.getElementById('exampleModal')
       if (modal) {
@@ -379,7 +382,7 @@ function Settings(props) {
               デバイス情報
             </a>
           </li>
-          {localStorage.getItem('role') === 'master' &&
+          {(logedInRole !== 'user') &&
             componentType === 'info' && (
               <li className='nav-item'>
                 <a

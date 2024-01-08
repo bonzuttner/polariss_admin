@@ -39,7 +39,7 @@ function Profile(props) {
     if (response.data) {
       if (type === 'info') {
         navigate('/setting/user-info')
-        window.location.reload(false)
+       window.location.reload(false)
       } else {
         window.location.reload(false)
       }

@@ -43,15 +43,27 @@ function Device() {
   }
 
   const updateDevice = async () => {
-    let path = id ? `devices/${id}` : `devices`
+    let path = `devices`
+    // id ? `devices/${id}` : `devices`
+    let request_type = id ? `put` : `post`
+    let userId =
+      type === 'info'
+        ? localStorage.getItem('userProfileId')
+        : localStorage.getItem('userId')
+    device.userId = userId
+    device.type = 'SKGM01'
+    device.sortNo = 1
+    if(!device.bikeId){
+      device.bikeId =user.bikes[0].id
+    }
     const response = await Api.call(
       device,
-      `devices`,
-      'put',
+      path,
+      request_type,
       localStorage.getItem('userId')
     )
     if (response.data) {
-      window.location.reload(false)
+      // window.location.reload(false)
     }
   }
 
@@ -125,7 +137,9 @@ function Device() {
                 >
                   <option value='SKB001'> SKB001 </option>
                   <option value='SKG001'> SKG001 </option>
-                  <option value='SKGM01' selected >SKGM01</option>
+                  <option value='SKGM01' selected>
+                    SKGM01
+                  </option>
                   <option value='SKGTL01'> SKGTL01 </option>
                 </select>
               </div>
@@ -141,7 +155,7 @@ function Device() {
                   aria-label='Default select example'
                   id='bikeId'
                   onChange={(event) =>
-                    handleChange(event.target.value, 'bikeId')
+                    handleChange(parseInt(event.target.value), 'bikeId')
                   }
                   value={device?.bikeId}
                 >

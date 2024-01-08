@@ -36,6 +36,12 @@ function Bike() {
   const updateBike = async () => {
     let path = id ? `bikes/${id}` : `bikes`
     let request_type = id ? `put` : `post`
+    let userId =
+      type === 'info'
+        ? localStorage.getItem('userProfileId')
+        : localStorage.getItem('userId')
+    bike.userId = userId
+    bike.type = 1
     const response = await Api.call(
       bike,
       path,
@@ -45,9 +51,9 @@ function Bike() {
     if (response.data) {
       if (type === 'info') {
         navigate('/setting/user-info')
-        window.location.reload(false)
+         window.location.reload(false)
       } else {
-        window.location.reload(false)
+         window.location.reload(false)
       }
     }
   }
@@ -99,7 +105,7 @@ function Bike() {
                 id='sortNo'
                 type={'number'}
                 value={bike?.sortNo}
-                onChange={(event) => handleChange(event.target.value, 'sortNo')}
+                onChange={(event) => handleChange(parseInt(event.target.value), 'sortNo')}
               />
             </div>
           </div>
@@ -125,7 +131,11 @@ function Bike() {
             <button
               type='button'
               className='btn btn-outline-primary btn-sm px-3'
-              onClick={() => navigate(`${type === 'info'? '/setting/user-info': '/setting'}`)}
+              onClick={() =>
+                navigate(
+                  `${type === 'info' ? '/setting/user-info' : '/setting'}`
+                )
+              }
             >
               戻る
             </button>
