@@ -15,7 +15,7 @@ function Settings(props) {
   let userProfileId =
     componentType === 'info' ? localStorage.getItem('userProfileId') : userId
 
-  let logedInRole = localStorage.getItem("role")
+  let logedInRole = localStorage.getItem('role')
   const [userDetail, setUserDetail] = useState({})
   const [selectedTab, setSelectedTab] = useState('profile')
   const getDetails = async () => {
@@ -44,18 +44,22 @@ function Settings(props) {
   const getUserList = async () => {
     let path = 'users/tree'
     const response = await Api.call({}, path, 'get', userId)
-    console.log("response: ", response)
     if (response.data) {
       let list = response.data.data
-      list?.splice(0, 0, {
-        admins2: [],
-        email: 'Master',
-        id: 'e19a238b-0a33-4b43-a440-22bb486657a2',
-        name1: 'Master',
-        name2: 'Master',
-        nickname: 'Master',
-        role: 'master',
-      })
+      if (logedInRole === 'master') {
+        list?.splice(0, 0, {
+          admins2: [],
+          email: 'Master',
+          id: 'e19a238b-0a33-4b43-a440-22bb486657a2',
+          name1: 'Master',
+          name2: 'Master',
+          nickname: 'Master',
+          role: 'master',
+        })
+      } else if (logedInRole === 'admin2') {
+        list = list[0].admins2
+      }
+
       setList(list)
     }
   }
@@ -123,7 +127,9 @@ function Settings(props) {
             <div className='card-header'>
               <button
                 className='btn btn-primary btn-sm my-2'
-                onClick={() => navigate('/setting/bike', { state: componentType })}
+                onClick={() =>
+                  navigate('/setting/bike', { state: componentType })
+                }
               >
                 新規登録
               </button>
@@ -139,7 +145,9 @@ function Settings(props) {
                       <button
                         className='btn btn-primary btn-sm my-2'
                         onClick={() =>
-                          navigate(`/setting/bike/${bike.id}`, { state: componentType })
+                          navigate(`/setting/bike/${bike.id}`, {
+                            state: componentType,
+                          })
                         }
                       >
                         編集
@@ -158,7 +166,9 @@ function Settings(props) {
             <div className='card-header'>
               <button
                 className='btn btn-primary btn-sm my-2'
-                onClick={() => navigate('/setting/device', { state: componentType })}
+                onClick={() =>
+                  navigate('/setting/device', { state: componentType })
+                }
               >
                 新規登録
               </button>
@@ -180,7 +190,9 @@ function Settings(props) {
                       <button
                         className='btn btn-primary btn-sm my-2'
                         onClick={() =>
-                          navigate(`/setting/device/${device.imsi}`, { state: componentType })
+                          navigate(`/setting/device/${device.imsi}`, {
+                            state: componentType,
+                          })
                         }
                       >
                         編集
@@ -209,12 +221,17 @@ function Settings(props) {
                     id='type'
                     onChange={(event) => setRole(event.target.value)}
                   >
-                    <option selected={role === 'admin1'} value='admin1'>
-                      Admin1
-                    </option>
-                    <option selected={role === 'admin2'} value='admin2'>
-                      Admin2
-                    </option>
+                    {logedInRole === 'master' && (
+                      <option selected={role === 'admin1'} value='admin1'>
+                        Admin1
+                      </option>
+                    )}
+                    {(logedInRole === 'master' || logedInRole === 'admin1') && (
+                      <option selected={role === 'admin2'} value='admin2'>
+                        Admin2
+                      </option>
+                    )}
+
                     <option selected={role === 'user'} value='user'>
                       User
                     </option>
@@ -238,7 +255,7 @@ function Settings(props) {
                     <Dropdown.Menu>
                       {list.map((item) => {
                         let returnedItem = []
-                        if (item.admins2.length > 0) {
+                        if (item.admins2?.length > 0) {
                           returnedItem.push(
                             <>
                               <Dropdown.Item
@@ -330,11 +347,17 @@ function Settings(props) {
     )
     if (response?.data?.code === 200) {
       localStorage.setItem('userProfileRole', response?.data.data.role)
-      //window.location.reload(false)
+      window.location.reload(false)
     } else {
       const modal = document.getElementById('exampleModal')
       if (modal) {
-        //modal.classList.remove("show");
+        modal.classList.remove('show')
+      }
+      let modalBack = document.getElementsByClassName('modal-backdrop')
+      if (modalBack) {
+        for (let i = 0; i < modalBack.length; i++) {
+          modalBack[i]?.classList.remove('show')
+        }
       }
       setError(response?.data?.message)
     }
@@ -342,6 +365,11 @@ function Settings(props) {
 
   return (
     <div className='setting-page'>
+      {error && (
+        <div class='alert alert-danger' role='alert'>
+          {error}
+        </div>
+      )}
       <div className='alert'>
         <p>{`・LoginUserID: ${localStorage.getItem('userId')}`}</p>
         <p>{`・UserProfile.userID: ${userProfileId}`}</p>
@@ -382,20 +410,19 @@ function Settings(props) {
               デバイス情報
             </a>
           </li>
-          {(logedInRole !== 'user') &&
-            componentType === 'info' && (
-              <li className='nav-item'>
-                <a
-                  className={`nav-link ${
-                    selectedTab === 'assign-users' ? 'active' : ''
-                  }`}
-                  href='#'
-                  onClick={() => tabClicked('assign-users')}
-                >
-                  Assign Users
-                </a>
-              </li>
-            )}
+          {logedInRole !== 'user' && componentType === 'info' && (
+            <li className='nav-item'>
+              <a
+                className={`nav-link ${
+                  selectedTab === 'assign-users' ? 'active' : ''
+                }`}
+                href='#'
+                onClick={() => tabClicked('assign-users')}
+              >
+                Assign Users
+              </a>
+            </li>
+          )}
         </ul>
         <div className='tab-content'>{renderTabContent()}</div>
       </div>
@@ -430,11 +457,6 @@ function Settings(props) {
             </div>
             <div class='modal-body'>
               <p>更新を実施します</p>
-              {error && (
-                <div class='alert alert-danger' role='alert'>
-                  {error}
-                </div>
-              )}
             </div>
             <div class='modal-footer'>
               <button

@@ -11,7 +11,7 @@ function Device() {
   const [device, setDevice] = useState({})
   const [user, setUser] = useState({})
   const [loading, setLoading] = useState(true)
-
+  const [error, setError] = useState('')
   const getUserData = async () => {
     let userId =
       type === 'info'
@@ -53,8 +53,8 @@ function Device() {
     device.userId = userId
     device.type = 'SKGM01'
     device.sortNo = 1
-    if(!device.bikeId){
-      device.bikeId =user.bikes[0].id
+    if (!device.bikeId) {
+      device.bikeId = user.bikes[0].id
     }
     const response = await Api.call(
       device,
@@ -62,13 +62,30 @@ function Device() {
       request_type,
       localStorage.getItem('userId')
     )
-    if (response.data) {
-      // window.location.reload(false)
+    if (response.data.code === 200) {
+      setError("")
+      window.location.reload(false)
+    } else {
+      let modal = document.getElementById('exampleModal')
+      modal.classList.remove('show')
+      let modalBack = document.getElementsByClassName('modal-backdrop')
+      if (modalBack) {
+        for (let i = 0; i < modalBack.length; i++) {
+          modalBack[i]?.classList.remove('show')
+        }
+      }
+      setError(response.data ? response.data.message : 'Error, Please try again!')
     }
   }
 
   return (
     <div className='edit-card'>
+      {error && (
+        <div class='alert alert-danger' role='alert'>
+          {error}
+        </div>
+      )}
+
       <div className='card'>
         <div className='card-header p-3'>
           <h4>デバイスデータ</h4>
