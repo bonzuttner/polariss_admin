@@ -42,6 +42,7 @@ function Bike() {
         : localStorage.getItem('userId')
     bike.userId = userId
     bike.type = 1
+    bike.sortNo = 1
     const response = await Api.call(
       bike,
       path,
@@ -53,6 +54,7 @@ function Bike() {
         navigate('/setting/user-info')
          window.location.reload(false)
       } else {
+        navigate('/setting')
          window.location.reload(false)
       }
     }
@@ -78,7 +80,8 @@ function Bike() {
               />
             </div>
           </div>
-          <div class='mb-3 row'>
+
+          {/* <div class='mb-3 row'> 
             <label for='type' class='col-sm-4 col-form-label'>
               バイク車種
             </label>
@@ -125,7 +128,7 @@ function Bike() {
                 </option>
               </select>
             </div>
-          </div>
+          </div>*/}
 
           <div className='d-flex justify-content-between'>
             <button
