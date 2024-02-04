@@ -1,7 +1,7 @@
 import { Dropdown } from 'bootstrap'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-
+import ModalComponent from '../common/ModalComponent';
 import Api from '../../api/Api'
 function List() {
   const navigate = useNavigate()
@@ -13,7 +13,8 @@ function List() {
   const [selectedSecondLevel, setSelectedSecondLevel] = useState('')
   const [showAll, setShowAll] = useState(false)
   const [showPool, setShowPool] = useState(false)
-
+  const [show, setShow] = useState(false);
+  const [selectedUser, setSelectedUser] = useState({});
   
 
   let userId = localStorage.getItem('userId')
@@ -180,6 +181,11 @@ function List() {
     navigate('/setting/user-info')
   }
 
+  const showModal = (user) => {
+    setSelectedUser(user)
+    setShow(true)
+  }
+
   const renderTable = (userList = [], showExtra = false) => {
     const listToRender = userList.length === 0 ? list : userList
     return (
@@ -227,7 +233,8 @@ function List() {
                       >
                         編集
                       </button>
-                      <button className='btn btn-danger btn-sm '>削除</button>
+                      <button className='btn btn-danger btn-sm '
+                       onClick={() => showModal(user)}>削除</button>
                     </td>
                   </tr>
                 )
@@ -267,6 +274,14 @@ function List() {
         renderUserTree()
       ) : (
         renderUserTree()
+      )}
+      {show && (
+        <ModalComponent
+          name={'users'}
+          id={selectedUser?.id}
+          close={() => setShow(false)}
+          userId={localStorage.getItem('userId')}
+        />
       )}
     </div>
   )
