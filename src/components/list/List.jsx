@@ -44,11 +44,12 @@ function List() {
         const response = await Api.call({}, 'users/pool', 'get', userId);
         if (response.data) {
           let allUsers = response.data.data;
-          const responseUsers = await Api.call({}, 'users/list', 'get', userId);
-          if (responseUsers.data) {
-            let usersList = responseUsers.data.data.concat(allUsers);
-            setUsersList(usersList);
-          }
+          setpoolList(allUsers);
+        }
+        const responseUsers = await Api.call({}, 'users/list', 'get', userId);
+        if (responseUsers.data) {
+          let usersList = responseUsers.data.data;
+          setUsersList(usersList);
         }
       }
       setLoading(false);
@@ -160,7 +161,7 @@ function List() {
               onClick={() => setShowAll(!showAll)}
             >{`${showAll ? 'Hide All Users' : 'Show Users Pool'}`}</button>
           </div>
-          {showAll && renderTable(usersList)}
+          {showAll && renderTable(poolList)}
         </>
       );
     } else {
@@ -173,7 +174,7 @@ function List() {
               onClick={() => setShowAll(!showAll)}
             >{`${showAll ? 'Hide All Users' : 'Show Users Pool'}`}</button>
           </div>
-          {showAll && renderTable(usersList)}
+          {showAll && renderTable(poolList)}
         </>
       );
     }
@@ -202,7 +203,7 @@ function List() {
     setShow(true);
   };
 
-  const renderTable = (userList = [], showExtra = false) => {
+  const renderTable = (userList = [], showExtra = false, type = '') => {
     const listToRender = userList.length === 0 ? list : userList;
     return (
       <div class="table-responsive">
