@@ -80,11 +80,9 @@ function List() {
           >{`${item.name2} ${item.name1}`}</button>
         );
         if (item.id === selectedFirstLevel.id) {
+          secondList = usersList.filter((user) => user.parent?.id === item.id);
           if (item.admins2.length === 0) {
             secondLevelTable = true;
-            secondList = usersList.filter(
-              (user) => user.parent?.id === item.id
-            );
           } else {
             item.admins2?.map((secondItem) => {
               secondtLevel.push(
@@ -94,6 +92,14 @@ function List() {
                 >{`${secondItem.name2} ${secondItem.name1}`}</button>
               );
             });
+            if (secondList.length > 1) {
+              secondtLevel.push(
+                <button
+                  className={`btn d-block btn-outline-secondary`}
+                  onClick={() => setSecondLevel(item, secondList)}
+                >{`Show Direct Children`}</button>
+              );
+            }
           }
         }
       });
@@ -180,15 +186,20 @@ function List() {
     }
   };
 
-  const setSecondLevel = async (item) => {
-    setLoading(true);
-    let path = `users/list`;
-    const response = await Api.call({}, path, 'get', item.id);
-    if (response.data) {
-      let list = response.data.data;
+  const setSecondLevel = async (item, list = []) => {
+    if (list.length > 0) {
       setList(list);
       setSelectedSecondLevel(item);
-      setLoading(false);
+    } else {
+      setLoading(true);
+      let path = `users/list`;
+      const response = await Api.call({}, path, 'get', item.id);
+      if (response.data) {
+        let list = response.data.data;
+        setList(list);
+        setSelectedSecondLevel(item);
+        setLoading(false);
+      }
     }
   };
 
