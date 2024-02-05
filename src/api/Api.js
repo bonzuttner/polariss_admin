@@ -2,9 +2,6 @@ import axios from 'axios'
 
 const apiUrl = import.meta.env.VITE_API_URL 
 
-console.log("apiUrl: ", apiUrl)
-
-
 export default class Api {
   static ApiURL = apiUrl
 
