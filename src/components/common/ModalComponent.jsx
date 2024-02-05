@@ -1,3 +1,4 @@
+import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Api from '../../api/Api';
@@ -5,10 +6,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 function ModalComponent({ name, id, close, userId }) {
   const navigate = useNavigate();
+
   const handleConfirm = async () => {
     const response = await Api.call({}, `${name}/${id}`, 'delete', userId);
     if (response.data) {
       navigate(`${name === 'users' ? '/setting/list' : '/setting'}`);
+      window.location.reload();
     }
   };
 
