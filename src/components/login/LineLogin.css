@@ -1,0 +1,12 @@
+.line-login {
+  width: 50%;
+  margin: 40px auto;
+  text-align: center;
+}
+.line-btn {
+  border: none;
+  margin: 40px 0 60px;
+}
+.images {
+  display: inline-grid;
+}

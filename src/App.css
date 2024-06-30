@@ -3,6 +3,7 @@ body {
   padding: 0;
   height: 100%;
   background: #f5f7fa !important;
+  overflow-x: hidden;
 }
 .btn,
 button {
@@ -13,8 +14,9 @@ button {
   border-bottom: 1px solid #cbd0dd;
 }
 .main-layout .logo-image {
-  width: 15rem;
-  padding: 1rem 2rem;
+  /* width: 15rem; */
+  width: 124px;
+  /* padding: 1rem 2rem; */
   height: auto;
 }
 .main-layout .user-dropdown::after {
