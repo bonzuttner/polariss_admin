@@ -9,7 +9,6 @@ import Api from '../../api/Api';
 
 const API_KEY = import.meta.env.API_KEY;
 function Home(props) {
-  console.log('props: ', props)
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);

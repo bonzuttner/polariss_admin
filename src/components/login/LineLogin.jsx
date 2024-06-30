@@ -1,36 +1,17 @@
 import React, { Suspense, useEffect } from 'react';
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import './LineLogin.css';
 import LineButtonImage from '../../assets/btn_login_base.png';
 function LineLogin() {
-  const location = useLocation();
+  
   const [error, setError] = useState('');
   const [show, setShow] = useState(false);
 
   useEffect(() => {}, []);
 
   const lineLogin = () => {
-    // Build query string.
-    // const query = querystring.stringify({
-    //   response_type: 'code',
-    //   client_id: 1661093729,
-    //   state: 'n5XpxTF3bk4iMIqlDKoQXcGf9u0v5Ui3cqFs0Pi1cORdISe6J5_XSqUaJK-UxMklPGJ0IfJ8lJ-6VMR3D_9emoxhZolLcQNrwJj3RvBMqZmFeFhWRMUC_Ndp8KHmXggU0KFUX4y3_UEUCROUq_sN1sDnohVynx9i0x81yeiV-bBV-LN6IRvHpzOVRevLAhZSCpT1dCQsLBTJyXIfeU6Hf3veql-amU2Gh5uPmoCcSc8',
-    //   scope: 'profile openid',
-    //   nonce: nonce,
-    //   prompt: 'consent',
-    //   max_age: maxAge,
-    //   bot_prompt: 'normal'
-    // });
-    // // Build the Line authorise URL.
-    // const lineAuthoriseURL =
-    //   'https://access.line.me/oauth2/v2.1/authorize?' +
-    //   query +
-    //   '&redirect_uri=' +
-    //   redirectURI;
-    // // Redirect to external URL.
-    window.location.href =
-      'https://access.line.me/oauth2/v2.1/login?returnUri=%2Foauth2%2Fv2.1%2Fauthorize%2Fconsent%3Fresponse_type%3Dcode%26client_id%3D1661093729%26redirect_uri%3Dhttp%3A%2F%2Flocalhost%3A5173%26state%3DJqv_5Bdv5IKDahQqlqIeGtvXS6HKJMLMi_e3lmoLQAar_WbF_cRMkUXqyxMADZnqDojHezxqeyWQGsScdVxjsJK6C0HKVK4v-Q9Xnz0tpuaFcUVHiomhYph6GYfMt6Ojn7nQapbwMm1e0xLaRtfv44GqvfMeEq-5n8vV8hWWpaQ3hpmVwZ3ZgdB5fFR4kpNHusAqZ-fvIYc71zHbHcV1XTRW2Ig5952zUw_J_VsL7gc%26scope%3Dprofile%2520openid&loginChannelId=1661093729&loginState=u7tA4gvzKs2vkXFkeTzcKO#';
+    const redirectUri = encodeURIComponent(location.origin);
+    window.location.href = `https://access.line.me/oauth2/v2.1/login?returnUri=%2Foauth2%2Fv2.1%2Fauthorize%2Fconsent%3Fresponse_type%3Dcode%26client_id%3D1661093729%26redirect_uri%3D${redirectUri}%26state%3DJqv_5Bdv5IKDahQqlqIeGtvXS6HKJMLMi_e3lmoLQAar_WbF_cRMkUXqyxMADZnqDojHezxqeyWQGsScdVxjsJK6C0HKVK4v-Q9Xnz0tpuaFcUVHiomhYph6GYfMt6Ojn7nQapbwMm1e0xLaRtfv44GqvfMeEq-5n8vV8hWWpaQ3hpmVwZ3ZgdB5fFR4kpNHusAqZ-fvIYc71zHbHcV1XTRW2Ig5952zUw_J_VsL7gc%26scope%3Dprofile%2520openid&loginChannelId=1661093729&loginState=u7tA4gvzKs2vkXFkeTzcKO#`;
   };
 
   return (
