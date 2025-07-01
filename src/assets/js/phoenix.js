@@ -287,7 +287,7 @@
 
         iconCopiedToast.querySelector(
           '.toast-body'
-        ).innerHTML = `<code class='text-500'>Code has been copied to clipboard.</code>`;
+        ).innerHTML = `<code className='text-500'>Code has been copied to clipboard.</code>`;
         iconCopiedToastInstance.show();
       });
     });
@@ -675,8 +675,8 @@
     const tooltipFormatter = (params, dateFormatter = 'MMM DD') => {
       let tooltipItem = ``;
       params.forEach(el => {
-        tooltipItem += `<div class='ms-1'>
-          <h6 class="text-700"><span class="fas fa-circle me-1 fs--2" style="color:${
+        tooltipItem += `<div className='ms-1'>
+          <h6 className="text-700"><span className="fas fa-circle me-1 fs--2" style="color:${
             el.color
           }"></span>
             ${el.seriesName} : ${
@@ -686,7 +686,7 @@
         </div>`;
       });
       return `<div>
-              <p class='mb-2 text-600'>
+              <p className='mb-2 text-600'>
                 ${
                   window.dayjs(params[0].axisValue).isValid()
                     ? window.dayjs(params[0].axisValue).format('DD MMM, YYYY')
@@ -2097,7 +2097,7 @@
               self.config.showMonths === 1 &&
               className !== "prevMonthDay" &&
               i % 7 === 6) {
-              self.weekNumbers.insertAdjacentHTML("beforeend", "<span class='flatpickr-day'>" + self.config.getWeek(date) + "</span>");
+              self.weekNumbers.insertAdjacentHTML("beforeend", "<span className='flatpickr-day'>" + self.config.getWeek(date) + "</span>");
           }
           triggerEvent("onDayCreate", dayElement);
           return dayElement;
@@ -2410,7 +2410,7 @@
               weekdays = __spreadArrays(weekdays.splice(firstDayOfWeek, weekdays.length), weekdays.splice(0, firstDayOfWeek));
           }
           for (var i = self.config.showMonths; i--;) {
-              self.weekdayContainer.children[i].innerHTML = "\n      <span class='flatpickr-weekday'>\n        " + weekdays.join("</span><span class='flatpickr-weekday'>") + "\n      </span>\n      ";
+              self.weekdayContainer.children[i].innerHTML = "\n      <span className='flatpickr-weekday'>\n        " + weekdays.join("</span><span className='flatpickr-weekday'>") + "\n      </span>\n      ";
           }
       }
       function buildWeeks() {
@@ -3807,8 +3807,8 @@
         controlButton.classList.add(type);
         controlButton.innerHTML =
           type === 'zoomIn'
-            ? '<span class="fas fa-plus text-black"></span>'
-            : '<span class="fas fa-minus text-black"></span>';
+            ? '<span className="fas fa-plus text-black"></span>'
+            : '<span className="fas fa-minus text-black"></span>';
 
         controlButton.addEventListener('click', () => {
           const zoom = map.getZoom();
@@ -4377,7 +4377,7 @@
           document.execCommand('copy');
           iconCopiedToast.querySelector(
             '.toast-body'
-          ).innerHTML = `<span class="fw-black">Copied:</span>  <code>${el.value}</code>`;
+          ).innerHTML = `<span className="fw-black">Copied:</span>  <code>${el.value}</code>`;
           iconCopiedToastInstance.show();
         }
       });
@@ -4465,7 +4465,7 @@
             options = {
               ...options,
               pagination: {
-                item: `<li><button class='page' type='button'></button></li>`,
+                item: `<li><button className='page' type='button'></button></li>`,
                 ...options.pagination
               }
             };
@@ -4515,7 +4515,7 @@
 
           const updateListControls = () => {
             listInfo &&
-              (listInfo.innerHTML = `${list.i} to ${numberOfcurrentItems} <span class='text-600'> Items of </span>${totalItem}`);
+              (listInfo.innerHTML = `${list.i} to ${numberOfcurrentItems} <span className='text-600'> Items of </span>${totalItem}`);
             paginationButtonPrev &&
               togglePaginationButtonDisable(
                 paginationButtonPrev,
@@ -4722,9 +4722,9 @@
           targetElement.insertAdjacentHTML(
             'afterend',
             `
-            <div data-move-container class='move-container'>
-              <div class='navbar-vertical-divider'>
-                <hr class='navbar-vertical-hr' />
+            <div data-move-container className='move-container'>
+              <div className='navbar-vertical-divider'>
+                <hr className='navbar-vertical-hr' />
               </div>
               ${navbarTopContent}
             </div>
@@ -5001,24 +5001,24 @@
         let slides = '';
         productImages.forEach(img => {
           slides += `
-          <div class='swiper-slide '>
-            <img class='w-100' src=${img} alt="">
+          <div className='swiper-slide '>
+            <img className='w-100' src=${img} alt="">
           </div>
         `;
         });
-        productSwiper.innerHTML = `<div class='swiper-wrapper'>${slides}</div>`;
+        productSwiper.innerHTML = `<div className='swiper-wrapper'>${slides}</div>`;
 
         let thumbSlides = '';
         productImages.forEach(img => {
           thumbSlides += `
-          <div class='swiper-slide '>
-            <div class="product-thumb-container p-2 p-sm-3 p-xl-2">
+          <div className='swiper-slide '>
+            <div className="product-thumb-container p-2 p-sm-3 p-xl-2">
               <img src=${img} alt="">
             </div>
           </div>
         `;
         });
-        thumbEl.innerHTML = `<div class='swiper-wrapper'>${thumbSlides}</div>`;
+        thumbEl.innerHTML = `<div className='swiper-wrapper'>${thumbSlides}</div>`;
 
         const thumbSwiper = new window.Swiper(thumbEl, {
           slidesPerView: 5,
@@ -5471,15 +5471,15 @@
           let slides = '';
           thumbImages.forEach(img => {
             slides += `
-          <div class='swiper-slide '>
-            <img class='img-fluid rounded mt-1' src=${img.src} alt=''/>
+          <div className='swiper-slide '>
+            <img className='img-fluid rounded mt-1' src=${img.src} alt=''/>
           </div>
         `;
           });
 
           const thumbs = document.createElement('div');
           thumbs.setAttribute('class', 'swiper-container thumb');
-          thumbs.innerHTML = `<div class='swiper-wrapper'>${slides}</div>`;
+          thumbs.innerHTML = `<div className='swiper-wrapper'>${slides}</div>`;
 
           if (thumbsOptions.parent) {
             const parent = document.querySelector(thumbsOptions.parent);

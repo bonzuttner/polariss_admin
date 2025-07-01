@@ -5,6 +5,9 @@ body {
   background: #f5f7fa !important;
   overflow-x: hidden;
 }
+#root {
+  overflow-x: hidden;
+}
 .btn,
 button {
   font-size: 0.8rem !important;
@@ -181,7 +184,7 @@ button {
 }
 .edit-card {
   width: 40%;
-  margin: 4rem auto;
+  margin: 4rem auto 1rem;
 }
 .edit-card .card .card-header {
   background-color: #f5f7fa;

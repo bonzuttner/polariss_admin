@@ -2,12 +2,17 @@ import React, { Suspense, useEffect } from 'react';
 import { useState } from 'react';
 import './LineLogin.css';
 import LineButtonImage from '../../assets/btn_login_base.png';
+import { useNavigate } from 'react-router-dom';
 function LineLogin() {
-  
+  const navigate = useNavigate();
   const [error, setError] = useState('');
   const [show, setShow] = useState(false);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (localStorage.getItem('userId')) {
+      navigate('/');
+    }
+  }, []);
 
   const lineLogin = () => {
     const redirectUri = encodeURIComponent(location.origin);
@@ -15,24 +20,32 @@ function LineLogin() {
   };
 
   return (
-    <div className="line-login">
-      <h2>ログイン</h2>
-      <button type="button" className="line-btn" onClick={() => lineLogin()}>
-        <img src={LineButtonImage} />
-      </button>
-      <p>LINEの友達追加をお願いします</p>
-      <div className="images">
-        <a href="https://shorturl.at/iyAD0">
-          <img
-            src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png"
-            alt="友だち追加"
-            height="36"
-            border="0"
-          />
-        </a>
-        <img src="https://qr-official.line.me/sid/L/812travn.png" />
-      </div>
-    </div>
+    <>
+      {!localStorage.getItem('userId') && (
+        <div className="line-login">
+          <h2>ログイン</h2>
+          <button
+            type="button"
+            className="line-btn"
+            onClick={() => lineLogin()}
+          >
+            <img src={LineButtonImage} />
+          </button>
+          <p>LINEの友達追加をお願いします</p>
+          <div className="images">
+            <a href="https://shorturl.at/iyAD0">
+              <img
+                src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png"
+                alt="友だち追加"
+                height="36"
+                border="0"
+              />
+            </a>
+            <img src="https://qr-official.line.me/sid/L/812travn.png" />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

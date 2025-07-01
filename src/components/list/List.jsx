@@ -217,7 +217,7 @@ function List() {
   const renderTable = (userList = [], showExtra = false, type = '') => {
     const listToRender = userList.length === 0 ? list : userList;
     return (
-      <div class="table-responsive">
+      <div className="table-responsive">
         <table className="table">
           <thead>
             <tr>
@@ -301,8 +301,8 @@ function List() {
         </button>
       </div>
       {loading ? (
-        <div class="spinner-border text-secondary" role="status">
-          <span class="visually-hidden">Loading...</span>
+        <div className="spinner-border text-secondary" role="status">
+          <span className="visually-hidden">Loading...</span>
         </div>
       ) : role === 'admin2' ? (
         renderUserTree()

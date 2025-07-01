@@ -1,0 +1,575 @@
+/* Container */
+.monitoringContainer {
+    padding: 0;
+    width: 99%;
+    margin: auto;
+    height: 50%;
+    background-color: white;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    border-radius: 4px; /* Slightly smaller than blue wrapper */
+    overflow: hidden; /* Ensures content stays rounded */
+    box-shadow:
+            1px 1px 23px rgba(0, 0, 0, 0.3);
+    border: 1px solid #ddd;
+    z-index: 1001;
+}
+/* Outer container that handles visibility */
+
+/* Blue container that visually wraps the modal */
+/* Backdrop */
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+/* Blue container wrapper */
+.intieriorWrapper {
+    position: fixed;
+    display: inline-block;
+    top: 50%;
+    left: 50%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    transform: translate(-50%, -50%);
+    width: 380px ; /* 20px larger on each side */
+    max-width: 100vb; /* When modal is 500px, this will be 540px */
+    max-height: 96vb;
+    padding: 10px;
+    background-color: #cdcdcd;
+    border-radius: 9px; /* Slightly larger than modal's radius */
+    z-index: 1001;
+    box-shadow: 0 11px 20px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    animation: modalAppear 0.3s ease-out;
+
+}
+
+/* Modal */
+
+@keyframes modalAppear {
+    from {
+        transform: translate(-50%, -60%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+/* Header */
+.modalHeader {
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 8px 8px 0 0;
+}
+
+.modalTitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.closeButton {
+    margin: 0;
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #404040;
+    line-height: 2;
+    padding: 0 3px;
+    left: -30px;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+/* Body */
+.modalBody {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.formGroup {
+    margin-bottom: 10px;
+}
+
+.label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+.innerLabel{
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-weight: 400;
+    font-size: 13px;
+}
+
+.subLabel {
+    display: block;
+    font-weight: normal;
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 4px;
+}
+
+.selectInput {
+    width: 100%;
+    margin-top: 5px;
+    padding: 4px 6px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    height: 28px;
+
+}
+
+/* Footer */
+.modalFooter {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background-color: #ffffff;
+    border-radius: 0 0 8px 8px;
+}
+
+.SOSButton{
+    position: relative;
+    margin: 2px;
+    padding: 1px 12px;
+    background-color: #D75C71;
+    height: 32px;
+    width: 88%;
+    color: #373737;
+    font-weight: 600;
+    font-size: 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.2s;
+}
+
+.primaryButton {
+    position: relative;
+    margin: 2px;
+    padding: 1px 12px;
+    background-color: #D75C71;
+    height: 32px;
+    width: 40%;
+    color: #424242;
+    font-weight: 500;
+    font-size: 88px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.2s;
+
+}
+
+.primaryButton:hover {
+    background-color: #D7596D;
+}
+.inactiveButton {
+    background-color: #939393;
+}
+
+.disabledButton {
+    cursor: not-allowed;
+    /* Add any other disabled styles if needed */
+}
+
+.secondaryButton {
+    position: relative;
+    margin: 0;
+    height: 32px;
+    width: 80px;
+    font-size: 10px;
+    background-color: #85888a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    transition: background-color 0.2s;
+}
+
+.secondaryButton:hover {
+    background-color: #5c636a;
+}
+
+/* Slider Container */
+.sliderContainer {
+    margin-top: 9px;
+    padding: 0 5px;
+}
+
+/* Slider Track */
+.sliderTrack {
+    position: relative;
+    height: 2px;
+    background-color: #878787;
+    border-radius: 2px;
+    margin: 10px 0;
+
+}
+
+/* Slider Fill (active portion) */
+.sliderFill {
+    position: absolute;
+    height: 100%;
+    background-color: #1e90ff;
+    border-radius: 2px;
+    transition: width 0.2s ease;
+}
+
+/* Slider Handle */
+.sliderHandle {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 16px;
+    background-color: #1e90ff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: left 0.2s ease;
+}
+
+/* Slider Markers */
+.sliderMarkers {
+    position: relative;
+    width: 100%;
+}
+
+.sliderMarker {
+    position: absolute;
+    top: -20px;
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+
+.markerLabel {
+    display: block;
+    margin-top: 36px;
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+}
+
+/* Active marker styling */
+.sliderMarker.active .markerLabel {
+    color: #1e90ff;
+    font-weight: bold;
+}
+
+.sliderContainer {
+    padding: 0 8px;
+    margin-top: 10px;
+}
+
+.sliderTrack {
+    position: relative;
+    height: 4px;
+    cursor: pointer;
+    background-color: #292929;
+    z-index: 1;
+}
+
+.trackSegments {
+    display: flex;
+    width: 100%;
+    height: 55px;
+    background-color: transparent;
+    position: relative;
+    top: -6px;
+}
+
+.trackSegment {
+    flex: 1;
+    border-right: 1px solid #f31f1f;
+    height: 13px;
+    width: 20px;
+}
+
+.trackSegment:last-child {
+    border-right: none;
+}
+
+.sliderFill {
+    position: absolute;
+    height: 4px;
+    background-color: #1e90ff;
+    top: 10px;
+    left: 0;
+    transition: width 0.2s ease;
+}
+
+.sliderHandle {
+    position: absolute;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    background-color: #1e90ff;
+    border-radius: 50%;
+    cursor: grab;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sliderHandle:active {
+    cursor: grabbing;
+}
+
+.valueLabels {
+    position: relative;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.valueLabels span {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Ruler marks (decorative only) */
+.rulerMarks {
+    position: relative;
+    display: flex;
+    width: 100%;
+    top: 10px;
+    z-index: 2;
+}
+
+.rulerMark {
+    flex: 1;
+    height: 18px;
+    border-right: 1px solid #000000;
+    top:10px;
+    margin: 0;
+}
+/* First and last marks should extend to edges */
+.rulerMarks::before,
+.rulerMarks::after {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background-color: #1c1c1c;
+}
+
+.rulerMarks::before {
+    left: 0;
+}
+
+.rulerMarks::after {
+    right: 0;
+}
+
+.rulerMark:last-child {
+    border-right: none;
+}
+
+/* Slider track */
+.sliderTrack {
+    position: relative;
+    height: 4px;
+    background-color: #020202;
+    border-radius: 2px;
+    cursor: pointer;
+    z-index: 10;
+    margin: 0;
+}
+
+/* Active fill */
+.sliderFill {
+    position: absolute;
+    height: 100%;
+    background-color: #1e90ff;
+    border-radius: 2px;
+    top: -1px;
+    transition: width 0.2s ease;
+}
+
+
+
+/*second Island*/
+/* Second Island - Notification Settings */
+.settingsIsland {
+    background: white;
+    border-radius: 4px;
+    width: 100%;
+    margin: 12px 0 14px;
+    overflow: hidden;
+    padding-bottom: 40px;
+    padding-left: 20px;
+    height: 18em;
+    box-shadow:
+            1px 4px 23px rgba(0, 0, 0, 0.4);
+
+}
+
+/* Island Header */
+.islandHeader {
+    padding: 8px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #fafafa;
+}
+
+.islandTitle {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+
+/* Island Body */
+.islandBody {
+    padding: 18px 16px;
+}
+
+/* Form Elements */
+.notificationSelect {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: #fff;
+    transition: border-color 0.2s;
+}
+
+.notificationSelect:focus {
+    border-color: #1e90ff;
+    outline: none;
+}
+
+/* Subtext */
+.islandSubtext {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    line-height: 1.4;
+    padding: 0 2px;
+}
+
+/* Island Footer */
+.islandFooter {
+    padding: 12px 16px;
+    border-top: 1px solid #f0f0f0;
+    background-color: #fafafa;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Action Buttons */
+.islandButton {
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.islandButton.primary {
+    background-color: #1e90ff;
+    color: white;
+    border: none;
+}
+
+.islandButton.secondary {
+    background-color: transparent;
+    border: 1px solid #d0d0d0;
+    color: #555;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 400px) {
+    .settingsIsland {
+        border-radius: 6px;
+    }
+
+    .islandBody {
+        padding: 14px 12px;
+    }
+
+    .notificationSelect {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+}
+
+
+
+/* Header area */
+.modalHeader {
+    padding: 4px 18px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.buttonsContainer { display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    justify-content: space-evenly;
+}
+
+/* message list */
+.messageHistorySection {
+    margin-top: 0;
+    padding-bottom: 20px;
+   position: relative;
+    top: -10px;
+
+}
+
+.sectionTitle {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.messageList {
+    list-style-type: disc;
+    padding-left: 2.5rem;
+    margin: 0;
+    width: 100%;
+}
+
+.messageItem {
+    padding: 0.1rem 0;
+    font-size: 0.6rem;
+    font-weight: 400;
+    color: #353535;
+}
+
+
+.messageItem:last-child {
+    border-bottom: none;
+    margin-bottom: 2em;
+}
+
+

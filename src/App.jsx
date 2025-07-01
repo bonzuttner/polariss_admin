@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React, {  useState } from 'react';
 import {
   BrowserRouter as Router,
-  useNavigate,
   Route,
   Routes,
 } from 'react-router-dom';
@@ -14,15 +13,30 @@ import Device from './components/device/Device';
 import List from './components/list/List';
 import Home from './components/Home/Home';
 import LineLogin from './components/login/LineLogin';
+import Utils from './components/utils/utils';
+import Setup from './components/setup/Setup';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-  useEffect(() => {}, []);
-
+  const [layoutKey, setLayoutKey] = useState(Utils.unique());
+  // let navigate = useNavigate();
+  // useEffect(() => {
+  //   let location = useLocation();
+  //   console.log('loca: ', location);
+  //   if (localStorage.getItem('type') === 'ot-registered') {
+  //     navigate('/setup');
+  //   }
+  // }, [location]);
   return (
     <Router>
-      <MainLayout>
+      <MainLayout key={layoutKey}>
         <Routes>
-          <Route exact path="/" element={<Home />} />
+          <Route
+            exact
+            path="/"
+            element={<Home setLayoutKey={setLayoutKey} />}
+          />
           <Route exact path="/login" element={<LineLogin />} />
           <Route exact path="/setting/:id" element={<Settings />} />
           <Route exact path="/setting" element={<Settings />} />
@@ -37,7 +51,19 @@ function App() {
           <Route exact path="/setting/device/:id" element={<Device />} />
           <Route exact path="/setting/device" element={<Device />} />
           <Route exact path="/setting/list" element={<List />} />
+          <Route exact path="/setup" element={<Setup />} />
         </Routes>
+        <ToastContainer
+            position="bottom-left"
+            autoClose={2500}
+            hideProgressBar={true}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+        />
       </MainLayout>
     </Router>
   );

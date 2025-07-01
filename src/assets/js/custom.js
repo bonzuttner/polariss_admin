@@ -262,7 +262,7 @@ $(document).ready(function($) {
         var date = new Date();
         var month = date.getMonth();
         for( var i = 1 ; i<=12 ; i++ ){
-            $('.calendar-wrapper').append('<div id="month_'+i+'" class="month"></div>');
+            $('.calendar-wrapper').append('<div id="month_'+i+'" className="month"></div>');
             $("#month_"+i).zabuto_calendar({
                 ajax: {
                     url: "assets/php/calendar.php",
@@ -279,8 +279,8 @@ $(document).ready(function($) {
                 show_next: false,
                 today: true,
                 nav_icon: {
-                    prev: '<i class="arrow_left"></i>',
-                    next: '<i class="arrow_right"></i>'
+                    prev: '<i className="arrow_left"></i>',
+                    next: '<i className="arrow_right"></i>'
                 }
             });
         }
@@ -298,7 +298,7 @@ $(document).ready(function($) {
     $(".form-email .btn[type='submit']").on("click", function(){
         var button = $(this);
         var form = $(this).closest("form");
-        button.prepend("<div class='status'></div>");
+        button.prepend("<div className='status'></div>");
         form.validate({
             submitHandler: function() {
                 $.post("assets/external/email.php", form.serialize(),  function(response) {
@@ -376,10 +376,10 @@ function heroSectionHeight(){
 function openModal(target, modalPath, clusterData, mapsFullScreen){
 
     if( mapsFullScreen === true ){
-        $(".gm-style").append('<div class="modal modal-external fade" id="'+ target +'" tabindex="-1" role="dialog" aria-labelledby="'+ target +'"><i class="loading-icon fa fa-circle-o-notch fa-spin"></i></div>');
+        $(".gm-style").append('<div className="modal modal-external fade" id="'+ target +'" tabindex="-1" role="dialog" aria-labelledby="'+ target +'"><i className="loading-icon fa fa-circle-o-notch fa-spin"></i></div>');
     }
     else {
-        $("body").append('<div class="modal modal-external fade" id="'+ target +'" tabindex="-1" role="dialog" aria-labelledby="'+ target +'"><i class="loading-icon fa fa-circle-o-notch fa-spin"></i></div>');
+        $("body").append('<div className="modal modal-external fade" id="'+ target +'" tabindex="-1" role="dialog" aria-labelledby="'+ target +'"><i className="loading-icon fa fa-circle-o-notch fa-spin"></i></div>');
     }
 
     $("#" + target + ".modal").on("show.bs.modal", function () {
@@ -485,10 +485,10 @@ function ratingPassive(element){
     $(element).find(".rating-passive").each(function() {
         for( var i = 0; i <  5; i++ ){
             if( i < $(this).attr("data-rating") ){
-                $(this).find(".stars").append("<figure class='active fa fa-star'></figure>")
+                $(this).find(".stars").append("<figure className='active fa fa-star'></figure>")
             }
             else {
-                $(this).find(".stars").append("<figure class='fa fa-star'></figure>")
+                $(this).find(".stars").append("<figure className='fa fa-star'></figure>")
             }
         }
     });
@@ -719,17 +719,17 @@ var viewport = (function() {
 
 function rating(element){
     var ratingElement =
-            '<span class="stars">'+
-                '<i class="fa fa-star s1" data-score="1"></i>'+
-                '<i class="fa fa-star s2" data-score="2"></i>'+
-                '<i class="fa fa-star s3" data-score="3"></i>'+
-                '<i class="fa fa-star s4" data-score="4"></i>'+
-                '<i class="fa fa-star s5" data-score="5"></i>'+
-                '<i class="fa fa-star s6" data-score="6"></i>'+
-                '<i class="fa fa-star s7" data-score="7"></i>'+
-                '<i class="fa fa-star s8" data-score="8"></i>'+
-                '<i class="fa fa-star s9" data-score="9"></i>'+
-                '<i class="fa fa-star s10" data-score="10"></i>'+
+            '<span className="stars">'+
+                '<i className="fa fa-star s1" data-score="1"></i>'+
+                '<i className="fa fa-star s2" data-score="2"></i>'+
+                '<i className="fa fa-star s3" data-score="3"></i>'+
+                '<i className="fa fa-star s4" data-score="4"></i>'+
+                '<i className="fa fa-star s5" data-score="5"></i>'+
+                '<i className="fa fa-star s6" data-score="6"></i>'+
+                '<i className="fa fa-star s7" data-score="7"></i>'+
+                '<i className="fa fa-star s8" data-score="8"></i>'+
+                '<i className="fa fa-star s9" data-score="9"></i>'+
+                '<i className="fa fa-star s10" data-score="10"></i>'+
                 '</span>'
         ;
     if( !element ) { element = ''; }
@@ -797,8 +797,8 @@ function initializeReadMore(){
             speed: 500,
             collapsedHeight: collapseHeight,
             blockCSS: 'display: inline-block; width: auto; min-width: 120px;',
-            moreLink: '<a href="#" class="btn btn-primary btn-xs btn-light-frame btn-framed btn-rounded">More<i class="icon_plus"></i></a>',
-            lessLink: '<a href="#" class="btn btn-primary btn-xs btn-light-frame btn-framed btn-rounded">Less<i class="icon_minus-06"></i></a>'
+            moreLink: '<a href="#" className="btn btn-primary btn-xs btn-light-frame btn-framed btn-rounded">More<i className="icon_plus"></i></a>',
+            lessLink: '<a href="#" className="btn btn-primary btn-xs btn-light-frame btn-framed btn-rounded">Less<i className="icon_minus-06"></i></a>'
         });
     }
 }
@@ -834,7 +834,7 @@ function fixedNavigation(state){
 // if( !viewport.is('xs') ){
 //     var messagesArray = [];
 //     $("[data-toggle=popover]").popover({
-//         template: '<div class="popover" role="tooltip"><div class="close"><i class="fa fa-close"></i></div><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+//         template: '<div className="popover" role="tooltip"><div className="close"><i className="fa fa-close"></i></div><div className="arrow"></div><h3 className="popover-title"></h3><div className="popover-content"></div></div>'
 //     });
 //     $(".popover .close").live('click',function () {
 //         $(this).closest(".popover").popover("hide");

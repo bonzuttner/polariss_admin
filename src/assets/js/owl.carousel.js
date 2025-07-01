@@ -410,8 +410,8 @@
 		this.$element.addClass('owl-loading');
 
 		// create stage
-		this.$stage = $('<' + this.settings.stageElement + ' class="owl-stage"/>')
-			.wrap('<div class="owl-stage-outer">');
+		this.$stage = $('<' + this.settings.stageElement + ' className="owl-stage"/>')
+			.wrap('<div className="owl-stage-outer">');
 
 		// append stage
 		this.$element.append(this.$stage.parent());
@@ -2173,19 +2173,19 @@
 			lazyClass = '',
 			settings = this._core.settings,
 			create = function(path) {
-				icon = '<div class="owl-video-play-icon"></div>';
+				icon = '<div className="owl-video-play-icon"></div>';
 
 				if (settings.lazyLoad) {
-					tnLink = '<div class="owl-video-tn ' + lazyClass + '" ' + srcType + '="' + path + '"></div>';
+					tnLink = '<div className="owl-video-tn ' + lazyClass + '" ' + srcType + '="' + path + '"></div>';
 				} else {
-					tnLink = '<div class="owl-video-tn" style="opacity:1;background-image:url(' + path + ')"></div>';
+					tnLink = '<div className="owl-video-tn" style="opacity:1;background-image:url(' + path + ')"></div>';
 				}
 				target.after(tnLink);
 				target.after(icon);
 			};
 
 		// wrap video content into owl-video-wrapper div
-		target.wrap('<div class="owl-video-wrapper"' + dimensions + '></div>');
+		target.wrap('<div className="owl-video-wrapper"' + dimensions + '></div>');
 
 		if (this._core.settings.lazyLoad) {
 			srcType = 'data-src';
@@ -2258,7 +2258,7 @@
 		item.addClass('owl-video-playing');
 		this._playing = item;
 
-		wrap = $('<div style="height:' + height + 'px; width:' + width + 'px" class="owl-video-frame">'
+		wrap = $('<div style="height:' + height + 'px; width:' + width + 'px" className="owl-video-frame">'
 			+ html + '</div>');
 		target.after(wrap);
 	};

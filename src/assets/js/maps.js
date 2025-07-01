@@ -107,23 +107,23 @@ function heroMap(_latitude,_longitude, element, markerTarget, sidebarResultTarge
 
                 if( markers[i]["featured"] == 1 ){
                     markerContent.innerHTML =
-                    '<div class="marker" data-id="'+ markers[i]["id"] +'" data-url="'+ markers[i]["url"] +'" data-color="'+ color +'" data-i="'+ i +'">' +
-                        '<div class="title">'+ markers[i]["title"] +'</div>' +
-                        '<div class="marker-wrapper">' +
-                            '<div class="tag"><i class="fa fa-check"></i></div>' +
-                            '<div class="pin">' +
-                                '<div class="image" style="background-image: url('+ thumbnailImage +');"></div>' +
+                    '<div className="marker" data-id="'+ markers[i]["id"] +'" data-url="'+ markers[i]["url"] +'" data-color="'+ color +'" data-i="'+ i +'">' +
+                        '<div className="title">'+ markers[i]["title"] +'</div>' +
+                        '<div className="marker-wrapper">' +
+                            '<div className="tag"><i className="fa fa-check"></i></div>' +
+                            '<div className="pin">' +
+                                '<div className="image" style="background-image: url('+ thumbnailImage +');"></div>' +
                             '</div>' +
                         '</div>' +
                     '</div>';
                 }
                 else {
                     markerContent.innerHTML =
-                        '<div class="marker" data-id="'+ markers[i]["id"] +'" data-url="'+ markers[i]["url"] +'"  data-color="'+ color +'" data-i="'+ i +'">' +
-                            '<div class="title">'+ markers[i]["title"] +'</div>' +
-                            '<div class="marker-wrapper">' +
-                                '<div class="pin">' +
-                                '<div class="image" style="background-image: url('+ thumbnailImage +');"></div>' +
+                        '<div className="marker" data-id="'+ markers[i]["id"] +'" data-url="'+ markers[i]["url"] +'"  data-color="'+ color +'" data-i="'+ i +'">' +
+                            '<div className="title">'+ markers[i]["title"] +'</div>' +
+                            '<div className="marker-wrapper">' +
+                                '<div className="pin">' +
+                                '<div className="image" style="background-image: url('+ thumbnailImage +');"></div>' +
                             '</div>' +
                         '</div>';
                 }

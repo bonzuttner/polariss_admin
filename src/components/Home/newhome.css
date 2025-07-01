@@ -8757,10 +8757,6 @@ body::before {
 .search-side .row .results-wrapper {
   width: 100%;
 }
-/* New Changes */
-.map-col {
-  height: 100vh;
-}
 
 .react-datepicker-popper {
   

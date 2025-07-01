@@ -74,7 +74,7 @@
           $this.attr('name', videoName);
           $.fn.fitVids._count++;
         }
-        $this.wrap('<div class="fluid-width-video-wrapper"></div>').parent('.fluid-width-video-wrapper').css('padding-top', (aspectRatio * 100)+'%');
+        $this.wrap('<div className="fluid-width-video-wrapper"></div>').parent('.fluid-width-video-wrapper').css('padding-top', (aspectRatio * 100)+'%');
         $this.removeAttr('height').removeAttr('width');
       });
     });

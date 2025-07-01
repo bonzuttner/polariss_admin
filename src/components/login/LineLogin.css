@@ -8,6 +8,19 @@
   margin: 40px 0 60px;
   background: transparent;
 }
+
 .images {
   display: inline-grid;
+}
+
+@media (max-width: 767px) {
+  .line-login {
+    width: auto;
+  }
+  .line-btn img {
+    max-width: 240px;
+  }
+  .images img {
+    max-width: 270px;
+  }
 }
