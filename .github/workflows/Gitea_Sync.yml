@@ -19,7 +19,7 @@ jobs:
       - name: Checkout GitHub Repository
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: ${{ github.ref_name }}
 
       - name: Clone Gitea Branch
         run: |
@@ -32,4 +32,4 @@ jobs:
           git config --global user.email "actions@github.com"
           git add .
           git commit -m "Sync from Gitea branch ${{ github.event.inputs.gitea_branch }}" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.OUR_PAT }}@github.com/${{ github.repository }}.git main
+          git push https://x-access-token:${{ secrets.OUR_PAT }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
