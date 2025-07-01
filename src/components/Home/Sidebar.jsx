@@ -23,7 +23,7 @@ function Sidebar({
 
     return (
         <div className={`col col-md-3 results-wrapper p-2 `}
-             style={{ backgroundColor: '#cfcfcf' }}
+             style={{ backgroundColor: '#f3f3f3' }}
               >
 
 
@@ -35,7 +35,7 @@ function Sidebar({
                             <div className="section-title">
                                 <h3>Select</h3>
                             </div>
-                            <div className="row " >
+                            <div className="row" >
                                 <div style={{backgroundColor: '#ffffff' , marginRight:"auto", borderRadius:5 ,  boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)' , fontSize:12}} className="col-md-5 col-sm-5">
                                     <DatePicker
                                         dateFormat={'yyyy-MM-dd'}
@@ -271,7 +271,7 @@ function Sidebar({
                                         style={{width: '100%'}}
                                         className={`btn ${
                                             device?.deviceStatus === '要確認'
-                                                ? 'btn-outline-primary' : 'btn-outline-danger'
+                                                ? 'btn-outline-empty' : 'btn-outline-empty'
 
                                         }`}
                                     >
@@ -359,7 +359,7 @@ function Sidebar({
                                         style={{width: '100%'}}
                                         className={`btn ${
                                             device?.deviceStatus === '要確認'
-                                                ? 'btn-outline-primary' : 'btn-outline-danger'
+                                                ? 'btn-outline-empty' : 'btn-outline-empty'
 
                                         }`}
                                     >

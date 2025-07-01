@@ -1181,6 +1181,13 @@ body .secondary-nav a i {
   background-color: transparent !important;
   cursor: default;
 }
+
+.btn-outline-empty {
+  border-color: transparent;
+  color: #4611a7 !important;
+  background-color: transparent !important;
+  cursor: default;
+}
 .btn-outline-danger,
 .btn-outline-danger:hover {
   border-color: #dc3545 !important;

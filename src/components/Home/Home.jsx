@@ -17,6 +17,7 @@ import SimulationModal from "./SimulationModal.jsx";
 
 const CutomMap = React.lazy(() => import('./Map.jsx'));
 const API_KEY = import.meta.env.API_KEY;
+const INTERVAL = import.meta.env.VITE_REFRESH_INTERVAL_MS;
 
 function Home({ setLayoutKey }) {
   const navigate = useNavigate();
@@ -166,7 +167,10 @@ function Home({ setLayoutKey }) {
 
 
   useEffect(() => {
+    const refreshInterval = parseInt(INTERVAL || '10000' , 10)
+
     const interval = setInterval(async () => {
+
       if (!selectedDevice?.imsi) return;
 
       try {
@@ -174,7 +178,7 @@ function Home({ setLayoutKey }) {
       } catch (err) {
         console.error('Error refreshing last location:', err);
       }
-    }, 10000); // every 10 seconds
+    }, refreshInterval); // every 10 seconds
 
     return () => clearInterval(interval);
   }, [selectedDevice]);
