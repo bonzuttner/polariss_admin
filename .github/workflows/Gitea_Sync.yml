@@ -19,7 +19,7 @@ jobs:
       - name: Checkout GitHub Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: master
 
       - name: Clone Gitea Branch
         run: |
