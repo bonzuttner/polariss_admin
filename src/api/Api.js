@@ -23,19 +23,19 @@ export default class Api {
           ? {
               headers: headers,
               timeout: 1200000,
-              withCredentials: true // debugging only
+
             }
           : method === 'delete'
           ? {
               headers: headers,
               data: requestBody,
-                    withCredentials: true // debugging only
+
                 }
           : requestBody,
         {
           headers: headers,
           timeout: 1200000,
-            withCredentials: true // debugging only
+
         }
         // , {crossDomain: true}
       )
