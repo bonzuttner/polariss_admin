@@ -83,5 +83,19 @@ export const DeviceService = {
 
     toggleMutualMonitoring: async ({ turnOn, imsi }) => {
         return Api.call({ turnOn, imsi }, `devices/monitoringSettings/mutual`, 'put', '');
-    }
+    },
+    getAllDevicesWithLastLocation: async ()=> {
+        return Api.call({},
+            'devices/with-last-location',
+             'get',
+            localStorage.getItem('userId')
+            );
+    },
+    getNearbyDevices: async (lat , lon)=>{
+        return Api.call({},
+            `devices/nearby?lat=${lat}&lon=${lon}`,
+            'get',
+            localStorage.getItem('userId')
+            )
+    },
 };

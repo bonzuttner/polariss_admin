@@ -183,7 +183,7 @@ function Sidebar({
             <div className="row">
                 {/* <div className="results-wrapper"> */}
                 {/*simulation island*/}
-                {SIMULATION_MODE && (<div className="form search-form inputs-underline rounded-md  p-2 ">
+                {SIMULATION_MODE && <div className="form search-form inputs-underline rounded-md  p-2 ">
                         <div style={{
                             backgroundColor: '#ffffff',
                             borderRadius: 7,
@@ -223,7 +223,13 @@ function Sidebar({
                                             <button
                                                 type="button"  // ✅ prevents submit
                                                 className="btn btn-danger w-100"
-                                                onClick={() => stopSimulation(selectedBike.id)}
+                                                onClick={async () => {
+                                                    //await the stop simulation to finish the trigger a refresh
+                                                    await  stopSimulation(selectedBike.id);
+                                                    //for now, it re-renders according to the "re-new", button logic
+                                                    // it could trigger getting device movements it the time in the data picker still on its original values
+                                                    handleClick();
+                                                } }
                                             >
                                                 Stop Simulation
                                             </button>
@@ -245,8 +251,7 @@ function Sidebar({
                             </form>
                         </div>
 
-                    </div>
-                )}
+                    </div>}
                 {/* </div> */}
             </div>
             <div className="row">

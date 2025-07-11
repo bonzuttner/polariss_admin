@@ -127,7 +127,7 @@ const SliderHandle = ({ monitoringFields, setMonitoringFields }) => {
 // Extracted Notification Select Component
 const NotificationSelect = ({ notifications, monitoringFields, handleSelect }) => (
     <div className={styles.formGroup}>
-      <label className={styles.innerLabel}>通知制限</label>
+      <label className={styles.innerLabel} style={{marginTop:30}}>通知制限</label>
       <select
           className={styles.selectInput}
           name="notifications"
@@ -146,7 +146,7 @@ const NotificationSelect = ({ notifications, monitoringFields, handleSelect }) =
 // Extracted Engine Control Component
 const EngineControl = ({ device, handleConfirm }) => (
     <>
-      <h4 className={styles.innerLabel}>エンジン制御</h4>
+      <h4 className={styles.innerLabel}>監視モード：</h4>
       <div className={styles.buttonsContainer}>
         <button
             className={`${styles.primaryButton} ${
@@ -182,7 +182,8 @@ const SOSMode = ({ device,  monitoringFields ,  onUpdate  }) => {
         // Block mutual monitoring if self-monitoring is off
         if (!device?.monitoringActive && turnOn) {
 
-            toast.warning("Self-monitoring must be ON before enabling SOS mode.");            return;
+            toast.warning("Self-monitoring must be ON before enabling SOS mode.");
+            return;
         }
 
 

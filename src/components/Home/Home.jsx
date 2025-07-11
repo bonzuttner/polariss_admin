@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useState, useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './Home.css';
 import { APIProvider } from '@vis.gl/react-google-maps';
@@ -11,7 +11,7 @@ import Sidebar from "./Sidebar.jsx";
 import useSelections from '../../hooks/useSelection.js';
 import useDeviceData from '../../hooks/useDeviceData';
 import { DeviceService } from '../../api/deviceService';
-import SimulationModal from "./SimulationModal.jsx";
+import SimulationModal from "../simulationModal/SimulationModal.jsx";
 
 
 
@@ -30,6 +30,8 @@ function Home({ setLayoutKey }) {
   const [pageKey, setPageKey] = useState(Utils.unique());
   const [engine, setEngine] = useState({});
   const [loading, setLoading] = useState(true);
+  const [currentRefreshInterval, setCurrentRefreshInterval] = useState(parseInt(INTERVAL || '10000', 10));
+
 
 
   // Flag to control device data fetching
@@ -115,6 +117,28 @@ function Home({ setLayoutKey }) {
       setLoading(false);
     }
   }, [navigate, setUsers, updateSelections]);
+
+  //get the stored simulations
+  useEffect(() => {
+    const stored = localStorage.getItem('activeSimulations');
+
+    if (!stored) {
+      console.log("No stored simulations found.");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object') {
+        setActiveSimulations(parsed);
+        console.log("✅ Restored simulations from localStorage:", parsed);
+      }
+    } catch (err) {
+      console.error("❌ Failed to parse stored simulations:", err);
+    }
+  }, []);
+
+
   // Fetch device data when needed
   useEffect(() => {
     if (!selectedDevice?.imsi || !shouldFetchDevice.current) return;
@@ -133,7 +157,7 @@ function Home({ setLayoutKey }) {
     fetchData();
   }, [selectedDevice, refreshDeviceData]);
 
-
+  //SOS button toggler (which changes the sos mode in the sidebar)
   useEffect(() => {
     if (device?.monitoringSettings?.monitoringType === 'mutual') {
       setSOSIsActive(true);
@@ -141,6 +165,7 @@ function Home({ setLayoutKey }) {
       setSOSIsActive(false);
     }
   }, [device?.monitoringSettings?.monitoringType]);
+
   // Initial load and auto-refresh
   useEffect(() => {
     if (!localStorage.getItem('userId')) {
@@ -164,24 +189,34 @@ function Home({ setLayoutKey }) {
     }
   }, [selectedUser]);
 
-
-
+  // simulation interval tracker :
   useEffect(() => {
-    const refreshInterval = parseInt(INTERVAL || '10000' , 10)
+    const simulationData = activeSimulations?.[selectedBike?.id];
+    const simulationInterval = simulationData?.simulationInterval;
 
+    if (simulationInterval) {
+      setCurrentRefreshInterval(parseInt(simulationInterval, 10));
+    } else {
+      setCurrentRefreshInterval(parseInt(INTERVAL || '10000', 10)); // fallback
+    }
+  }, [activeSimulations, selectedBike]);
+
+
+  // auto re fresher
+  useEffect(() => {
     const interval = setInterval(async () => {
-
       if (!selectedDevice?.imsi) return;
 
       try {
+        console.log(`🔄 Refreshing every ${currentRefreshInterval}ms`);
         refreshDeviceData();
       } catch (err) {
         console.error('Error refreshing last location:', err);
       }
-    }, refreshInterval); // every 10 seconds
+    }, currentRefreshInterval);
 
     return () => clearInterval(interval);
-  }, [selectedDevice]);
+  }, [selectedDevice, currentRefreshInterval]);
 
   // Fetch IBC devices when user changes
   useEffect(() => {
@@ -190,16 +225,21 @@ function Home({ setLayoutKey }) {
     }
   }, [selectedUser, fetchIbcDevices]);
 
-
+  //active simulations checker
   useEffect(() => {
-    const interval = setInterval(() => {
-      checkActiveSimulations(
+    const interval = setInterval( async () => {
+      await checkActiveSimulations(
           activeSimulations,
           setActiveSimulations,
-          DeviceService.getSimulationById
+          DeviceService.getSimulationById,
+          () => {
+            // ✅ Callback when a simulation ends
+            console.log("Simulation ended, refreshing device data immediately...");
+            shouldFetchDevice.current = true;
+            refreshDeviceData();
+          }
       );
-    }, 15000); // every 15 seconds
-
+    }, 3000); // every 3 secs
     return () => clearInterval(interval);
   }, [activeSimulations]);
 
@@ -261,7 +301,9 @@ function Home({ setLayoutKey }) {
   }, []);
 
   const stopSimulation = useCallback(async (bikeId) => {
-    const simulationId = activeSimulations[bikeId];
+    const simulationData = activeSimulations?.[bikeId];
+    const simulationId = simulationData?.simulationId;
+    console.log(" the active simulations are " ,simulationData);
     console.log("🛑 Attempting to stop simulation for bike:", bikeId);
     console.log("🛑 Using simulation ID:", simulationId);
     if (!simulationId) {
@@ -275,12 +317,19 @@ function Home({ setLayoutKey }) {
       setActiveSimulations(prev => {
         const updated = { ...prev };
         delete updated[bikeId];
+        //delete the stored simulation form local storage too
+        localStorage.setItem('activeSimulations', JSON.stringify(updated));
+
+        //re set to default value when we stop the simulation
+        setCurrentRefreshInterval(parseInt(INTERVAL || '10000', 10));
         return updated;
       });
     } catch (err) {
       if (err.response) {
         console.error("Status:", err.response.status);
         console.error("Data:", err.response.data);
+        //re set to default value when stopping simulation fails
+        setCurrentRefreshInterval(parseInt(INTERVAL || '10000', 10));
       } else {
         console.error(err);
       }
@@ -292,55 +341,7 @@ function Home({ setLayoutKey }) {
 
   // Memoize Sidebar to prevent unnecessary re-renders
 
-  const memoizedSidebar = useMemo(() => (
-      <Sidebar
-          users={users}
-          selectedUser={selectedUser}
-          selectedBike={selectedBike}
-          selectedDevice={selectedDevice}
-          device={device}
-          engine={engine}
-          startDate={startDate}
-          endDate={endDate}
-          setStartDate={setStartDate}
-          setEndDate={setEndDate}
-          handleSelect={handleSelection}
-          handleClick={handleClick}
-          showModal={showModal}
-          showEngModal={showEngModal}
-          handleSimulationModal={handleSimulationModal}
-          activeSimulations={activeSimulations}
-          stopSimulation={stopSimulation}
-          sosActive={SOSIsActive}
-      />
-  ), [
-    users,
-    selectedUser,
-    selectedBike,
-    selectedDevice,
-    device,
-    engine,
-    startDate,
-    endDate,
-    handleSelection,
-    showModal,
-    showEngModal,
-    handleSimulationModal ,
-    activeSimulations,
-    stopSimulation,
-    SOSIsActive,
-  ]);
 
-
-  // Add this effect to get device location
-  useEffect(() => {
-    if (selectedDevice?.imsi && device?.lastLocation) {
-      setCurrentLocation([
-        device.lastLocation.lat,
-        device.lastLocation.lon
-      ]);
-    }
-  }, [selectedDevice, device]);
 
 // Add this function
   return (
@@ -365,7 +366,26 @@ function Home({ setLayoutKey }) {
                 </div>
 
                 <div className={`show-side-bar ${show ? 'show' : 'hide'}`}>
-                  {memoizedSidebar}
+                  { <Sidebar
+                      users={users}
+                      selectedUser={selectedUser}
+                      selectedBike={selectedBike}
+                      selectedDevice={selectedDevice}
+                      device={device}
+                      engine={engine}
+                      startDate={startDate}
+                      endDate={endDate}
+                      setStartDate={setStartDate}
+                      setEndDate={setEndDate}
+                      handleSelect={handleSelection}
+                      handleClick={handleClick}
+                      showModal={showModal}
+                      showEngModal={showEngModal}
+                      handleSimulationModal={handleSimulationModal}
+                      activeSimulations={activeSimulations}
+                      stopSimulation={stopSimulation}
+                      sosActive={SOSIsActive}
+                  />}
                 </div>
 
                 <div className={'col col-12 col-md-9 map-col  map-col-fix '}>
@@ -374,21 +394,37 @@ function Home({ setLayoutKey }) {
                           apiKey={API_KEY}
                           libraries={['marker']}
                       >
-                        <Suspense  fallback={<div>Loading Map...</div>}>
                           <CutomMap
                               device={device}
                               movements={movements}
                               key={`map-${selectedDevice?.imsi}`}
                               range={range}
                               showModal={showModal}
-
                           />
-                        </Suspense>
                       </APIProvider>
                   )}
                 </div>
 
-                {memoizedSidebar}
+                { <Sidebar
+                    users={users}
+                    selectedUser={selectedUser}
+                    selectedBike={selectedBike}
+                    selectedDevice={selectedDevice}
+                    device={device}
+                    engine={engine}
+                    startDate={startDate}
+                    endDate={endDate}
+                    setStartDate={setStartDate}
+                    setEndDate={setEndDate}
+                    handleSelect={handleSelection}
+                    handleClick={handleClick}
+                    showModal={showModal}
+                    showEngModal={showEngModal}
+                    handleSimulationModal={handleSimulationModal}
+                    activeSimulations={activeSimulations}
+                    stopSimulation={stopSimulation}
+                    sosActive={SOSIsActive}
+                />}
               </div>
 
               {showMonitoring && (
@@ -409,14 +445,25 @@ function Home({ setLayoutKey }) {
                       selectedBike={selectedBike}
                       userId={localStorage.getItem('userId')}
                       currentLocation={currentLocation}
-                      onSimulationStarted={(simulationId) => {
+                      onSimulationStarted={(simulationId , simulationInterval) => {
                         console.log("📌 Storing simulation ID for bike:", selectedBike?.id);
+                        console.log("I have recvied the interval " , simulationInterval , ' ms');
                         console.log("📌 Simulation ID:", simulationId);
-                        setActiveSimulations(prev => ({
-                          ...prev,
-                          [selectedBike.id]: simulationId
-                        }));
+                        setActiveSimulations(prev => {
+                          const updated = {
+                            ...prev,
+                            [selectedBike.id]: {
+                              simulationId,
+                              simulationInterval
+                            }
+                          };
+                          //store the created simulation in the local storage
+                          localStorage.setItem('activeSimulations', JSON.stringify(updated));
+                          return updated;
+                        });
                         setShowSimulationModal(false);
+                        setCurrentRefreshInterval(simulationInterval);
+
 
                       }}
                       onClose={() => setShowSimulationModal(false)}
