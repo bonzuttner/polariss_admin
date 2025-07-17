@@ -30,6 +30,22 @@ export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
                 map,
             });
             nearbyCirclesRef.current.push(circle);
+
+            if (item.device?.hasMutualMonitoring) {
+                const lat = device?.lastLocation?.lat;
+                const lng = device?.lastLocation?.lon;
+                // const geofenceCenter = new google.maps.LatLng(lat, lng);
+
+                circle.current = new maps.Circle({
+                    radius: 250,
+                    center: { lat: loc.lat, lng: loc.lon },
+                    strokeColor: '#D7596D',
+                    fillColor: '#D7596D',
+                    fillOpacity: 0.1,
+                    strokeWeight: 2,
+                    map,
+                });
+            }
         });
 
         return () => nearbyCirclesRef.current.forEach(c => c.setMap(null));

@@ -27,7 +27,7 @@ import  {useMapIdleListener} from "../../hooks/useMapIdleListner.js";
 const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === 'true';
 const DEFAULT_CENTER = { lat: 36.2223633040231, lng: 137.81848964688243 };
 const DEFAULT_ZOOM_OUT = 8;
-const DEFAULT_ZOOM_IN = 18;
+const DEFAULT_ZOOM_IN = 17;
 const ANIMATION_DURATION = 4000;
 
 

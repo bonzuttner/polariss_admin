@@ -41,6 +41,21 @@ export function usePolylineAndCircleUpdater({ map, maps, movements, device, mark
                 map,
             });
         }
+        if (device?.monitoringSettings?.monitoringType ==="mutual") {
+            const lat = device?.lastLocation?.lat;
+            const lng = device?.lastLocation?.lon;
+            const geofenceCenter = new google.maps.LatLng(lat, lng);
+
+            circleRef.current = new maps.Circle({
+                radius: 250,
+                center: geofenceCenter,
+                strokeColor: '#D7596D',
+                fillColor: '#D7596D',
+                fillOpacity: 0.1,
+                strokeWeight: 2,
+                map,
+            });
+        }
 
         return () => {
             if (polylineRef.current) polylineRef.current.setMap(null);
