@@ -1,5 +1,4 @@
-import {useEffect, useRef} from "react";
-
+import { useEffect, useRef } from "react";
 
 const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "true";
 
@@ -7,8 +6,9 @@ export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
     const nearbyCirclesRef = useRef([]);
 
     useEffect(() => {
-        if (!map || !maps || !google || !SIMULATION_MODE) return;
+        if (!map || !maps || !window.google || !SIMULATION_MODE) return;
 
+        // Clear existing circles
         nearbyCirclesRef.current.forEach(c => c.setMap(null));
         nearbyCirclesRef.current = [];
 
@@ -20,6 +20,7 @@ export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
 
             if (!loc?.lat || !loc?.lon || !range || mainIMSI === itemId) return;
 
+            // Create primary circle for device range
             const circle = new maps.Circle({
                 radius: range,
                 center: { lat: loc.lat, lng: loc.lon },
@@ -31,12 +32,9 @@ export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
             });
             nearbyCirclesRef.current.push(circle);
 
+            // Create additional circle for mutual monitoring if needed
             if (item.device?.hasMutualMonitoring) {
-                const lat = device?.lastLocation?.lat;
-                const lng = device?.lastLocation?.lon;
-                // const geofenceCenter = new google.maps.LatLng(lat, lng);
-
-                circle.current = new maps.Circle({
+                const mutualCircle = new maps.Circle({
                     radius: 250,
                     center: { lat: loc.lat, lng: loc.lon },
                     strokeColor: '#D7596D',
@@ -45,9 +43,15 @@ export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
                     strokeWeight: 2,
                     map,
                 });
+                nearbyCirclesRef.current.push(mutualCircle);
             }
         });
 
-        return () => nearbyCirclesRef.current.forEach(c => c.setMap(null));
-    }, [map, maps, nearbyDevices]);
+        return () => {
+            nearbyCirclesRef.current.forEach(c => c.setMap(null));
+            nearbyCirclesRef.current = [];
+        };
+    }, [map, maps, nearbyDevices, device]);
+
+    return nearbyCirclesRef;
 }
