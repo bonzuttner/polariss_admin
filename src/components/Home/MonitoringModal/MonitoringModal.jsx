@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 
 import styles from './Monitoring.module.css';
 import {DeviceService} from "../../../api/deviceService.js";
+const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
 
 // Extracted Header Component
 const ModalHeader = ({ title, onClose }) => (
@@ -212,27 +213,33 @@ const SOSMode = ({ device,  monitoringFields ,  onUpdate  }) => {
             toast.error(error?.response?.data?.message || 'An error occurred.');
         }};
 
- return(   <>
-        <p className={styles.innerLabel}>SOSモード</p>
-        <div className={styles.buttonsContainer}>
-            <button className={styles.SOSButton}   onClick={handleConfirm}>
-                {SOSIsActive ? '解除中 (ON)' : '監視中 (OFF)'}
-            </button>
-        </div>
-    </>
- );
+ return (<>
+
+ {MONITORING_MODE && (
+     <div>
+         <p className={styles.innerLabel}>SOSモード</p>
+         <div className={styles.buttonsContainer}>
+             <button className={styles.SOSButton} onClick={handleConfirm}>
+                 {SOSIsActive ? '解除中 (ON)' : '監視中 (OFF)'}
+             </button>
+         </div>
+     </div>
+ )}
+     </>
+ )
+     ;
 };
 
 // Extracted Message History Component
 const MessageHistory = () => {
-  const messages = [
-    '2025/06/13 15:33 車両がジオフェンスを退出しました',
-    '2025/06/13 15:12 車両がジオフェンスに入りました',
-    '2025/06/13 11:06 エンジンが起動しました'
-  ];
+    const messages = [
+        '2025/06/13 15:33 車両がジオフェンスを退出しました',
+        '2025/06/13 15:12 車両がジオフェンスに入りました',
+        '2025/06/13 11:06 エンジンが起動しました'
+    ];
 
-  return (
-      <div className={styles.messageHistorySection}>
+    return (
+        <div className={styles.messageHistorySection}>
         <h3 className={styles.sectionTitle}>メッセージ履歴</h3>
         <ul className={styles.messageList}>
           {messages.map((message, index) => (

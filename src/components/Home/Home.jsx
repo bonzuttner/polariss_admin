@@ -43,6 +43,7 @@ function Home({ setLayoutKey }) {
   const [currentLocation, setCurrentLocation] = useState(null);
 
   // Use custom hooks
+  const [allDevices, setAllDevices] = useState([]);
   const {
     users,
     selectedUser,
@@ -52,7 +53,6 @@ function Home({ setLayoutKey }) {
     updateSelections,
     handleSelect
   } = useSelections();
-
   const {
     device,
     movements,
@@ -99,6 +99,20 @@ function Home({ setLayoutKey }) {
         const users = response.data.data;
         setUsers(users);
 
+        // Collect all devices across all users
+        const devices = users.flatMap(user =>
+            user.bikes.flatMap(bike =>
+                bike.devices.map(device => ({
+                  ...device,
+                  bikeId: bike.id,
+                  bikeName: bike.name,
+                  userId: user.id,
+                  userName: user.nickname
+                }))
+            )
+        );
+        setAllDevices(devices);
+
         if (users.length > 0) {
           // Enable device fetching before updating selections
           shouldFetchDevice.current = true;
@@ -137,6 +151,49 @@ function Home({ setLayoutKey }) {
       console.error("❌ Failed to parse stored simulations:", err);
     }
   }, []);
+
+  // Add this handler for device selection
+  const handleDeviceSelect = useCallback((selectedDevice) => {
+    if (!selectedDevice || !users) return;
+    // Enable device fetching
+    shouldFetchDevice.current = true;
+    // Create a synthetic event for the user selection
+    const userEvent = {
+      target: {
+        value: selectedDevice.userId.toString()
+      }
+    };
+
+    // First select the user
+    const userSelection = handleSelect('user', userEvent);
+    if (!userSelection) return;
+
+    // Then create a synthetic event for the bike selection
+    const bikeEvent = {
+      target: {
+        value: selectedDevice.bikeId.toString()
+      }
+    };
+
+    // Select the bike
+    const bikeSelection = handleSelect('bike', bikeEvent);
+    if (!bikeSelection) return;
+
+    // Finally select the device
+    const deviceEvent = {
+      target: {
+        value: selectedDevice.id.toString()
+      }
+    };
+    // Trigger selections in order
+    handleSelect('user', userEvent);
+    handleSelect('bike', bikeEvent);
+    handleSelect('device', deviceEvent);
+
+    // Explicitly trigger data fetch for the selected device
+    refreshDeviceData();
+
+  }, [users, handleSelect , refreshDeviceData]);
 
 
   // Fetch device data when needed
@@ -386,6 +443,8 @@ function Home({ setLayoutKey }) {
                 activeSimulations={activeSimulations}
                 stopSimulation={stopSimulation}
                 sosActive={SOSIsActive}
+                allDevices={allDevices}
+                onDeviceSelect={handleDeviceSelect}
               />}
             </div>
 
@@ -425,6 +484,8 @@ function Home({ setLayoutKey }) {
               activeSimulations={activeSimulations}
               stopSimulation={stopSimulation}
               sosActive={SOSIsActive}
+              allDevices={allDevices}
+              onDeviceSelect={handleDeviceSelect}
             />}
           </div>
 

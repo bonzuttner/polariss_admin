@@ -4,13 +4,19 @@ import Utils from "../components/utils/utils.js";
 
 export function usePolylineAndCircleUpdater({ map, maps, movements, device, markerPosition, setHasLastLocation }) {
     const polylineRef = useRef(null);
-    const circleRef = useRef(null);
+    const circlesRef = useRef([]); // Now using an array for multiple circles
 
     useEffect(() => {
         if (!maps || !map) return;
 
+        // Clear previous polylines and circles
         if (polylineRef.current) polylineRef.current.setMap(null);
-        if (circleRef.current) circleRef.current.setMap(null);
+
+        // Clear all existing circles
+        circlesRef.current.forEach(circle => {
+            if (circle) circle.setMap(null);
+        });
+        circlesRef.current = [];
 
         if (!Utils.isEmpty(movements)) {
             const coords = movements.map(({ lat, lon }) => ({ lat, lng: lon }));
@@ -26,12 +32,13 @@ export function usePolylineAndCircleUpdater({ map, maps, movements, device, mark
 
         setHasLastLocation(Boolean(device?.lastLocation?.lat));
 
-        if (device?.monitoringSettings?.range > 0) {
+        // Create new circles as needed
+        if (device?.monitoringSettings?.range > 0 || !window.google) {
             const lat = device.monitoringSettings.lat;
             const lng = device.monitoringSettings.lon;
             const geofenceCenter = new google.maps.LatLng(lat, lng);
 
-            circleRef.current = new maps.Circle({
+            const rangeCircle = new maps.Circle({
                 radius: device.monitoringSettings.range,
                 center: geofenceCenter,
                 strokeColor: '#4611a7',
@@ -40,13 +47,15 @@ export function usePolylineAndCircleUpdater({ map, maps, movements, device, mark
                 strokeWeight: 2,
                 map,
             });
+            circlesRef.current.push(rangeCircle);
         }
-        if (device?.monitoringSettings?.monitoringType ==="mutual") {
+
+        if (device?.monitoringSettings?.monitoringType === "mutual") {
             const lat = device?.lastLocation?.lat;
             const lng = device?.lastLocation?.lon;
             const geofenceCenter = new google.maps.LatLng(lat, lng);
 
-            circleRef.current = new maps.Circle({
+            const mutualCircle = new maps.Circle({
                 radius: 250,
                 center: geofenceCenter,
                 strokeColor: '#D7596D',
@@ -55,11 +64,15 @@ export function usePolylineAndCircleUpdater({ map, maps, movements, device, mark
                 strokeWeight: 2,
                 map,
             });
+            circlesRef.current.push(mutualCircle);
         }
 
         return () => {
+            // Cleanup function
             if (polylineRef.current) polylineRef.current.setMap(null);
-            if (circleRef.current) circleRef.current.setMap(null);
+            circlesRef.current.forEach(circle => {
+                if (circle) circle.setMap(null);
+            });
         };
     }, [map, maps, movements, device, markerPosition]);
 }

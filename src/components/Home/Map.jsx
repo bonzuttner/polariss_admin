@@ -20,6 +20,8 @@ import { useFetchNearbyDevices } from "../../hooks/useFetchNearbyDevices.js";
 import { usePolylineAndCircleUpdater } from "../../hooks/usePolylineAndCircleUpdater.js";
 import { useNearbyDeviceCircles } from "../../hooks/useNearbyDeviceCircles.js";
 import { useMapIdleListener } from "../../hooks/useMapIdleListner.js";
+import { usePanToDevice } from "../../hooks/usePanToDevice.js";
+
 
 const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === 'true';
 const DEFAULT_CENTER = { lat: 36.2223633040231, lng: 137.81848964688243 };
@@ -51,6 +53,12 @@ export default function CutomMap(props) {
   // Use the nearby device circles hook
   useNearbyDeviceCircles({ map, maps, nearbyDevices, device });
 
+  usePanToDevice(device, {
+    animate: true,
+    duration: 1000,
+    zoomInLevel: 17,  // Custom zoom when device has location
+    zoomOutLevel: 8   // Custom zoom when no location
+  });
   const markerPosition = getMarkerPosition(device, simulatedPosition);
   const label = device?.device?.bike?.name;
   const markerLabel = getMarkerLabel(label);

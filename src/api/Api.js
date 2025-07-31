@@ -23,7 +23,6 @@ export default class Api {
           ? {
               headers: headers,
               timeout: 1200000,
-
             }
           : method === 'delete'
           ? {
@@ -35,7 +34,6 @@ export default class Api {
         {
           headers: headers,
           timeout: 1200000,
-
         }
         // , {crossDomain: true}
       )
