@@ -1259,7 +1259,7 @@ body .secondary-nav a i {
   display: none !important;
 }
 .react-datepicker-popper {
-  left: unset !important;
+  position: absolute !important;
 }
 .react-datepicker__navigation--previous,
 .react-datepicker__navigation--next {
@@ -1426,4 +1426,3 @@ body .secondary-nav a i {
     width: 80%;
   }
 }
-
