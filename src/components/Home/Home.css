@@ -1198,7 +1198,10 @@ body .secondary-nav a i {
   border: 2px solid #4611a7;
 }
 
-
+.device-result-item:hover {
+  background-color: #e6e0ff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
 .btn-outline-empty {
   border-color: transparent;
