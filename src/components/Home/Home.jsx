@@ -319,6 +319,9 @@ function Home({ setLayoutKey }) {
 
 
   const handleClick = () => {
+    console.log("Start Date (Raw):", startDate); // Check raw Date object
+    console.log("Start Date (ISO):", startDate?.toISOString()); // ISO format
+    console.log("Start Date (Locale):", startDate?.toString()); // Local time string
     shouldFetchDevice.current = true;
     refreshDeviceData();
     setShow(false);

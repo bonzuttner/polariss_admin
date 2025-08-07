@@ -17,9 +17,15 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
         ].join('-');
     };
 
-    // Memoize formatted dates to prevent unnecessary re-renders
-    const formattedStartDate = useMemo(() => formatDate(startDate), [startDate]);
-    const formattedEndDate = useMemo(() => formatDate(endDate), [endDate]);
+// Format dates without converting to UTC
+    const formatDateWithoutUTC = (date) => {
+        if (!date) return null;
+        const d = new Date(date);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    };
+
+    const formattedStartDate = useMemo(() => formatDateWithoutUTC(startDate), [startDate]);
+    const formattedEndDate = useMemo(() => formatDateWithoutUTC(endDate), [endDate]);
 
 
     // Device ID ref for comparison

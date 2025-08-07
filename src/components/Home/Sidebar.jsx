@@ -38,9 +38,9 @@ function Sidebar({
                 {/* Date Picker Section */}
                 <div className="form search-form inputs-underline" style={{
                     backgroundColor: '#ffffff',
-                    borderRadius:7,
+                    borderRadius: 7,
                     boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                    width:'100%',
+                    width: '100%',
                     paddingLeft: 8,
                 }}>
                     <form onSubmit={(e) => e.preventDefault()}>
@@ -48,27 +48,67 @@ function Sidebar({
                             <h3>Select</h3>
                         </div>
                         <div className="row">
-                            <div style={{backgroundColor: '#ffffff',
-                                marginRight:"auto",
-                                borderRadius:5,
+                            <div style={{
+                                backgroundColor: '#ffffff',
+                                marginRight: "auto",
+                                borderRadius: 5,
                                 boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                                fontSize:12}}
+                                fontSize: 12
+                            }}
                                  className="col-md-5 col-sm-5">
                                 <DatePicker
-                                    dateFormat={'yyyy-MM-dd'}
                                     selected={startDate}
                                     onChange={(date) => setStartDate(date)}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="yyyy-MM-dd HH:mm"
+                                    timeCaption="Time"
+                                    placeholderText="Select start date and time"
                                     showMonthDropdown
                                     showYearDropdown
+                                    dropdownMode="select"
+                                    isClearable
                                 />
                             </div>
-                            <div style={{backgroundColor: '#ffffff', marginLeft:"auto", borderRadius:5, boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)', fontSize:12}} className="col-md-5 col-sm-5">
+                            <div style={{
+                                backgroundColor: '#ffffff',
+                                marginLeft: "auto", borderRadius: 5,
+                                boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
+                                fontSize: 12
+                            }}
+                                 className="col-md-5 col-sm-5">
                                 <DatePicker
-                                    dateFormat={'yyyy-MM-dd'}
                                     selected={endDate}
                                     onChange={(date) => setEndDate(date)}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="yyyy-MM-dd HH:mm"
+                                    timeCaption="Time"
+                                    placeholderText="Select end date and time"
                                     showMonthDropdown
                                     showYearDropdown
+                                    dropdownMode="select"
+                                    isClearable
+                                    minDate={startDate}
+                                    popperPlacement="bottom-end"  // Auto-adjusts based on available space
+                                    popperModifiers={{
+                                        shift: {
+                                            enabled: true,
+                                            fn: (data) => {
+                                                data.styles.right = "200px";  // Manual left adjustment
+                                                return data;
+                                            },
+                                        },
+                                    }}
+                                    style={{
+                                        width: "100%",
+                                        backgroundColor: "#ffffff",
+                                        borderRadius: 5,
+                                        boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.6)",
+                                        fontSize: 12,
+                                    }}
                                 />
                             </div>
                         </div>
@@ -77,7 +117,14 @@ function Sidebar({
                                 type="submit"
                                 className="btn btn-primary pull-right search-btn"
                                 onClick={() => handleClick()}
-                                style={{marginRight:-30, marginBottom:-20, boxShadow: '0px 3px 5px rgba(0, 0, 0, 0.6)'}}
+                                style={{
+                                    marginRight: -30,
+                                    marginBottom: -20,
+                                    boxShadow: '0px 3px 5px rgba(0, 0, 0, 0.6)',
+                                    opacity: (!startDate || !endDate) ? 0.8 : 1  // Visual feedback
+                                }}
+                                disabled={!startDate || !endDate}  // Disabled state
+                                title={(!startDate || !endDate) ? "Please select both start and end dates" : ""}
                             >
                                 更新
                             </button>
@@ -85,62 +132,61 @@ function Sidebar({
                     </form>
                 </div>
                 {allDevices.length > 1 && (
-                <div className='row m-auto mt-5'>
-                    {/* Global Search Box */}
+                    <div className='row m-auto mt-5'>
+                        {/* Global Search Box */}
 
-                    <div className="form-group" style={{
-                        backgroundColor: '#ececec',
-                        borderRadius: 5,
-                        boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                        width:'96%',
-                        marginRight: 8,
-                        overflowY:'auto',
-                    }}>
-                        <div className="input-group width-33 m-auto">
+                        <div className="form-group" style={{
+                            backgroundColor: '#ececec',
+                            borderRadius: 5,
+                            boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
+                            width: '96%',
+                            marginRight: 8,
+                            overflowY: 'auto',
+                        }}>
+                            <div className="input-group width-33 m-auto">
             <span className="input-group-text">
               <FaSearch/>
             </span>
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Search all devices... / デバイスを検索..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                lang="ja"  // Supports Japanese input methods
-                                inputMode="text"  // Allows all character types
-                                style={{ fontFamily: 'Arial, "Hiragino Sans", Meiryo, sans-serif' }}  // Proper font stack
-                            />
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Search all devices... / デバイスを検索..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    lang="ja"  // Supports Japanese input methods
+                                    inputMode="text"  // Allows all character types
+                                    style={{fontFamily: 'Arial, "Hiragino Sans", Meiryo, sans-serif'}}  // Proper font stack
+                                />
+                            </div>
                         </div>
-                    </div>
 
 
-                    {/* Search Results */}
-                    {searchQuery && (
-                        <div className="mt-2" style={{maxHeight: '300px', overflowY: 'auto'}}>
-                            {filteredDevices.length > 0 ? (
-                                filteredDevices.map(device => (
-                                    <div
-                                        key={`${device.userId}-${device.bikeId}-${device.imsi}`}
-                                        className={`device-result-item ${device.imsi === selectedDevice?.imsi ? 'selected' : ''}`}
-                                        onClick={() => {
-                                            onDeviceSelect(device);
-                                            setSearchQuery('');
-                                        }}
-                                    >
-                                        <div>
-                                            <strong>{device.userName}</strong> &gt; {device.bikeName} &gt; {device.name}
+                        {/* Search Results */}
+                        {searchQuery && (
+                            <div className="mt-2" style={{maxHeight: '300px', overflowY: 'auto'}}>
+                                {filteredDevices.length > 0 ? (
+                                    filteredDevices.map(device => (
+                                        <div
+                                            key={`${device.userId}-${device.bikeId}-${device.imsi}`}
+                                            className={`device-result-item ${device.imsi === selectedDevice?.imsi ? 'selected' : ''}`}
+                                            onClick={() => {
+                                                onDeviceSelect(device);
+                                                setSearchQuery('');
+                                            }}
+                                        >
+                                            <div>
+                                                <strong>{device.userName}</strong> &gt; {device.bikeName} &gt; {device.name}
+                                            </div>
+                                            <div className="text-muted small">IMSI: {device.imsi}</div>
                                         </div>
-                                        <div className="text-muted small">IMSI: {device.imsi}</div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="p-2 text-muted">No devices found</div>
-                            )}
-                        </div>
-                    )}
-                </div>
+                                    ))
+                                ) : (
+                                    <div className="p-2 text-muted">No devices found</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 )}
-
 
 
                 {/* Selection Dropdowns */}
@@ -334,9 +380,10 @@ function Sidebar({
                                 <div className="col-md-6 col-sm-6">監視モード：</div>
                                 <div className="col-md-6 col-sm-6">
                                     <button
-                                        style={{width: '100%',
-                                       cursor:'pointer',
-                                    }}
+                                        style={{
+                                            width: '100%',
+                                            cursor: 'pointer',
+                                        }}
                                         onClick={(event) => showModal(event)}
                                         className={`btn ${
                                             device?.monitoringActive

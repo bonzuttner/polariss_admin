@@ -8759,7 +8759,7 @@ body::before {
 }
 
 .react-datepicker-popper {
-  
+  position: absolute !important;
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {

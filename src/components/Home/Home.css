@@ -1259,7 +1259,10 @@ body .secondary-nav a i {
   display: none !important;
 }
 .react-datepicker-popper {
-  position: absolute !important;
+  left: unset !important;
+  z-index: 5000;
+  right: 50px !important;
+  margin: auto;
 }
 .react-datepicker__navigation--previous,
 .react-datepicker__navigation--next {
@@ -1298,6 +1301,10 @@ body .secondary-nav a i {
 }
 .gm-style-iw.gm-style-iw-c .gm-style-iw-d {
   overflow-x: hidden !important;
+}
+.react-datepicker-popper {
+  left: unset !important;
+  z-index: 100;
 }
 
 @keyframes slide {
@@ -1426,3 +1433,4 @@ body .secondary-nav a i {
     width: 80%;
   }
 }
+
