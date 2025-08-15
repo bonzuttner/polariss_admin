@@ -1,8 +1,8 @@
 // src/components/simulationModal/MiniMap.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import {useMap, AdvancedMarker, Pin, useMapsLibrary} from '@vis.gl/react-google-maps';
-import  {DeviceService} from '../../api/deviceService.js';
-const MiniMap = ({ onStartChange, onEndChange, initialStart , device }) => {
+import { useMap, AdvancedMarker, Pin, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { DeviceService } from '../../api/deviceService.js';
+const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
     const map = useMap();
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
@@ -63,15 +63,15 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart , device }) => {
 
     //get the devices
     useEffect(() => {
-        const fetchDevices = async ()=> {
+        const fetchDevices = async () => {
             try {
-                const response =await DeviceService.getAllDevicesWithLastLocation();
-                if(response?.data?.code ===200){
+                const response = await DeviceService.getAllDevicesWithLastLocation();
+                if (response?.data?.code === 200) {
                     setDevices(response.data.data);
-                }else{
-                    console.warn('Failed to fetch devices : ' , response?.data?.message);
+                } else {
+                    console.warn('Failed to fetch devices : ', response?.data?.message);
                 }
-            }catch (err){
+            } catch (err) {
                 console.error('Error fetch devices : ', err);
             }
         };
@@ -122,18 +122,18 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart , device }) => {
                 );
             })}
 
-            {shouldShowMarker  && (
-            <AdvancedMarker position={device?.lastLocation ? {
-                lat: device.lastLocation.lat ,
-                lng: device.lastLocation.lon
-            } : DEFAULT_CENTER}  >
-                <Pin
-                    background={'purple'}
-                    borderColor={'white'}
-                    glyphColor={'white'}
-                    style={{zIndex:2000}}
-                />
-            </AdvancedMarker>
+            {shouldShowMarker && (
+                <AdvancedMarker position={device?.lastLocation ? {
+                    lat: device.lastLocation.lat,
+                    lng: device.lastLocation.lon
+                } : DEFAULT_CENTER}  >
+                    <Pin
+                        background={'purple'}
+                        borderColor={'white'}
+                        glyphColor={'white'}
+                        style={{ zIndex: 2000 }}
+                    />
+                </AdvancedMarker>
             )
             }
             {/* Start Marker */}
@@ -159,7 +159,7 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart , device }) => {
             )}
 
             {/* Clear Button */}
-            <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1 }}>
+            <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 100000 }}>
                 <button
                     onClick={clearMarkers}
                     className="btn btn-sm btn-danger"

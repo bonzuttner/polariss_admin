@@ -1,6 +1,7 @@
 import {useState, useMemo, useRef, useCallback} from 'react';
 import { DeviceService } from '../api/deviceService';
-import Utils from '../components/utils/utils';
+import { formatBackendDate } from '../components/utils/dateFormatter.js';
+
 
 export default function useDeviceData(selectedDevice, startDate, endDate) {
     const [device, setDevice] = useState({});
@@ -16,18 +17,6 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
             d.getDate().toString().padStart(2, '0')
         ].join('-');
     };
-
-// Format dates without converting to UTC
-    const formatDateWithoutUTC = (date) => {
-        if (!date) return null;
-        const d = new Date(date);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-    };
-
-    const formattedStartDate = useMemo(() => formatDateWithoutUTC(startDate), [startDate]);
-    const formattedEndDate = useMemo(() => formatDateWithoutUTC(endDate), [endDate]);
-
-
     // Device ID ref for comparison
     const prevDeviceIdRef = useRef(null);
 
@@ -43,8 +32,8 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
             const { device: deviceInfo, movements: movementData } =
                 await DeviceService.getDeviceInfo(
                     selectedDevice.imsi,
-                    formattedStartDate,
-                    formattedEndDate
+                    startDate,
+                    endDate
                 );
 
             setDevice(deviceInfo);

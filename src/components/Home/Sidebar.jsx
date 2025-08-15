@@ -1,20 +1,38 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import Utils from '../utils/utils.js';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaTimes } from 'react-icons/fa';
+
+import 'react-datepicker/dist/react-datepicker.css';
 
 const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "true";
 const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
+
 function Sidebar({
-                     users, selectedUser, selectedBike, selectedDevice,
-                     device, engine, startDate, endDate,
-                     setStartDate, setEndDate, handleSelect, handleClick,
-                     showModal, showEngModal, handleSimulationModal, activeSimulations, stopSimulation, sosActive,
-                     allDevices, onDeviceSelect
-                 }) {
+    users,
+    selectedUser,
+    selectedBike,
+    selectedDevice,
+    device,
+    engine,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+    handleSelect,
+    handleClick,
+    showModal,
+    showEngModal,
+    handleSimulationModal,
+    activeSimulations,
+    stopSimulation,
+    sosActive,
+    allDevices,
+    onDeviceSelect
+}) {
+
     const [searchQuery, setSearchQuery] = useState('');
- console.log(allDevices);
+
     const handleLocalSelect = (field, event) => {
         event.preventDefault();
         handleSelect(field, event);
@@ -30,433 +48,394 @@ function Sidebar({
         );
     }, [allDevices, searchQuery]);
 
+
+    const disabled = !startDate || !endDate;
+    const hasQuery = Boolean(searchQuery);
+
     return (
-        <div className={`col col-md-3 results-wrapper p-2`} style={{
-            backgroundColor: '#f3f3f3'
-        }}>
+        <div className={`col col-md-3 results-wrapper p-2`} style={{ backgroundColor: '#f3f3f3' }}>
+
             <div className="row sidebar-wrapper p-4">
                 {/* Date Picker Section */}
-                <div className="form search-form inputs-underline" style={{
-                    backgroundColor: '#ffffff',
-                    borderRadius: 7,
-                    boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                    width: '100%',
-                    paddingLeft: 8,
-                }}>
-                    <form onSubmit={(e) => e.preventDefault()}>
-                        <div className="section-title">
-                            <h3>Select</h3>
-                        </div>
-                        <div className="row">
-                            <div style={{
-                                backgroundColor: '#ffffff',
-                                marginRight: "auto",
-                                borderRadius: 5,
-                                boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                                fontSize: 12
-                            }}
-                                 className="col-md-5 col-sm-5">
-                                <DatePicker
-                                    selected={startDate}
-                                    onChange={(date) => setStartDate(date)}
-                                    showTimeSelect
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="yyyy-MM-dd HH:mm"
-                                    timeCaption="Time"
-                                    placeholderText="Select start date and time"
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    dropdownMode="select"
-                                    isClearable
-                                />
+                <div className="card shadow-sm border-0">
+                    <div className="card-body">
+                        <form onSubmit={(e) => e.preventDefault()}>
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                                <h5 className="mb-0">Select</h5>
                             </div>
-                            <div style={{
-                                backgroundColor: '#ffffff',
-                                marginLeft: "auto", borderRadius: 5,
-                                boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                                fontSize: 12
-                            }}
-                                 className="col-md-5 col-sm-5">
-                                <DatePicker
-                                    selected={endDate}
-                                    onChange={(date) => setEndDate(date)}
-                                    showTimeSelect
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="yyyy-MM-dd HH:mm"
-                                    timeCaption="Time"
-                                    placeholderText="Select end date and time"
-                                    showMonthDropdown
-                                    showYearDropdown
-                                    dropdownMode="select"
-                                    isClearable
-                                    minDate={startDate}
-                                    popperPlacement="bottom-end"  // Auto-adjusts based on available space
-                                    popperModifiers={{
-                                        shift: {
-                                            enabled: true,
-                                            fn: (data) => {
-                                                data.styles.right = "200px";  // Manual left adjustment
-                                                return data;
-                                            },
-                                        },
-                                    }}
-                                    style={{
-                                        width: "100%",
-                                        backgroundColor: "#ffffff",
-                                        borderRadius: 5,
-                                        boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.6)",
-                                        fontSize: 12,
-                                    }}
-                                />
+
+                            <div className="row g-3">
+                                {/* From */}
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-semibold" htmlFor="from-date">
+                                        From date
+                                    </label>
+                                    <DatePicker
+                                        id="from-date"
+                                        selected={startDate}
+                                        onChange={(date) => setStartDate(date)}
+                                        showTimeSelect
+                                        timeFormat="HH:mm"
+                                        timeIntervals={15}
+                                        dateFormat="yyyy-MM-dd HH:mm"
+                                        timeCaption="Time"
+                                        placeholderText="Select start date & time"
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        dropdownMode="select"
+                                        isClearable
+                                        className="form-control form-control-sm"
+                                        wrapperClassName="w-100"
+                                        popperPlacement="bottom-start"
+                                    />
+                                </div>
+
+                                {/* To */}
+                                <div className="col-12 col-md-6">
+                                    <label className="form-label fw-semibold" htmlFor="to-date">
+                                        To date
+                                    </label>
+                                    <DatePicker
+                                        id="to-date"
+                                        selected={endDate}
+                                        onChange={(date) => setEndDate(date)}
+                                        showTimeSelect
+                                        timeFormat="HH:mm"
+                                        timeIntervals={15}
+                                        dateFormat="yyyy-MM-dd HH:mm"
+                                        timeCaption="Time"
+                                        placeholderText="Select end date & time"
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        dropdownMode="select"
+                                        isClearable
+                                        minDate={startDate}
+                                        className="form-control form-control-sm"
+                                        wrapperClassName="w-100"
+                                        popperPlacement="bottom-end"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <div className="form-group">
-                            <button
-                                type="submit"
-                                className="btn btn-primary pull-right search-btn"
-                                onClick={() => handleClick()}
-                                style={{
-                                    marginRight: -30,
-                                    marginBottom: -20,
-                                    boxShadow: '0px 3px 5px rgba(0, 0, 0, 0.6)',
-                                    opacity: (!startDate || !endDate) ? 0.8 : 1  // Visual feedback
-                                }}
-                                disabled={!startDate || !endDate}  // Disabled state
-                                title={(!startDate || !endDate) ? "Please select both start and end dates" : ""}
-                            >
-                                更新
-                            </button>
-                        </div>
-                    </form>
+
+                            <div className="d-flex justify-content-end mt-4">
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary px-4"
+                                    onClick={handleClick}
+                                    disabled={disabled}
+                                    title={disabled ? "Please select both start and end dates" : ""}
+                                >
+                                    更新
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                {allDevices.length > 1 && (
-                    <div className='row m-auto mt-5'>
-                        {/* Global Search Box */}
 
-                        <div className="form-group" style={{
-                            backgroundColor: '#ececec',
-                            borderRadius: 5,
-                            boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                            width: '96%',
-                            marginRight: 8,
-                            overflowY: 'auto',
-                        }}>
-                            <div className="input-group width-33 m-auto">
-            <span className="input-group-text">
-              <FaSearch/>
-            </span>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="Search all devices... / デバイスを検索..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    lang="ja"  // Supports Japanese input methods
-                                    inputMode="text"  // Allows all character types
-                                    style={{fontFamily: 'Arial, "Hiragino Sans", Meiryo, sans-serif'}}  // Proper font stack
-                                />
+                {allDevices.length > 1 && (
+                    <div className="row justify-content-center mt-5">
+                        <div className="col-12">
+                            <div className="card shadow-sm border-0">
+                                <div className="card-body">
+                                    {/* Global Search Box */}
+                                    <label htmlFor="device-global-search" className="form-label fw-semibold">
+                                        Search all devices
+                                    </label>
+
+                                    <div className="input-group">
+                                        <span className="input-group-text">
+                                            <FaSearch />
+                                        </span>
+                                        <input
+                                            id="device-global-search"
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search all devices... / デバイスを検索..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            lang="ja"
+                                            inputMode="text"
+                                            style={{ fontFamily: 'Arial, "Hiragino Sans", Meiryo, sans-serif' }}
+                                            aria-describedby="device-search-help"
+                                            autoComplete="off"
+                                        />
+                                        {hasQuery && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline-secondary"
+                                                onClick={() => setSearchQuery("")}
+                                                aria-label="Clear search"
+                                            >
+                                                <FaTimes />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Search Results */}
+                                    {hasQuery && (
+                                        <div className="device-results mt-3">
+                                            {filteredDevices.length > 0 ? (
+                                                <ul className="list-group list-group-flush">
+                                                    {filteredDevices.map((device) => {
+                                                        const isActive = device.imsi === selectedDevice?.imsi;
+                                                        return (
+                                                            <li
+                                                                key={`${device.userId}-${device.bikeId}-${device.imsi}`}
+                                                                className={`list-group-item d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-1 pointer ${isActive ? "active" : ""}`}
+                                                                role="button"
+                                                                onClick={() => {
+                                                                    onDeviceSelect(device);
+                                                                    setSearchQuery("");
+                                                                }}
+                                                            >
+                                                                <div className="fw-semibold text-truncate">
+                                                                    {device.userName} <span className="text-muted">&gt;</span> {device.bikeName}{" "}
+                                                                    <span className="text-muted">&gt;</span> {device.name}
+                                                                </div>
+                                                                <div className={`small ${isActive ? "text-white-50" : "text-muted"}`}>
+                                                                    IMSI: {device.imsi}
+                                                                </div>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            ) : (
+                                                <div className="text-muted small py-2 px-1">No devices found</div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-
-
-                        {/* Search Results */}
-                        {searchQuery && (
-                            <div className="mt-2" style={{maxHeight: '300px', overflowY: 'auto'}}>
-                                {filteredDevices.length > 0 ? (
-                                    filteredDevices.map(device => (
-                                        <div
-                                            key={`${device.userId}-${device.bikeId}-${device.imsi}`}
-                                            className={`device-result-item ${device.imsi === selectedDevice?.imsi ? 'selected' : ''}`}
-                                            onClick={() => {
-                                                onDeviceSelect(device);
-                                                setSearchQuery('');
-                                            }}
-                                        >
-                                            <div>
-                                                <strong>{device.userName}</strong> &gt; {device.bikeName} &gt; {device.name}
-                                            </div>
-                                            <div className="text-muted small">IMSI: {device.imsi}</div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="p-2 text-muted">No devices found</div>
-                                )}
-                            </div>
-                        )}
                     </div>
                 )}
 
-
                 {/* Selection Dropdowns */}
-                <div className="form search-form inputs-underline rounded-md p-2 mt-5" style={{
-                    backgroundColor: '#ffffff',
-                    borderRadius: 7,
-                    margin: 16,
-                    boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)',
-                    overflowY: 'auto',
-                    width: '90%',
-                }}>
+                <div className="search-form-container mt-4">
                     <form>
                         {/* User Selection */}
-                        <div className="row">
-                            <div className="col-md-12 col-sm-12">
-                                <div className="form-group">
-                                    <select
-                                        className="form-control form-select selectpicker"
-                                        name="user"
-                                        value={selectedUser?.id || ''}
-                                        onChange={(event) => handleLocalSelect('user', event)}
-                                    >
-                                        {users.map((user) => (
-                                            <option key={user.id} value={user.id}>
-                                                {user.nickname}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
+                        <div className="form-group mb-3">
+                            <select
+                                className="form-control"
+                                name="user"
+                                value={selectedUser?.id || ''}
+                                onChange={(event) => handleLocalSelect('user', event)}
+                            >
+                                {users.map((user) => (
+                                    <option key={user.id} value={user.id}>
+                                        {user.nickname}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Bike Selection */}
-                        <div className="row">
-                            <div className="col-md-12 col-sm-12">
-                                <div className="form-group">
-                                    <select
-                                        className={`form-control ${selectedUser?.bikes?.length > 1 ? 'form-select' : ''}`}
-                                        name="bike"
-                                        onChange={(event) => handleLocalSelect('bike', event)}
-                                        value={selectedBike?.id || ''}
-                                    >
-                                        {selectedUser?.bikes?.map((bike) => (
-                                            <option key={bike.id} value={bike.id}>
-                                                {bike.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
+                        <div className="form-group mb-3">
+                            <select
+                                className="form-control"
+                                name="bike"
+                                onChange={(event) => handleLocalSelect('bike', event)}
+                                value={selectedBike?.id || ''}
+                            >
+                                {selectedUser?.bikes?.map((bike) => (
+                                    <option key={bike.id} value={bike.id}>
+                                        {bike.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Device Selection */}
-                        <div className="row">
-                            <div className="col-md-12 col-sm-12 ">
-                                <div className="form-group">
-                                    <select
-                                        className={`form-control ${selectedBike?.devices?.length > 1 ? 'form-select' : ''}`}
-                                        name="device"
-                                        onChange={(event) => handleLocalSelect('device', event)}
-                                        value={selectedDevice?.id || ''}
-                                    >
-                                        {selectedBike?.devices?.map((device) => (
-                                            <option key={device.id} value={device.id}>
-                                                {device.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
+                        <div className="form-group mb-0">
+                            <select
+                                className="form-control"
+                                name="device"
+                                onChange={(event) => handleLocalSelect('device', event)}
+                                value={selectedDevice?.id || ''}
+                            >
+                                {selectedBike?.devices?.map((device) => (
+                                    <option key={device.id} value={device.id}>
+                                        {device.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </form>
                 </div>
 
                 {/* Simulation Section */}
                 {SIMULATION_MODE && (
-                    <div className="form search-form inputs-underline rounded-md p-2">
-                        <div style={{
-                            backgroundColor: '#ffffff',
-                            borderRadius: 7,
-                            margin: 12,
-                            boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)'
-                        }}>
-                            <form>
-                                {!Utils.isEmptyObject(engine) && (
-                                    <div className="row">
-                                        <div className="col-md-6 col-sm-6">{'エンジン制御：'}</div>
-                                        <div className="col-md-6 col-sm-6">
-                                            <button
-                                                style={{width: '100%'}}
-                                                onClick={(event) => showEngModal(event)}
-                                                className={`btn ${
-                                                    engine?.engineStatus === 'OFF'
-                                                        ? 'btn-outline-primary'
-                                                        : 'btn-primary'
+                    <div className="simulation-form-container">
+                        <form>
+                            {/* Engine Control */}
+                            {!Utils.isEmptyObject(engine) && (
+                                <div className="row align-items-center mb-3">
+                                    <div className="col-6 fw-bold">エンジン制御：</div>
+                                    <div className="col-6">
+                                        <button
+                                            type="button"
+                                            onClick={showEngModal}
+                                            className={`btn w-100 ${engine?.engineStatus === 'OFF'
+                                                ? 'btn-outline-primary'
+                                                : 'btn-primary'
                                                 }`}
-                                            >
-                                                {engine?.engineStatus}
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                                <hr/>
-                                {/* Simulation Island*/}
-                                <div className="row mt-3">
-                                    <div className="col-md-12">
-                                        {activeSimulations[selectedBike?.id] ? (
-                                            <button
-                                                type="button"
-                                                className="btn btn-danger w-100"
-                                                onClick={async () => {
-                                                    await stopSimulation(selectedBike.id);
-                                                    handleClick();
-                                                }}
-                                            >
-                                                Stop Simulation
-                                            </button>
-                                        ) : (
-                                            <button
-                                                type="button"
-                                                className="btn btn-primary w-100"
-                                                onClick={() => handleSimulationModal()}
-                                            >
-                                                Create Simulation
-                                            </button>
-                                        )}
+                                        >
+                                            {engine?.engineStatus}
+                                        </button>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
+                            )}
+
+                            <hr />
+
+                            {/* Simulation Controls */}
+                            <div className="row mt-3">
+                                <div className="col-12">
+                                    {activeSimulations[selectedBike?.id] ? (
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger w-100"
+                                            onClick={async () => {
+                                                await stopSimulation(selectedBike.id);
+                                                handleClick();
+                                            }}
+                                        >
+                                            Stop Simulation
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary w-100"
+                                            onClick={handleSimulationModal}
+                                        >
+                                            Create Simulation
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 )}
 
                 {/* Device Status Section */}
-                <div className="form search-form inputs-underline rounded">
-                    <div style={{
-                        backgroundColor: "#ffffff",
-                        borderRadius: 7,
-                        boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.6)'
-                    }}>
-                        <form>
-                            <div className="row mt-4 p-1">
-                                <div className="col-md-6 col-sm-6">Device Status：</div>
-                                <div className="col-md-6 col-sm-6">
-                                    <p
-                                        style={{width: '100%'}}
-                                        className={`btn ${
-                                            device?.deviceStatus === '要確認'
-                                                ? 'btn-outline-empty' : 'btn-outline-empty'
-
+                <div className="device-card">
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        {/* Device Status */}
+                        <div className="row align-items-center mt-3 px-1">
+                            <div className="col-6">Device Status：</div>
+                            <div className="col-6 text-end text-md-start">
+                                <span
+                                    className={`pill ${device?.deviceStatus === '要確認' ? 'pill-warning' : 'pill-muted'
                                         }`}
-                                    >
-                                        {device?.deviceStatus}
-                                    </p>
-                                </div>
+                                >
+                                    {device?.deviceStatus ?? '-'}
+                                </span>
                             </div>
+                        </div>
 
-                            <div className="row mt-4 p-1">
-                                <div className="col-md-6 col-sm-6">通知受付:</div>
-                                <div className="col-md-6 col-sm-6">
-                                    <div>
-                                        {device?.monitoringActive ? (
-                                            <button className={"primaryButton"} style={{width: '100%'}}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                    }}>
-                                                ON
-                                            </button>
-                                        ) : (
-                                            <button className={"secondaryButton"} style={{width: '100%'}}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                    }}>
-                                                OFF
-                                            </button>
-                                        )}</div>
-
-                                </div>
-                            </div>
-
-                            <div className="row mt-4">
-                                <div className="col-md-6 col-sm-6">通信日時</div>
-                                <div className="col-md-6 col-sm-6 text-center">
-                                    {device?.lastLocation?.dt?.replace('T', ' ')}
-                                </div>
-                            </div>
-
-                            <div className="row mt-4">
-                                <div className="col-md-6 col-sm-6">監視モード：</div>
-                                <div className="col-md-6 col-sm-6">
+                        {/* 通知受付 */}
+                        <div className="row align-items-center mt-4 px-1">
+                            <div className="col-6">通知受付:</div>
+                            <div className="col-6">
+                                {device?.monitoringActive ? (
                                     <button
-                                        style={{
-                                            width: '100%',
-                                            cursor: 'pointer',
+                                        type="button"
+                                        className="btn btn-success w-100"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            // toggle/handle here if needed
                                         }}
-                                        onClick={(event) => showModal(event)}
-                                        className={`btn ${
-                                            device?.monitoringActive
-                                                ? 'btn-outline-primary'
-                                                : 'btn-primary'
-                                        }`}
                                     >
-                                        {device?.monitoringActive ? '監視中' : '解除中'}
+                                        ON
                                     </button>
-                                </div>
-                            </div>
-                            {MONITORING_MODE && (<div className="row mt-4">
-                                <div className="col-md-6 col-sm-6">SOS：</div>
-                                <div className="col-md-6 col-sm-6">
-                                    <div>
-                                        {sosActive ? (
-                                            <button className={"primaryButton"} style={{width: '100%'}}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                    }}>
-                                                ON
-                                            </button>
-                                        ) : (
-                                            <button className={"secondaryButton"} style={{width: '100%'}}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                    }}>
-                                                OFF
-                                            </button>
-                                        )}</div>
-                                </div>
-                            </div>)}
-
-
-                            <div className="row mt-4">
-                                <div className="col-md-6 col-sm-6">バッテリー：</div>
-                                <div className="col-md-6 col-sm-6">
-                                    <p
-                                        style={{width: '100%'}}
-                                        className={`btn ${
-                                            device?.deviceStatus === '要確認'
-                                                ? 'btn-outline-empty' : 'btn-outline-empty'
-
-                                        }`}
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary w-100"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            // toggle/handle here if needed
+                                        }}
                                     >
-                                        {device?.lastLocation?.bat}
-                                    </p>
+                                        OFF
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 通信日時 */}
+                        <div className="row align-items-center mt-4">
+                            <div className="col-6">通信日時</div>
+                            <div className="col-6 text-end text-md-start">
+                                <span className="text-muted">
+                                    {device?.lastLocation?.dt?.replace('T', ' ') || '-'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* 監視モード */}
+                        <div className="row align-items-center mt-4">
+                            <div className="col-6">監視モード：</div>
+                            <div className="col-6">
+                                <button
+                                    type="button"
+                                    className={`btn w-100 ${device?.monitoringActive ? 'btn-outline-primary' : 'btn-primary'
+                                        }`}
+                                    onClick={showModal}
+                                >
+                                    {device?.monitoringActive ? '監視中' : '解除中'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* SOS (only in MONITORING_MODE) */}
+                        {MONITORING_MODE && (
+                            <div className="row align-items-center mt-4">
+                                <div className="col-6">MM：</div>
+                                <div className="col-6">
+                                    {sosActive ? (
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger w-100"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            ON
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-danger w-100"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            OFF
+                                        </button>
+                                    )}
                                 </div>
                             </div>
+                        )}
 
+                        {/* バッテリー */}
+                        <div className="row align-items-center mt-4">
+                            <div className="col-6">バッテリー：</div>
+                            <div className="col-6 text-end text-md-start">
+                                <span className="pill pill-muted">
+                                    {device?.lastLocation?.bat ?? '-'}
+                                </span>
+                            </div>
+                        </div>
 
-                            <hr/>
-                            {/* <div className="row">
-                <div className="col-md-6 col-sm-6">監視モード：</div>
-                <div className="col-md-6 col-sm-6">
-                  <button
-                    style={{ width: '100%' }}
-                    onClick={(event) => showModal(event)}
-                    className={`btn ${
-                      device?.monitoringActive
-                        ? 'btn-outline-primary'
-                        : 'btn-primary'
-                    }`}
-                  >
-                    {device?.monitoringActive ? '監視中' : '解除中'}
-                  </button>
+                        <hr className="my-4" />
+                    </form>
                 </div>
-              </div> */}
-                        </form>
-                    </div>
-                </div>
+
             </div>
         </div>
     );

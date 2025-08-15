@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useState, useEffect, useRef } from 'react';
+import React, {Suspense, useCallback, useState, useEffect, useRef, useMemo} from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './Home.css';
 import { APIProvider } from '@vis.gl/react-google-maps';
@@ -12,6 +12,10 @@ import useSelections from '../../hooks/useSelection.js';
 import useDeviceData from '../../hooks/useDeviceData';
 import { DeviceService } from '../../api/deviceService';
 import SimulationModal from "../simulationModal/SimulationModal.jsx";
+import { startOfDay, endOfDay } from 'date-fns';
+import { formatBackendDate } from '../utils/dateFormatter.js';
+
+
 
 
 
@@ -23,14 +27,27 @@ function Home({ setLayoutKey }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [show, setShow] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(() => startOfDay(new Date()));
+  const [endDate, setEndDate] = useState(() => endOfDay(new Date()));
   const [showMonitoring, setShowMonitoring] = useState(false);
   const [showEngineModal, setShowEngineModal] = useState(false);
   const [pageKey, setPageKey] = useState(Utils.unique());
   const [engine, setEngine] = useState({});
   const [loading, setLoading] = useState(true);
   const [currentRefreshInterval, setCurrentRefreshInterval] = useState(parseInt(INTERVAL || '10000', 10));
+
+
+  // Memoize dates in backend format
+  const backendStartDate = useMemo(() =>
+          startDate ? formatBackendDate(startDate) : null,
+      [startDate]
+  );
+
+  const backendEndDate = useMemo(() =>
+          endDate ? formatBackendDate(endDate) : null,
+      [endDate]
+  );
+
 
 
 
@@ -59,7 +76,7 @@ function Home({ setLayoutKey }) {
     range,
     loading: deviceLoading,
     refresh: refreshDeviceData
-  } = useDeviceData(selectedDevice, startDate, endDate);
+  } = useDeviceData(selectedDevice, backendStartDate, backendEndDate);
 
   const [SOSIsActive, setSOSIsActive] = useState(false);
 
@@ -260,7 +277,7 @@ function Home({ setLayoutKey }) {
   }, [activeSimulations, selectedBike]);
 
 
-  // auto re fresher (what)
+  // auto re fresher
   useEffect(() => {
     const interval = setInterval(async () => {
       if (!selectedDevice?.imsi) return;
@@ -361,6 +378,12 @@ function Home({ setLayoutKey }) {
     setShowEngineModal(false);
   }, []);
 
+  console.log('Current dates:', {
+    start: backendStartDate,
+    end: backendEndDate,
+    selectedDevice: selectedDevice?.imsi
+  });
+
   const stopSimulation = useCallback(async (bikeId) => {
     const simulationData = activeSimulations?.[bikeId];
     const simulationId = simulationData?.simulationId;
@@ -399,8 +422,6 @@ function Home({ setLayoutKey }) {
 
 
   const showBar = () => setShow(!show);
-
-  // Memoize Sidebar to prevent unnecessary re-renders
 
 
 
