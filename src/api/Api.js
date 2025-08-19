@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const apiUrl = import.meta.env.VITE_API_URL 
+const apiUrl = "https://polarissfintech-cegee7efcuenffhq.japaneast-01.azurewebsites.net/v2/"
 export default class Api {
   static ApiURL = apiUrl
 

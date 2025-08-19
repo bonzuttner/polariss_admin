@@ -5,8 +5,8 @@ import { FaSearch, FaTimes } from 'react-icons/fa';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
-const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "true";
-const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
+const SIMULATION_MODE = false;
+const MONITORING_MODE = false;
 
 function Sidebar({
     users,

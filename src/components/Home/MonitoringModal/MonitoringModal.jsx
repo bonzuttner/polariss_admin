@@ -170,7 +170,7 @@ const EngineControl = ({ device, handleConfirm }) => (
 
 // Extracted SOS Mode Component
 const SOSMode = ({ device, monitoringFields, onUpdate }) => {
-  const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
+  const MONITORING_MODE = false;
   const [SOSIsActive, setSOSIsActive] = useState(
     device?.monitoringSettings?.monitoringType === 'mutual');
   const handleConfirm = async () => {
