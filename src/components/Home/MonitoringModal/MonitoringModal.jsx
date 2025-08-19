@@ -170,6 +170,7 @@ const EngineControl = ({ device, handleConfirm }) => (
 
 // Extracted SOS Mode Component
 const SOSMode = ({ device, monitoringFields, onUpdate }) => {
+  const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
   const [SOSIsActive, setSOSIsActive] = useState(
     device?.monitoringSettings?.monitoringType === 'mutual');
   const handleConfirm = async () => {
@@ -214,9 +215,11 @@ const SOSMode = ({ device, monitoringFields, onUpdate }) => {
   return (<>
     <p className={styles.innerLabel}>相互監視</p>
     <div className={styles.buttonsContainer}>
-      <button className={styles.SOSButton} onClick={handleConfirm}>
-        {SOSIsActive ? '解除中 (ON)' : '監視中 (OFF)'}
-      </button>
+      {MONITORING_MODE && (
+        <button className={styles.SOSButton} onClick={handleConfirm}>
+          {SOSIsActive ? '解除中 (ON)' : '監視中 (OFF)'}
+        </button>
+      )}
     </div>
   </>
   );
