@@ -401,7 +401,7 @@ function Settings(props) {
               href="#"
               onClick={() => tabClicked('bikes')}
             >
-              車両情報
+              顧客名
             </a>
           </li>
           <li className="nav-item">
