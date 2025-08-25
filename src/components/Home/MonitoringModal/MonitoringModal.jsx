@@ -212,17 +212,16 @@ const SOSMode = ({ device, monitoringFields, onUpdate }) => {
     }
   };
 
-  return (<>
-    <p className={styles.innerLabel}>相互監視</p>
-    <div className={styles.buttonsContainer}>
-      {MONITORING_MODE && (
-        <button className={styles.SOSButton} onClick={handleConfirm}>
-          {SOSIsActive ? '解除中 (ON)' : '監視中 (OFF)'}
-        </button>
-      )}
-    </div>
-  </>
-  );
+  return MONITORING_MODE ? (
+      <>
+        <p className={styles.innerLabel}>相互監視</p>
+        <div className={styles.buttonsContainer}>
+          <button className={styles.SOSButton} onClick={handleConfirm}>
+            {SOSIsActive ? '解除中 (ON)' : '監視中 (OFF)'}
+          </button>
+        </div>
+      </>
+  ) : null;
 };
 
 // Extracted Message History Component
@@ -345,7 +344,7 @@ function MonitoringModal({ device, updateRange, range, setSOSIsActive }) {
                 setSOSIsActive={setSOSIsActive}
               />
 
-              <MessageHistory />
+              {/*<MessageHistory />*/}
             </div>
           </div>
         </>

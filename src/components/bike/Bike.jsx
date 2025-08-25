@@ -97,7 +97,7 @@ function Bike(props) {
         <form className="p-4">
           <div className="mb-3 row">
             <label for="name" className="col-sm-4 col-form-label">
-              バイク名
+              顧客名
             </label>
             <div className="col-sm-8">
               <input
