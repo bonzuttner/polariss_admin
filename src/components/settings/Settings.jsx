@@ -55,7 +55,7 @@ function Settings(props) {
         list?.splice(0, 0, {
           admins2: [],
           email: 'Master',
-          id: 'e19a238b-0a33-4b43-a440-22bb486657a2',
+          id: '27661ba2-bc20-49a8-a9eb-8089c611d1dc',
           name1: 'Master',
           name2: 'Master',
           nickname: 'Master',
