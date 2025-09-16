@@ -1,0 +1,212 @@
+/* Bike.module.css */
+.editCard {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Card Styles */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.cardHeader {
+    padding: 20px;
+    background: linear-gradient(90deg, #4611a7 0%, #8664ff 100%);
+    color: white;
+}
+
+.cardHeader h4 {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Form Styles */
+.form {
+    padding: 24px;
+}
+
+.formGroup {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.formLabel {
+    font-weight: 600;
+    color: #333;
+    min-width: 120px;
+    margin: 0;
+    font-size: 14px;
+}
+
+.formInput {
+    flex: 1;
+}
+
+.formControl {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.formControl:focus {
+    outline: none;
+    border-color: #4611a7;
+    box-shadow: 0 0 0 3px rgba(70, 17, 167, 0.1);
+}
+
+.formActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.actionButtons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Alert Styles */
+.alertDanger {
+    padding: 12px 16px;
+    background-color: #ffebee;
+    color: #d32f2f;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #d32f2f;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.btnSm {
+    padding: 8px 16px;
+    font-size: 14px;
+    height: 36px;
+}
+
+.btnPrimary {
+    background-color: #4611a7;
+    color: white;
+}
+
+.btnPrimary:hover {
+    background-color: #9184ff;
+    color: #0a0057;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px #07005a;
+}
+
+.btnOutline {
+    background-color: transparent;
+    border: 2px solid #c3c3c3;
+    color: #3a3a3a;
+}
+
+.btnOutline:hover {
+    background-color: #4611a7;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btnDanger {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.btnDanger:hover {
+    background-color: #b71c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .editCard {
+        padding: 16px;
+    }
+
+    .formGroup {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .formLabel {
+        margin-bottom: 8px;
+        min-width: auto;
+    }
+
+    .formActions {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .actionButtons {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .form {
+        padding: 16px;
+    }
+
+    .cardHeader {
+        padding: 16px;
+    }
+
+    .cardHeader h4 {
+        font-size: 18px;
+    }
+
+    .actionButtons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .actionButtons button {
+        width: 100%;
+    }
+}

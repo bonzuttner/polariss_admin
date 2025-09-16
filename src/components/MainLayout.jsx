@@ -1,6 +1,3 @@
-import React, { Suspense, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 function MainLayout(props) {
   return (
     <div className="main-layout">
@@ -15,7 +12,6 @@ function MainLayout(props) {
               />
             </a>
           </div>
-          {}
           <div className="right">
             {localStorage.getItem('userId') ? (
               <div className="primary-nav has-mega-menu">
@@ -24,7 +20,7 @@ function MainLayout(props) {
                     <a>{localStorage.getItem('user-name') || 'Name'}</a>
                     <div className="wrapper">
                       <div id="nav-homepages" className="nav-wrapper">
-                        <ul>Name
+                        <ul>
                           <li>
                             <a href="/setting">管理画面</a>
                           </li>
@@ -56,11 +52,6 @@ function MainLayout(props) {
                 </a>
               </div>
             )}
-            <div className="nav-btn">
-              <i></i>
-              <i></i>
-              <i></i>
-            </div>
           </div>
         </nav>
       </header>

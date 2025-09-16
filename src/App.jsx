@@ -7,6 +7,7 @@ import {
 import './App.css';
 import MainLayout from './components/MainLayout';
 import Settings from './components/settings/Settings';
+import SimManagement from './components/simManagement/SimManagement.jsx'
 import Profile from './components/profile/Profile';
 import Bike from './components/bike/Bike';
 import Device from './components/device/Device';
@@ -45,6 +46,8 @@ function App() {
             path="/setting/user-info"
             element={<Settings type={'info'} />}
           />
+          <Route path="/sim-list/:id" element={<SimManagement  />} />
+
           <Route exact path="/setting/profile" element={<Profile />} />
           <Route exact path="/setting/bike/:id" element={<Bike />} />
           <Route exact path="/setting/bike" element={<Bike />} />

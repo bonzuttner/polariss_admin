@@ -4,6 +4,8 @@ import { useLocation } from 'react-router-dom';
 import Api from '../../api/Api';
 import { useNavigate, useParams } from 'react-router-dom';
 import ModalComponent from '../common/ModalComponent';
+import styles from './Bike.module.css'; // Create this CSS module
+
 function Bike(props) {
   const component = props.component;
   const location = useLocation();
@@ -17,17 +19,17 @@ function Bike(props) {
 
   const getUserData = async () => {
     let userId =
-      type === 'info'
-        ? localStorage.getItem('userProfileId')
-        : localStorage.getItem('userId');
+        type === 'info'
+            ? localStorage.getItem('userProfileId')
+            : localStorage.getItem('userId');
     const responseUser = await Api.call({}, `users/${userId}`, 'get', userId);
     if (responseUser.data) {
       let userData = responseUser.data.data;
       let selectedBike = id
-        ? userData.bikes.find((a) => a.id == id)
-        : userData.bikes[0];
+          ? userData.bikes.find((a) => a.id == id)
+          : userData.bikes[0];
       setUser(userData);
-      setBike(selectedBike);
+      setBike(selectedBike || {});
     }
   };
 
@@ -43,17 +45,17 @@ function Bike(props) {
     let path = id ? `bikes/${id}` : `bikes`;
     let request_type = id ? `put` : `post`;
     let userId =
-      type === 'info'
-        ? localStorage.getItem('userProfileId')
-        : localStorage.getItem('userId');
+        type === 'info'
+            ? localStorage.getItem('userProfileId')
+            : localStorage.getItem('userId');
     bike.userId = userId;
     bike.type = 1;
     bike.sortNo = 1;
     const response = await Api.call(
-      bike,
-      path,
-      request_type,
-      localStorage.getItem('userId')
+        bike,
+        path,
+        request_type,
+        localStorage.getItem('userId')
     );
     if (response.data.code === 200) {
       setError('');
@@ -78,139 +80,142 @@ function Bike(props) {
         }
       }
       setError(
-        response.data ? response.data.message : 'Error, Please try again!'
+          response.data ? response.data.message : 'Error, Please try again!'
       );
     }
   };
 
   return (
-    <div className="edit-card">
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      )}
-      <div className="card">
-        <div className="card-header p-3">
-          <h4>バイクデータ</h4>
-        </div>
-        <form className="p-4">
-          <div className="mb-3 row">
-            <label for="name" className="col-sm-4 col-form-label">
-              顧客名
-            </label>
-            <div className="col-sm-8">
-              <input
-                className="form-control"
-                id="name"
-                value={bike?.name}
-                onChange={(event) => handleChange(event.target.value, 'name')}
-              />
+      <div className={styles.editCard}>
+        {error && (
+            <div className={styles.alertDanger} role="alert">
+              {error}
             </div>
+        )}
+
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h4>バイクデータ</h4>
           </div>
-          <div
-            className={`d-flex ${
-              props.component !== 'setup'
-                ? 'justify-content-between'
-                : 'justify-content-end'
-            }`}
-          >
-            {props.component !== 'setup' && (
-              <button
-                type="button"
-                className="btn btn-outline-primary btn-sm px-3"
-                onClick={() =>
-                  navigate(
-                    `${type === 'info' ? '/setting/user-info' : '/setting'}`
-                  )
-                }
-              >
-                戻る
-              </button>
-            )}
-            <div className="d-flex justify-content-between">
-              {id && (
-                <button
-                  type="button"
-                  className="btn btn-danger btn-sm mx-3 px-2"
-                  onClick={() => setShow(true)}
-                >
-                  削除
-                </button>
+
+          <form className={styles.form}>
+            <div className={styles.formGroup}>
+              <label htmlFor="name" className={styles.formLabel}>
+                バイク名
+              </label>
+              <div className={styles.formInput}>
+                <input
+                    className={styles.formControl}
+                    id="name"
+                    value={bike?.name || ''}
+                    onChange={(event) => handleChange(event.target.value, 'name')}
+                />
+              </div>
+            </div>
+
+            <div className={styles.formActions}>
+              {props.component !== 'setup' && (
+                  <button
+                      type="button"
+                      className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`}
+                      onClick={() =>
+                          navigate(
+                              `${type === 'info' ? '/setting/user-info' : '/setting'}`
+                          )
+                      }
+                  >
+                    戻る
+                  </button>
               )}
-              {component !== 'setup' ? (
+
+              <div className={styles.actionButtons}>
+                {id && (
+                    <button
+                        type="button"
+                        className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
+                        onClick={() => setShow(true)}
+                    >
+                      削除
+                    </button>
+                )}
+
+                {component !== 'setup' ? (
+                    <button
+                        type="button"
+                        className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        onClick={() => updateBike()}
+                    >
+                      更新
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        className={`${styles.btn} ${styles.btnPrimary}`}
+                        onClick={() => updateBike()}
+                    >
+                      更新
+                    </button>
+                )}
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {/* Modal */}
+        <div
+            className="modal fade"
+            id="exampleModal"
+            tabIndex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="exampleModalLabel">
+                  確認
+                </h1>
                 <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#exampleModal"
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>更新を実施します</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                    type="button"
+                    className="btn btn-outline-primary"
+                    data-bs-dismiss="modal"
+                >
+                  戻る
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => updateBike()}
                 >
                   更新
                 </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => updateBike()}
-                >
-                  更新
-                </button>
-              )}
-            </div>
-          </div>
-        </form>
-      </div>
-      <div
-        className="modal fade"
-        id="exampleModal"
-        tabindex="-1"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="exampleModalLabel">
-              確認
-              </h1>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <p>更新を実施します</p>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline-primary"
-                data-bs-dismiss="modal"
-              >
-                戻る
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => updateBike()}
-              >
-                更新
-              </button>
+              </div>
             </div>
           </div>
         </div>
+
+        {show && (
+            <ModalComponent
+                name={'bikes'}
+                id={id}
+                close={() => setShow(false)}
+                userId={localStorage.getItem('userId')}
+            />
+        )}
       </div>
-      {show && (
-        <ModalComponent
-          name={'bikes'}
-          id={id}
-          close={() => setShow(false)}
-          userId={localStorage.getItem('userId')}
-        />
-      )}
-    </div>
   );
 }
 

@@ -1,26 +1,250 @@
-.line-login {
-  width: 50%;
-  margin: 40px auto;
+.line-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.line-login-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 185, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 440px;
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
 }
-.line-btn {
+
+.line-login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 185, 0, 0.15);
+}
+
+.line-logo {
+  margin-bottom: 20px;
+}
+
+.line-login-title {
+  color: #333;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.line-login-subtitle {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+.line-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  background-color: #00B900;
+  color: white;
   border: none;
-  margin: 40px 0 60px;
-  background: transparent;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 30px;
 }
 
-.images {
-  display: inline-grid;
+.line-login-btn:hover {
+  background-color: #00A500;
+  transform: scale(1.02);
 }
 
+.line-login-btn:active {
+  transform: scale(0.98);
+}
+
+.line-btn-icon {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.line-friend-section {
+  border-top: 1px solid #eee;
+  padding-top: 30px;
+}
+
+.line-friend-text {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.line-friend-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.line-friend-btn {
+  transition: opacity 0.3s ease;
+}
+
+.line-friend-btn:hover {
+  opacity: 0.9;
+}
+
+/* QR Code Trigger Button */
+.qr-trigger {
+  position: relative;
+  display: inline-block;
+}
+
+.qr-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.qr-trigger-btn:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+/* Floating QR Code */
+.floating-qr-code {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-12px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 100;
+  pointer-events: none;
+  width: 220px;
+}
+
+.qr-trigger:hover .floating-qr-code {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(-20px);
+}
+
+.qr-code-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  position: relative;
+}
+
+.qr-code-content:after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: white transparent transparent transparent;
+}
+
+.qr-code-content h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.qr-code-content img {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 8px;
+}
+
+.qr-code-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Responsive Design */
 @media (max-width: 767px) {
-  .line-login {
-    width: auto;
+  .line-login-container {
+    padding: 16px;
   }
-  .line-btn img {
-    max-width: 240px;
+
+  .line-login-card {
+    padding: 30px 24px;
   }
-  .images img {
-    max-width: 270px;
+
+  .line-login-title {
+    font-size: 24px;
+  }
+
+  .line-login-btn {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .line-friend-buttons {
+    gap: 16px;
+  }
+
+  .floating-qr-code {
+    width: 200px;
+  }
+
+  .qr-code-content img {
+    width: 130px;
+    height: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .line-login-card {
+    padding: 24px 20px;
+  }
+
+  .line-login-title {
+    font-size: 22px;
+  }
+
+  .line-login-subtitle {
+    font-size: 14px;
+  }
+
+  .line-login-btn {
+    font-size: 14px;
+  }
+
+  .line-friend-text {
+    font-size: 13px;
+  }
+
+  .floating-qr-code {
+    width: 180px;
+  }
+
+  .qr-code-content img {
+    width: 120px;
+    height: 120px;
   }
 }

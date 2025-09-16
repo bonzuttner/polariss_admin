@@ -1,0 +1,469 @@
+/* ===== SETTINGS PAGE STYLES ===== */
+.settingPage {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Alert Styles */
+.alertDanger {
+  padding: 12px 16px;
+  background-color: #ffebee;
+  color: #d32f2f;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #d32f2f;
+}
+
+.infoAlert {
+  background-color: #e3f2fd;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border-left: 4px solid #1976d2;
+}
+
+.infoAlert p {
+  margin: 4px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+
+
+/* Card Styles */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.cardHeader {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(90deg, #4611a7 0%, #8664ff 100%);
+}
+
+.cardReveal {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* List Group Styles */
+.listGroup {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.listGroupItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.listGroupItem:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-weight: 600;
+  color: #404040;
+  margin: 0;
+  min-width: 120px;
+}
+
+.value {
+  color: #3a3a3a;
+  margin: 0;
+  text-align: right;
+}
+
+/* Detail List Items */
+.detailListItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.itemName {
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.itemActions p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.emptyState {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+  margin: 0;
+}
+
+/* Form Styles */
+.form {
+  padding: 24px;
+}
+
+.formGroup {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.formLabel {
+  font-weight: 600;
+  color: #333;
+  min-width: 120px;
+  margin: 0;
+}
+
+.formInput {
+  flex: 1;
+}
+
+.formSelect {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.formSelect:focus {
+  outline: none;
+  border-color: #4611a7;
+}
+
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+/* Dropdown Styles */
+.dropdownToggle {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+}
+
+.dropdownToggle:focus {
+  border-color: #4611a7;
+}
+
+.dropdownMenu {
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+.dropdownItem:hover {
+  background-color: #f5f0ff;
+}
+
+.selected {
+  background-color: #4611a7;
+  color: white;
+}
+
+.selected:hover {
+  background-color: #5e2bc9;
+  color: white;
+}
+
+.secondLevel {
+  padding-left: 20px;
+  background-color: #fafafa;
+}
+
+/* Tab Styles */
+.tabsSection {
+  margin-bottom: 24px;
+}
+
+.navTabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.navItem {
+  margin-right: 8px;
+}
+
+.navLink {
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  color: #666;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.navLink:hover {
+  color: #4611a7;
+  background-color: #f5f0ff;
+  border-radius: 8px 8px 0 0;
+}
+
+.navLink.active {
+  color: #4611a7;
+  border-bottom-color: #4611a7;
+  background-color: #f5f0ff;
+}
+
+.tabContent {
+  min-height: 300px;
+  transition: opacity 0.3s ease;
+}
+
+.tabChanging {
+  opacity: 0.7;
+}
+
+
+
+.actionButtons {
+    display: flex;
+    gap: 1px;
+    align-items: center;
+}
+
+/* Alert Styles */
+.alertDanger {
+    padding: 12px 16px;
+    background-color: #ffebee;
+    color: #d32f2f;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #d32f2f;
+}
+
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .settingPage {
+    padding: 16px;
+  }
+
+  .formGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .formLabel {
+    margin-bottom: 8px;
+  }
+
+  .navTabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .listGroupItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .detailListItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .itemActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+
+/* Base button class - applies to all buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  gap: 4px;
+  white-space: nowrap;
+
+}
+
+/* Button sizes */
+.btnSm {
+  padding: 8px 16px;
+  font-size: 14px;
+  height: 36px;
+}
+
+.btnMd {
+  padding: 12px 20px;
+  font-size: 16px;
+  height: 44px;
+  margin: 0 2px;
+}
+
+.btnLg {
+  padding: 16px 24px;
+  font-size: 18px;
+  height: 52px;
+  margin-right: 3%;
+  margin-left: 3%;
+}
+
+/* Button variants */
+.btnPrimary {
+  background-color: #4611a7;
+  color: white;
+
+}
+
+.btnPrimary:hover {
+  background-color: #9184ff;
+  color: #0a0057;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px #07005a;
+}
+
+.btnSecondary {
+  background-color: #f0f0f0;
+  color: #666;
+  margin-right: 1%;
+  margin-left: 1%;
+}
+
+.btnSecondary:hover {
+  background-color: #e0e0e0;
+  color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btnOutline {
+  background-color: transparent;
+  border: 2px solid #c3c3c3;
+  color: #3a3a3a;
+}
+
+.btnOutline:hover {
+  background-color: #4611a7;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Full width button */
+.btnFull {
+  width: 100%;
+}
+
+/* Disabled state */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Container for horizontal layout */
+.horizontalContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px; /* Adjust spacing between items */
+  width: 100%;
+  flex-wrap: wrap; /* Allows wrapping to next line if needed */
+}
+
+/* If you need different spacing options */
+.horizontalContainerTight {
+  composes: horizontalContainer;
+  gap: 8px;
+}
+
+.horizontalContainerWide {
+  composes: horizontalContainer;
+  gap: 24px;
+}
+
+/* Alignment variants */
+.horizontalContainerStart {
+  composes: horizontalContainer;
+  justify-content: flex-start;
+  direction: rtl;
+}
+
+/* For non-wrapping containers */
+.horizontalContainerNoWrap {
+  composes: horizontalContainer;
+  flex-wrap: nowrap;
+  overflow-x: auto; /* Adds scrolling if content overflows */
+}
+
+
+/* Danger button variant */
+.btnDanger {
+    composes: btn;
+    background-color: #d32f2f;
+    color: white;
+}
+
+.btnDanger:hover {
+    background-color: #b71c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+}
+

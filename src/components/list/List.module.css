@@ -1,0 +1,727 @@
+/* List.module.css */
+
+/* Base button class - applies to all buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.h2 {
+    font-weight: 700;
+    text-align: left;
+    margin-bottom: 30px;
+    margin-left: 8px;
+    color: #333;
+    font-size: 1.8rem;
+}
+
+/* Button sizes */
+.btnSm {
+    padding: 8px 16px;
+    font-size: 14px;
+    height: 36px;
+    min-width: 80px;
+}
+
+.btnMd {
+    padding: 12px 20px;
+    font-size: 16px;
+    height: 44px;
+    min-width: 100px;
+}
+
+.btnLg {
+    padding: 16px 24px;
+    font-size: 18px;
+    height: 52px;
+    min-width: 120px;
+}
+
+/* Button variants */
+.btnPrimary {
+    background-color: #4611a7;
+    color: white;
+    border: 2px solid #4611a7;
+}
+
+.btnPrimary:hover {
+    background-color: #5722c4;
+    border-color: #5722c4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(70, 17, 167, 0.3);
+}
+
+.btnPrimary:disabled {
+    background-color: #9ca3af;
+    border-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btnSecondary {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 2px solid #dee2e6;
+}
+
+.btnSecondary:hover {
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: #adb5bd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btnOutline {
+    background-color: transparent;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+}
+
+.btnOutline:hover {
+    background-color: #4611a7;
+    color: white;
+    border-color: #4611a7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(70, 17, 167, 0.2);
+}
+
+.btnOutline:disabled {
+    background-color: transparent;
+    border-color: #e9ecef;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Danger button variant */
+.btnDanger {
+    background-color: #dc3545;
+    color: white;
+    border: 2px solid #dc3545;
+}
+
+.btnDanger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Full width button */
+.btnFull {
+    width: 100%;
+}
+
+/* Disabled state */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Container for horizontal layout */
+.horizontalContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.horizontalContainerTight {
+    composes: horizontalContainer;
+    gap: 8px;
+}
+
+.horizontalContainerWide {
+    composes: horizontalContainer;
+    gap: 24px;
+}
+
+.horizontalContainerNoWrap {
+    composes: horizontalContainer;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.horizontalContainerStart {
+    composes: horizontalContainer;
+    justify-content: flex-start;
+}
+
+.horizontalContainerCenter {
+    composes: horizontalContainer;
+    justify-content: center;
+}
+
+.horizontalContainerEnd {
+    composes: horizontalContainer;
+    justify-content: flex-end;
+}
+
+.horizontalContainerBetween {
+    composes: horizontalContainer;
+    justify-content: space-between;
+}
+
+.horizontalContainerAround {
+    composes: horizontalContainer;
+    justify-content: space-around;
+}
+
+/* ===== MODERN TABLE STYLES ===== */
+.tableContainer {
+    width: 100%;
+    margin: 10px 0 40px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    background: white;
+    border: 1px solid #e9ecef;
+}
+
+.modernTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: white;
+}
+
+.modernTable th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #495057;
+    padding: 16px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.modernTable td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #f1f3f4;
+    color: #495057;
+    vertical-align: middle;
+}
+
+.modernTable tr:last-child td {
+    border-bottom: none;
+}
+
+.evenRow {
+    background-color: #ffffff;
+}
+
+.oddRow {
+    background-color: #fafbfc;
+}
+
+.modernTable tr:hover {
+    background-color: #f0f4ff;
+    transition: background-color 0.2s ease;
+}
+
+/* Role badges */
+.roleBadge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.roleAdmin {
+    background-color: #ffebee;
+    color: #d32f2f;
+    border: 1px solid #ffcdd2;
+}
+
+.roleManager {
+    background-color: #e8f5e9;
+    color: #388e3c;
+    border: 1px solid #c8e6c9;
+}
+
+.roleUser {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #bbdefb;
+    font-weight: 500;
+}
+
+/* Status */
+.statusActive {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.statusInactive {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Action buttons */
+.actionButtons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Loading state */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #6c757d;
+    background: white;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.loadingSpinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4611a7;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: #6c757d;
+    animation: fadeIn 0.5s ease-out;
+    background: white;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.emptyStateIcon {
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+.emptyState h3 {
+    margin: 0 0 10px 0;
+    color: #4611a7;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+/* ===== IMPROVED PAGINATION STYLES ===== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 24px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-top: 1px solid #dee2e6;
+}
+
+.pagination .btn {
+    min-width: 40px;
+    height: 40px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    margin: 0;
+}
+
+.pagination .btnSm {
+    min-width: 40px;
+    height: 40px;
+    padding: 8px 12px;
+}
+
+/* Current page button styling */
+.pagination .btnPrimary {
+    background-color: #4611a7;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(70, 17, 167, 0.2);
+}
+
+/* Page number buttons */
+.pagination .btnOutline {
+    background-color: white;
+    border-color: #dee2e6;
+    color: #495057;
+}
+
+.pagination .btnOutline:hover:not(:disabled) {
+    background-color: #4611a7;
+    border-color: #4611a7;
+    color: white;
+}
+
+/* Navigation buttons (prev/next) */
+.pagination .btnOutline:first-child,
+.pagination .btnOutline:last-child {
+    font-weight: 600;
+    min-width: 60px;
+}
+
+.pagination .btnOutline:disabled {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+
+/* Pagination info */
+.paginationInfo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 16px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+/* ===== MODAL STYLES ===== */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modalHeader {
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.modalHeader h3 {
+    margin: 0;
+    color: #495057;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 24px !important;
+    cursor: pointer;
+    color: #6c757d;
+    padding: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.modalBody {
+    padding: 24px;
+}
+
+.modalBody p {
+    margin-bottom: 12px;
+    color: #6c757d;
+}
+
+.textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: #4611a7;
+    box-shadow: 0 0 0 3px rgba(70, 17, 167, 0.1);
+}
+
+.modalFooter {
+    padding: 20px;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* ===== ANIMATION STYLES ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes rowAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tableReveal {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.tableRowAnimated {
+    animation: rowAppear 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .tableContainer {
+        overflow-x: auto;
+        margin: 10px 0 30px 0;
+    }
+
+    .modernTable {
+        min-width: 700px;
+    }
+
+    .modernTable th,
+    .modernTable td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    .actionButtons {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .btnSm {
+        padding: 6px 12px;
+        font-size: 12px;
+        height: 32px;
+        min-width: 70px;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 16px;
+    }
+
+    .pagination .btn {
+        min-width: 36px;
+        height: 36px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .modalFooter {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .modalFooter .btn {
+        width: 100%;
+    }
+
+    .h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tableContainer {
+        margin: 10px -10px 20px -10px;
+        border-radius: 0;
+    }
+
+    .modernTable th,
+    .modernTable td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .pagination {
+        padding: 12px;
+        margin: 16px 0;
+    }
+
+    .pagination .btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .h2 {
+        font-size: 1.3rem;
+        margin-left: 4px;
+    }
+}
+
+/* ===== UTILITIES ===== */
+.textCenter {
+    text-align: center;
+}
+
+.textLeft {
+    text-align: left;
+}
+
+.textRight {
+    text-align: right;
+}
+
+.mt1 {
+    margin-top: 8px;
+}
+
+.mt2 {
+    margin-top: 16px;
+}
+
+.mt3 {
+    margin-top: 24px;
+}
+
+.mb1 {
+    margin-bottom: 8px;
+}
+
+.mb2 {
+    margin-bottom: 16px;
+}
+
+.mb3 {
+    margin-bottom: 24px;
+}
+
+.p1 {
+    padding: 8px;
+}
+
+.p2 {
+    padding: 16px;
+}
+
+.p3 {
+    padding: 24px;
+}

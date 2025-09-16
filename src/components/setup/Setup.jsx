@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import '../settings/Setting.css';
+import '../settings/Settings.module.css';
 import Api from '../../api/Api';
 import Profile from '../profile/Profile';
 import Bike from '../bike/Bike';
