@@ -95,13 +95,13 @@ function Bike(props) {
 
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h4>バイクデータ</h4>
+            <h4>顧客名</h4>
           </div>
 
           <form className={styles.form}>
             <div className={styles.formGroup}>
               <label htmlFor="name" className={styles.formLabel}>
-                バイク名
+                顧客名
               </label>
               <div className={styles.formInput}>
                 <input
