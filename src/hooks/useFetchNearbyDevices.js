@@ -1,7 +1,7 @@
 import {useEffect} from "react";
 
 
-const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "true";
+const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "false";
 
 export  function useFetchNearbyDevices(mapInstance, fetchNearbyDevices) {
     useEffect(() => {

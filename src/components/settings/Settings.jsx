@@ -249,7 +249,7 @@ function Settings(props) {
                   className={`${styles.navLink} ${selectedTab === 'bikes' ? styles.active : ''}`}
                   onClick={() => handleTabClick('bikes')}
               >
-                車両情報
+                顧客名
               </button>
             </li>
             <li className={styles.navItem}>

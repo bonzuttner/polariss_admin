@@ -156,7 +156,7 @@ const SimManagement = () => {
                     {/* Bike Name Field (Editable) */}
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel} htmlFor="bikeName">
-                            Bike Name
+                            顧客名
                         </label>
                         <div className={styles.formInput}>
                             <input
