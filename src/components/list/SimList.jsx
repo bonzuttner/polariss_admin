@@ -56,7 +56,7 @@ function SimList({deviceUpdate}) {
         if (pageNumber >= 1 && pageNumber <= totalPages) {
             setSimCurrentPage(pageNumber);
         }
-    } ,[]);
+    } ,[totalPages]);
 
     const simNextPage =useCallback( () => {
         if (simCurrentPage < totalPages) {

@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './Settings.module.css';
 import Api from '../../api/Api';
-import Dropdown from 'react-bootstrap/Dropdown';
+import AssignUsersTab from "./AssignUsersTab.jsx";
+import DevicesTab from "./DevicesTab.jsx";
+import BikesTab from "./BikesTab.jsx";
+import ProfileTab from "./ProfileTab.jsx";
+
 
 function Settings(props) {
   const navigate = useNavigate();
@@ -23,7 +27,14 @@ function Settings(props) {
   const [userDetail, setUserDetail] = useState({});
   const [selectedTab, setSelectedTab] = useState('profile');
 
-  // Add tab transition effect
+
+
+
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+
+  //  tab transition effect
   const handleTabClick = (tab) => {
     setIsTabChanging(true);
     setTimeout(() => {
@@ -35,9 +46,12 @@ function Settings(props) {
   // Add smooth content transition
   useEffect(() => {
     setActiveTabContent(renderTabContent());
-  }, [selectedTab, userDetail]);
+  }, [selectedTab, userDetail ,  role, parent, list]);
+
 
   const getDetails = async () => {
+    setIsProfileLoading(true);
+    try {
     const response = await Api.call(
         {},
         `users/${userProfileId}`,
@@ -61,6 +75,15 @@ function Settings(props) {
       setUserDetail(response.data.data);
       setParent(response.data.data.parent);
     }
+  }
+  catch (error) {
+    console.error('Error fetching details:', error);
+    }
+    finally {
+      setIsProfileLoading(false);
+    }
+
+
   };
 
   const getUserList = async () => {
@@ -95,254 +118,73 @@ function Settings(props) {
     }
   }, []);
 
-  const setParentData = (item) => {
+  const setParentData =  (item) => {
+    console.log('Setting parent to:', item);
     setParent(item);
   };
-  const renderNormalDeviceList = () => (
-      <div className={`${styles.card} ${styles.cardReveal}`}>
-        <div className={styles.cardHeader}>
-          <div className={styles.horizontalContainerStart}>
-
-            <button
-                className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm} my-2`}
-                onClick={() =>
-                    navigate('/setting/device', {state: componentType})
-                }
-            >
-              新規登録
-            </button>
-
-          </div>
-        </div>
-        <ul className={styles.listGroup}>
-          {userDetail.devices?.length > 0 ? (
-              userDetail.devices.map((device) => (
-                  <li key={device.imsi} className={styles.detailListItem}>
-                    <p className={styles.itemName}>{device.name}</p>
-                    <div className={styles.itemActions}>
-                      <p>
-                        {
-                          userDetail.bikes?.find((a) => a.id === device.bikeId)
-                              ?.name
-                        }
-                      </p>
-                      <p>{device.type}</p>
-                      <p>{device.sortNo}</p>
-                      <button
-                          className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
-                          onClick={() =>
-                              navigate(`/setting/device/${device.imsi}`, {
-                                state: componentType,
-                              })
-                          }
-                      >
-                        編集
-                      </button>
-                    </div>
-                  </li>
-              ))
-          ) : (
-              <li className={styles.listGroupItem}>
-                <p className={styles.emptyState}>デバイス情報がありません</p>
-              </li>
-          )}
-        </ul>
-      </div>
-  );
-  const renderTabContent = () => {
+  // Update the role dropdown onChange handler
+  const handleRoleChange = (event) => {
+    console.log('Setting role to:', event.target.value);
+    setRole(event.target.value);
+  };
+  const renderTabContent = useCallback(() => {
     switch (selectedTab) {
       case 'profile':
         return (
-            <div className={`${styles.card} ${styles.cardReveal}`}>
-              <div className={styles.cardHeader}>
-                <div className={styles.horizontalContainerStart}>
-
-                  <button
-                      className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm} `}
-                      onClick={() =>
-                          navigate('/setting/profile', {state: componentType})
-                      }
-                  >
-                    編集
-                  </button>
-                </div>
-
-              </div>
-              <ul className={styles.listGroup}>
-                <li className={styles.listGroupItem}>
-                  <p className={styles.label}>苗字</p>
-                  <p className={styles.value}>{userDetail.name1 || '-'}</p>
-                </li>
-                <li className={styles.listGroupItem}>
-                  <p className={styles.label}>名前</p>
-                  <p className={styles.value}>{userDetail.name2 || '-'}</p>
-                </li>
-                <li className={styles.listGroupItem}>
-                  <p className={styles.label}>ニックネーム</p>
-                  <p className={styles.value}>{userDetail.nickname || '-'}</p>
-                </li>
-                <li className={styles.listGroupItem}>
-                  <p className={styles.label}>E-Mail</p>
-                  <p className={styles.value}>{userDetail.email || '-'}</p>
-                </li>
-                <li className={styles.listGroupItem}>
-                  <p className={styles.label}>ユーザー種別</p>
-                  <p className={styles.value}>{userDetail.role || '-'}</p>
-                </li>
-              </ul>
-            </div>
+            <ProfileTab
+                userDetail={userDetail}
+                componentType={componentType}
+                navigate={navigate}
+                isLoading={isProfileLoading}
+                isUpdating={isUpdating}
+            />
         );
 
       case 'bikes':
         return (
-            <div className={`${styles.card} ${styles.cardReveal}`}>
-              <div className={styles.cardHeader}>
-                <div className={styles.horizontalContainerStart}>
-                  <button
-                      className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm} my-2`}
-                      onClick={() =>
-                          navigate('/setting/bike', {state: componentType})
-                      }
-                  >
-                    新規登録
-                  </button>
-
-                </div>
-
-              </div>
-              <ul className={styles.listGroup}>
-                {userDetail?.bikes?.length > 0 ? (
-                    userDetail.bikes.map((bike) => (
-                        <li key={bike.id} className={styles.detailListItem}>
-                          <p className={styles.itemName}>{bike.name}</p>
-                          <div className={styles.itemActions}>
-                            <p className={styles.itemName}>{bike.type}</p>
-                            <p className={styles.itemName}>{bike.sortNo}</p>
-                            <button
-                                className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`}
-                                onClick={() =>
-                                    navigate(`/setting/bike/${bike.id}`, {
-                                      state: componentType,
-                                    })
-                                }
-                            >
-                              編集
-                            </button>
-                          </div>
-                        </li>
-                    ))
-                ) : (
-                    <li className={styles.listGroupItem}>
-                      <p className={styles.emptyState}>車両情報がありません</p>
-                    </li>
-                )}
-              </ul>
-            </div>
+            <BikesTab
+                userDetail={userDetail}
+                componentType={componentType}
+                navigate={navigate}
+            />
         );
 
       case 'devices':
-        return renderNormalDeviceList();
-
-
-
+        return (
+            <DevicesTab
+                userDetail={userDetail}
+                componentType={componentType}
+                navigate={navigate}
+            />
+        );
 
       case 'assign-users':
         return (
-            <div className={`${styles.card} ${styles.cardReveal}`}>
-              <form className={styles.form}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="type" className={styles.formLabel}>
-                    Role
-                  </label>
-                  <div className={styles.formInput}>
-                    <select
-                        className={styles.formSelect}
-                        id="type"
-                        onChange={(event) => setRole(event.target.value)}
-                        value={role}
-                    >
-                      {logedInRole === 'master' && (
-                          <option value="admin1">Admin1</option>
-                      )}
-                      {(logedInRole === 'master' || logedInRole === 'admin1') && (
-                          <option value="admin2">Admin2</option>
-                      )}
-                      <option value="user">User</option>
-                    </select>
-                  </div>
-                </div>
+            <AssignUsersTab
+                role={role}
+                handleRoleChange={handleRoleChange}
+                parent={parent}
+                setParentData={setParentData}
+                list={list}
+                logedInRole={logedInRole}
+                navigate={navigate}
+                updateUserRoleParent={updateUserRoleParent}
+                error={error}
+                isUpdating={isUpdating}
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="parent" className={styles.formLabel}>
-                    Parent
-                  </label>
-                  <div className={styles.formInput}>
-                    <Dropdown>
-                      <Dropdown.Toggle
-                          id="dropdown-basic"
-                          className={styles.dropdownToggle}
-                      >
-                        {parent ? parent?.nickname : 'Select parent'}
-                      </Dropdown.Toggle>
-
-                      <Dropdown.Menu className={styles.dropdownMenu}>
-                        {list.map((item) => (
-                            <React.Fragment key={item.id}>
-                              <Dropdown.Item
-                                  className={item.id === parent?.id ? styles.selected : ''}
-                                  onClick={() => setParentData(item)}
-                              >
-                                <div className={styles.dropdownItem}>
-                                  <p>{item.nickname}</p>
-                                </div>
-                              </Dropdown.Item>
-                              {item.admins2?.length > 0 && (
-                                  <div className={styles.secondLevel}>
-                                    {item.admins2.map((admin2) => (
-                                        <Dropdown.Item
-                                            key={admin2.id}
-                                            className={admin2.id === parent?.id ? styles.selected : ''}
-                                            onClick={() => setParentData(admin2)}
-                                        >
-                                          {admin2.nickname}
-                                        </Dropdown.Item>
-                                    ))}
-                                  </div>
-                              )}
-                            </React.Fragment>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </div>
-                </div>
-
-                <div className={styles.formActions}>
-                  <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`}
-                      onClick={() => navigate('/setting')}
-                  >
-                    戻る
-                  </button>
-                  <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnPrimary}`}
-                      data-bs-toggle="modal"
-                      data-bs-target="#exampleModal"
-                  >
-                    更新
-                  </button>
-                </div>
-              </form>
-            </div>
+            />
         );
 
       default:
         return null;
     }
-  };
+  }, [selectedTab, userDetail, role, parent, list, logedInRole, componentType, error , isUpdating]);
 
   const updateUserRoleParent = async () => {
+    setIsUpdating(true);
+    setError(''); // Clear previous errors
+
+    try {
     let body = {
       role: role,
     };
@@ -371,7 +213,12 @@ function Settings(props) {
       }
       setError(response?.data?.message);
     }
-  };
+  } catch (error) {
+      console.error('Update error:', error);
+      setError('更新中にエラーが発生しました');
+    } finally {
+      setIsUpdating(false);
+    }} ;
 
   return (
       <div className={styles.settingPage}>

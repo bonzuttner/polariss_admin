@@ -54,26 +54,26 @@ function CustomerList() {
     }, [currentPage, itemsPerPage]);
 
     // Pagination functions
-    const paginate = (pageNumber) => {
+    const paginate =useCallback ((pageNumber) => {
         if (pageNumber >= 1 && pageNumber <= totalPages) {
             setCurrentPage(pageNumber);
         }
-    };
+    }, [totalPages]);
 
-    const nextPage = () => {
+    const nextPage = useCallback( () => {
         if (currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
         }
-    };
+    } , [ currentPage,totalPages]);
 
-    const prevPage = () => {
+    const prevPage = useCallback( () => {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
-    };
+    } , [currentPage]);
 
-    const goToFirstPage = () => setCurrentPage(1);
-    const goToLastPage = () => setCurrentPage(totalPages);
+    const goToFirstPage = useCallback( () => setCurrentPage(1) , []);
+    const goToLastPage = useCallback( () => setCurrentPage(totalPages) , [totalPages]);
 
     // Generate page numbers for pagination
     const getPageNumbers = () => {

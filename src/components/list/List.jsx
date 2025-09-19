@@ -35,7 +35,7 @@ function List() {
       const response = await Api.call(
           { page, page_size: pageSize },
           'users/profiles/list',
-          'get', // Changed to POST since pagination is in body
+          'get',
           userId
       );
 
@@ -63,7 +63,7 @@ function List() {
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
-  }, []);
+  }, [userId]);
 
   const getList = useCallback(async () => {
     setLoading(true);
@@ -102,7 +102,7 @@ function List() {
       }
       setLoading(false);
     }
-  }, [role, userId, currentPage, itemsPerPage, fetchUsers]);
+  }, [role, userId, itemsPerPage, fetchUsers]);
 
   useEffect(() => {
     if (role !== 'user') {
