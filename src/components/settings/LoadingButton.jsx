@@ -10,7 +10,7 @@ const LoadingButton = ({
                            disabled = false,
                            ...props
                        }) => {
-    const buttonClasses = `${styles.btn} ${styles.btnPrimary}  ${isLoading ? SPstyles.btnLoading : ''}`;
+    const buttonClasses = `${styles.btn} ${styles.btnPrimary} ${styles.btnSm}  ${isLoading ? SPstyles.btnLoading : ''}`;
     return (
         <button
             {...props}

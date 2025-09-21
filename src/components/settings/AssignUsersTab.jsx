@@ -75,7 +75,6 @@ const AssignUsersTab = ({
                         isLoading={isUpdating}
                         spinnerColor="white"
                         disabled={isUpdating}
-z
                     >
                         更新
                     </LoadingButton>

@@ -12,7 +12,7 @@ function Settings(props) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [list, setList] = useState([]);
-  const [parent, setParent] = useState('');
+  const [parent, setParent] = useState(null);
   const [role, setRole] = useState(localStorage.getItem('userProfileRole'));
   const [error, setError] = useState('');
   const [isTabChanging, setIsTabChanging] = useState(false);
@@ -32,7 +32,10 @@ function Settings(props) {
 
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-
+  // Add this useEffect to debug the isUpdating state
+  useEffect(() => {
+    console.log('isUpdating state changed:', isUpdating);
+  }, [isUpdating]);
 
   //  tab transition effect
   const handleTabClick = (tab) => {

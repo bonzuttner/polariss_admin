@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import Api from "../../api/Api.js";
-import styles from '../device/Device.module.css'; // Using the same CSS module
+import styles from '../device/Device.module.css';
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import LoadingButton from '../settings/LoadingButton'; // Adjust path as needed
 
 const SimManagement = () => {
     const navigate = useNavigate();
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const handleSimDeviceUpdate = async () => {
         const bikeNameInput = document.getElementById('bikeName');
@@ -15,6 +17,8 @@ const SimManagement = () => {
             alert('バイク名を入力してください');
             return;
         }
+
+        setIsUpdating(true); // Start loading
 
         try {
             const userId = localStorage.getItem('userId');
@@ -50,8 +54,7 @@ const SimManagement = () => {
                 );
 
                 if (deviceResponse.data && deviceResponse.data.code === 200) {
-                  toast.success('デバイスの更新が成功しました')
-
+                    toast.success('デバイスの更新が成功しました');
                     navigate('/setting/list');
                 } else {
                     throw new Error('デバイスの更新に失敗しました');
@@ -62,6 +65,8 @@ const SimManagement = () => {
         } catch (error) {
             console.error('Error updating device:', error);
             toast.error('更新中にエラーが発生しました: ' + error.message);
+        } finally {
+            setIsUpdating(false); // Stop loading regardless of success/error
         }
     };
 
@@ -165,6 +170,7 @@ const SimManagement = () => {
                                 className={styles.formControl}
                                 placeholder="バイク名を入力してください"
                                 required
+                                disabled={isUpdating} // Disable input during update
                             />
                         </div>
                     </div>
@@ -175,16 +181,20 @@ const SimManagement = () => {
                             type="button"
                             className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`}
                             onClick={() => navigate('/setting/list')}
+                            disabled={isUpdating} // Disable cancel button during update
                         >
                             キャンセル
                         </button>
-                        <button
+                        <LoadingButton
                             type="button"
-                            className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}
+                            className={`${styles.btnSm}`}
                             onClick={handleSimDeviceUpdate}
+                            isLoading={isUpdating}
+                            spinnerColor="white"
+                            disabled={isUpdating}
                         >
                             更新
-                        </button>
+                        </LoadingButton>
                     </div>
                 </div>
             </div>

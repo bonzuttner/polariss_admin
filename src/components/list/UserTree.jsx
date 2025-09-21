@@ -1,48 +1,101 @@
-//UserTree.jsx
 import styles from './List.module.css';
-import {useCallback, useState} from "react";
+import { useCallback, useState, useEffect } from "react";
+import Api from '../../api/Api';
 
 function UserTree({
                       role,
                       selectedSecondLevel,
                       list,
-                      usersList,
-                      poolList,
-                      showAll,
                       setSelectedFirstLevel,
                       setSecondLevel,
-                      setShowAll,
                       userUpdate,
                       showModal,
-                      selectedFirstLevel,
-                      currentPage,
-                      totalPages,
-                      totalUsers,
-                      itemsPerPage,
-                      paginateUsers
-}) {
-    const [localCurrentPage, setLocalCurrentPage] = useState(currentPage);
+                      selectedFirstLevel
+                  }) {
+    const [usersList, setUsersList] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(5);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    const currentUserId = localStorage.getItem('userId');
+
+
+
+
+    // Fetch users with pagination
+    const fetchUsers = useCallback(async (page = 1, pageSize = 5) => {
+        setLoading(true);
+        try {
+            const response = await Api.call(
+                {},
+                `users/profiles/list?page=${page}&page_size=${pageSize}`,
+                'get',
+                localStorage.getItem('userId')
+            );
+
+            if (response.data && response.data.code === 200) {
+                const { users_profiles, pagination } = response.data.data;
+
+                const transformedUsers = users_profiles.map(user => ({
+                    id: user.user_id,
+                    device_id: user.device_id,
+                    name1: user.last_name,
+                    name2: user.first_name,
+                    nickname: user.nickname,
+                    email: user.email,
+                    role: user.role,
+                    status: user.status,
+                    parent: null
+                }));
+                //filter out the records for the same logged user
+                setUsersList(transformedUsers.filter(user => user.id !== currentUserId));
+                setTotalUsers(pagination.total);
+                setTotalPages(pagination.total_pages);
+                setCurrentPage(pagination.page);
+            }
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+
+
+    // Fetch users when component mounts or page changes
+    useEffect(() => {
+        if (role === 'master' || role === 'admin1' || role === 'admin2') {
+            fetchUsers(currentPage, itemsPerPage);
+            console.log(fetchUsers);
+        }
+    }, [currentPage, itemsPerPage, role, fetchUsers]);
+
+    // Pagination function
+    const paginateUsers = useCallback((pageNumber) => {
+        if (pageNumber >= 1 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
+        }
+    }, [totalPages]);
+
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 5;
 
         if (totalPages <= maxVisiblePages) {
-            // Show all pages if total pages is less than max visible
             for (let i = 1; i <= totalPages; i++) {
                 pageNumbers.push(i);
             }
         } else {
-            // Show truncated pagination
             const halfVisible = Math.floor(maxVisiblePages / 2);
             let startPage = Math.max(1, currentPage - halfVisible);
             let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-            // Adjust if we're at the end
             if (endPage === totalPages) {
                 startPage = Math.max(1, endPage - maxVisiblePages + 1);
             }
 
-            // Add first page and ellipsis if needed
             if (startPage > 1) {
                 pageNumbers.push(1);
                 if (startPage > 2) {
@@ -50,12 +103,10 @@ function UserTree({
                 }
             }
 
-            // Add visible page numbers
             for (let i = startPage; i <= endPage; i++) {
                 pageNumbers.push(i);
             }
 
-            // Add ellipsis and last page if needed
             if (endPage < totalPages) {
                 if (endPage < totalPages - 1) {
                     pageNumbers.push('...');
@@ -67,7 +118,16 @@ function UserTree({
         return pageNumbers;
     };
 
-    const renderTable = useCallback((userList = [], showExtra = false, type = '') => {
+    const renderTable = useCallback((userList = [], showExtra = false) => {
+        if (loading) {
+            return (
+                <div className={styles.loadingContainer}>
+                    <div className={styles.loadingSpinner}></div>
+                    <p>データを読み込み中...</p>
+                </div>
+            );
+        }
+
         return (
             <>
                 <br />
@@ -177,11 +237,12 @@ function UserTree({
                             {getPageNumbers().map((pageNumber, index) => (
                                 <button
                                     key={index}
-                                    className={`${styles.btn} ${styles.btnSm} ${pageNumber === currentPage
-                                        ? styles.btnPrimary
-                                        : pageNumber === '...'
-                                            ? styles.btnOutline
-                                            : styles.btnOutline
+                                    className={`${styles.btn} ${styles.btnSm} ${
+                                        pageNumber === currentPage
+                                            ? styles.btnPrimary
+                                            : pageNumber === '...'
+                                                ? styles.btnOutline
+                                                : styles.btnOutline
                                     }`}
                                     onClick={() => pageNumber !== '...' && paginateUsers(pageNumber)}
                                     disabled={pageNumber === '...'}
@@ -221,7 +282,7 @@ function UserTree({
                         </div>
                     )}
 
-                    {userList.length === 0 && (
+                    {userList.length === 0 && !loading && (
                         <div className={styles.emptyState}>
                             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className={styles.emptyStateIcon}>
                                 <path d="M3 6H21M3 6V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V6M3 6L5 3H19L21 6M10 10H14M10 14H14M10 18H14"
@@ -234,12 +295,12 @@ function UserTree({
                 </div>
             </>
         );
-    }, [setSecondLevel, userUpdate, showModal, currentPage, totalPages, totalUsers, itemsPerPage, paginateUsers]);
+    }, [setSecondLevel, userUpdate, showModal, currentPage, totalPages, totalUsers, itemsPerPage, paginateUsers, loading]);
+
     const renderUserTree = () => {
         if (role === 'master' && !selectedSecondLevel) {
             const firstLevel = [];
             const secondtLevel = [];
-            let secondLevelTable = false;
             let secondList = [];
 
             list.map((item) => {
@@ -248,7 +309,7 @@ function UserTree({
                         className={` ${styles.btn} ${styles.btnMd} ${item.id === selectedFirstLevel.id
                             ? styles.btnPrimary
                             : styles.btnOutline
-                            }`}
+                        }`}
                         id={item.id}
                         onClick={() => setSelectedFirstLevel(item)}
                     >{`${item.name2} ${item.name1}`}</button>
@@ -257,7 +318,7 @@ function UserTree({
                 if (item.id === selectedFirstLevel.id) {
                     secondList = usersList.filter((user) => user.parent?.id === item.id);
                     if (item.admins2.length === 0) {
-                        secondLevelTable = true;
+                        // secondLevelTable = true;
                     } else {
                         item.admins2?.map((secondItem) => {
                             secondtLevel.push(
@@ -280,17 +341,9 @@ function UserTree({
                 }
             });
 
-            return (
-                <>
-
-
-                    {/*{showPool && renderTable(poolList)}*/}
-                    { renderTable(usersList.filter(user =>
-                        !poolList.some(poolUser => poolUser.id === user.id)
-                    ))}
-                </>
-            );
-        } else if (role === 'admin1' && !selectedSecondLevel) {
+            return renderTable(usersList);
+        }
+        else if (role === 'admin1' && !selectedSecondLevel) {
             const firstLevel = [];
             let secondtLevel = [];
 
@@ -300,43 +353,21 @@ function UserTree({
                         className={`btn d-block ${item.id === selectedFirstLevel.id
                             ? 'btn-secondary'
                             : 'btn-outline-secondary'
-                            }`}
+                        }`}
                         onClick={() => setSelectedFirstLevel(item)}
                     >{`${item.name2} ${item.name1}`}</button>
                 );
 
                 if (item.id === selectedFirstLevel.id) {
-                    let extraUsers = usersList.filter(
-                        (user) => user.parent?.id === item.id
-                    );
+                    let extraUsers = usersList;
                     secondtLevel = extraUsers;
                 }
             });
 
-            return (
-                <>
-
-
-                            {renderTable(secondtLevel, true)}
-
-
-                    {/*{showAll && renderTable(poolList)}*/}
-                </>
-            );
-        } else {
-            return (
-                <>
-                    {renderTable()}
-                    <div className="show-all-section">
-                        <button
-                            className={`${styles.btn} ${styles.btnMd} mt-2 ${styles.btnPrimary
-                                }`}
-                            onClick={() => setShowAll(!showAll)}
-                        >{`${showAll ? 'Hide All Users' : 'Show Users Pool'}`}</button>
-                    </div>
-                    {showAll && renderTable(poolList)}
-                </>
-            );
+            return renderTable(secondtLevel, true);
+        }
+        else {
+            return renderTable(usersList);
         }
     };
 
