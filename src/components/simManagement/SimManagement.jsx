@@ -168,7 +168,7 @@ const SimManagement = () => {
                                 type="text"
                                 id="bikeName"
                                 className={styles.formControl}
-                                placeholder="バイク名を入力してください"
+                                placeholder="顧客名を入力してください"
                                 required
                                 disabled={isUpdating} // Disable input during update
                             />

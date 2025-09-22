@@ -360,7 +360,7 @@ function CustomerList() {
                                     <th scope="col">所属店舗</th>
                                     <th scope="col">契約日</th>
                                     <th scope="col">契約期間(月)</th>
-                                    <th scope="col">最後の楽章</th>
+                                    <th scope="col">最終通信</th>
                                     <th scope="col">備考</th>
                                     <th scope="col">操作</th>
                                 </tr>
