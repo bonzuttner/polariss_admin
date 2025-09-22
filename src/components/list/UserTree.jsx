@@ -137,7 +137,6 @@ function UserTree({
                         <thead>
                         <tr>
                             <th scope="col">ユーザーID</th>
-                            <th scope="col">デバイスID</th>
                             <th scope="col">姓</th>
                             <th scope="col">名</th>
                             <th scope="col">ニックネーム</th>
@@ -162,7 +161,6 @@ function UserTree({
                                     style={rowStyle}
                                 >
                                     <td>{user.id}</td>
-                                    <td>{user.device_id || 'ー'}</td>
                                     <td>{user.name1}</td>
                                     <td>{user.name2}</td>
                                     <td>{user.nickname}</td>

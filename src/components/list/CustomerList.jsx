@@ -38,7 +38,7 @@ function CustomerList() {
                     affiliatedStore: customer.affiliated_store,
                     contractDate: customer.contract_date,
                     totalMonths: customer.total_months,
-                    lastNotificationDate: customer.last_notification,
+                    lastNotificationDate: customer.last_movement_dt,
                     notes: customer.notes === "None" ? "" : customer.notes,
                     bikeId: customer?.bike_id,
                 }));
@@ -360,7 +360,7 @@ function CustomerList() {
                                     <th scope="col">所属店舗</th>
                                     <th scope="col">契約日</th>
                                     <th scope="col">契約期間(月)</th>
-                                    <th scope="col">最終通知日</th>
+                                    <th scope="col">最後の楽章</th>
                                     <th scope="col">備考</th>
                                     <th scope="col">操作</th>
                                 </tr>
