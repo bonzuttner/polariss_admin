@@ -5,6 +5,7 @@ import ModalComponent from '../common/ModalComponent';
 import Api from '../../api/Api';
 import styles from './List.module.css';
 import CustomerList from './CustomerList';
+import UserList from './UserList';
 import SimList from './SimList';
 import UserTree from './UserTree';
 import NotesModal from './NotesModal';
@@ -118,6 +119,14 @@ function List() {
                 selectedFirstLevel={selectedFirstLevel}
             />
         )}
+
+        {role === 'master' && <UserList
+
+            userUpdate={userUpdate}
+            showModal={showModal}
+        />}
+
+
 
         <NotesModal />
         {show && (

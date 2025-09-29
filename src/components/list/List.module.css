@@ -874,3 +874,143 @@
 .p3 {
     padding: 24px;
 }
+
+/* Sorting Controls */
+.sortingContainer {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.sortingRow {
+    display: flex;
+    gap: 2rem;
+    align-items: start;
+    flex-wrap: wrap;
+justify-content: space-between;
+}
+.primalContainer
+{
+    display: flex;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 100%; /* place above button */
+    right: 40%;   /* move left a bit */
+    transform: translate(-10px, -10px); /* float top-left */
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    pointer-events: none; /* prevent blocking */
+    z-index: 10;
+}
+
+.tooltipContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.sortableHeader {
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.sortableHeader:hover {
+    color: #4611a7; /* purple accent (matches your theme) */
+    background-color: rgba(70, 17, 167, 0.05);
+}
+
+.tooltipContainer:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-490px, -20px); /* animate upward */
+}
+
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translate(-10px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-10px, -10px);
+    }
+}
+
+
+.sortControl {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sortLabel {
+    font-weight: 600;
+    color: #495057;
+    white-space: nowrap;
+}
+
+.sortSelect {
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 0.9rem;
+}
+
+.sortDirectionButton {
+    padding: 0.5rem 1rem;
+    border: 1px solid #4611a7;
+    border-radius: 4px;
+    background-color: #4611a7;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.sortDirectionButton:hover {
+    background-color: #3a0e8c;
+    border-color: #3a0e8c;
+}
+
+.sortDirectionButton.sortAsc::before {
+    content: "↑ ";
+}
+
+.sortDirectionButton.sortDesc::before {
+    content: "↓ ";
+}
+
+.sortInfo {
+    margin-left: 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .sortingRow {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .sortControl {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sortSelect {
+        flex: 1;
+        margin-left: 1rem;
+    }
+}

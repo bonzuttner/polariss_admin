@@ -68,7 +68,6 @@ function UserTree({
     useEffect(() => {
         if (role === 'master' || role === 'admin1' || role === 'admin2') {
             fetchUsers(currentPage, itemsPerPage);
-            console.log(fetchUsers);
         }
     }, [currentPage, itemsPerPage, role, fetchUsers]);
 
@@ -137,8 +136,8 @@ function UserTree({
                         <thead>
                         <tr>
                             <th scope="col">ユーザーID</th>
-                            <th scope="col">姓</th>
-                            <th scope="col">名</th>
+                            <th scope="col">店舗名</th>
+                            <th scope="col">店舗名（補足)</th>
                             <th scope="col">ニックネーム</th>
                             <th scope="col">Email</th>
                             <th scope="col">属性</th>
@@ -161,8 +160,8 @@ function UserTree({
                                     style={rowStyle}
                                 >
                                     <td>{user.id}</td>
-                                    <td>{user.name1}</td>
                                     <td>{user.name2}</td>
+                                    <td>{user.name1}</td>
                                     <td>{user.nickname}</td>
                                     <td>{user.email}</td>
                                     <td>

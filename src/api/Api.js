@@ -4,7 +4,7 @@ const apiUrl = "https://polarissfintech-cegee7efcuenffhq.japaneast-01.azurewebsi
 export default class Api {
   static ApiURL = apiUrl
 
-  static call = async (requestBody, path, method, header) => {
+  static call = async (requestBody, path, method, header,responseType) => {
     let url = path ? `${this.ApiURL}${path}` : this.ApiURL
 
     let headers = {
@@ -14,6 +14,9 @@ export default class Api {
         : localStorage.getItem('userId')
         ? localStorage.getItem('userId')
         : '',
+    }
+    if (responseType) {
+      headers['responseType'] = responseType;
     }
 
     try {
