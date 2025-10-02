@@ -114,7 +114,7 @@ function UserList({ userUpdate, showModal }) {
 
     return (
         <div className={styles.tableContainer}>
-            <h2 className={styles.h2}>ユーザーリスト</h2>
+            <h2 className={styles.h2}>「ロールアサイン待ちリスト」</h2>
 
             {users.length === 0 ? (
                 <div className={styles.emptyState}>
@@ -127,51 +127,68 @@ function UserList({ userUpdate, showModal }) {
                         <thead>
                         <tr>
                             <th scope="col">ユーザーID</th>
-                            <th scope="col">名前</th>
+                            <th scope="col">店舗名</th>
+                            <th scope="col">店舗名（補足)</th>
                             <th scope="col">ニックネーム</th>
-                            <th scope="col">メール</th>
-                            <th scope="col">役割</th>
-                            <th scope="col">ステータス</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">属性</th>
+                            <th scope="col">状態</th>
                             <th scope="col">操作</th>
                         </tr>
                         </thead>
 
                         <tbody>
-                        {users.map((user, index) => (
-                            <tr
-                                key={`${user.id}-${index}`}
-                                className={`${index % 2 === 0 ? styles.evenRow : styles.oddRow}`}
-                            >
-                                <td>{user.id}</td>
-                                <td>{user.name2} {user.name1}</td>
-                                <td>{user.nickname || 'None'}</td>
-                                <td>{user.email || 'None'}</td>
-                                <td>{user.role}</td>
-                                <td>
-        <span
-            className={user.status === 'active' ? styles.statusActive : styles.statusInactive}
-        >
-          {user.status === 'active' ? '有効' : '無効'}
-        </span>
-                                </td>
-                                <td>
-                                    <div className={styles.actionButtons}>
-                                        <button
-                                            className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}
-                                            onClick={() => userUpdate(user)}
-                                        >
-                                            編集
-                                        </button>
-                                        <button
-                                            className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`}
-                                            onClick={() => showModal(user)}
-                                        >
-                                            削除
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                        {users.map((user, index) => {
+                            const rowStyle = {
+                                animationDelay: `${index * 0.05}s`,
+                                opacity: 0
+                            };
+
+                            return (
+                                <tr
+                                    key={user.device_id || index}
+                                    className={`${index % 2 === 0 ? styles.evenRow : styles.oddRow} ${styles.tableRowAnimated}`}
+                                    style={rowStyle}
+                                >
+                                    <td>{user.id}</td>
+                                    <td>{user.name2}</td>
+                                    <td>{user.name1}</td>
+                                    <td>{user.nickname}</td>
+                                    <td>{user.email}</td>
+                                    <td>
+                      <span className={`${styles.roleBadge} ${
+                          user.role === 'admin' ? styles.roleAdmin :
+                              user.role === 'manager' ? styles.roleManager :
+                                  styles.roleUser
+                      }`}>
+                        {user.role}
+                      </span>
+                                    </td>
+                                    <td>
+                      <span className={user.status === 'active' ? styles.statusActive : styles.statusInactive}>
+                        {user.status === 'active' ? '有効' : '無効'}
+                      </span>
+                                    </td>
+
+                                    <td>
+                                        <div className={styles.actionButtons}>
+                                            <button
+                                                className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}
+                                                onClick={() => userUpdate(user)}
+                                            >
+                                                編集
+                                            </button>
+                                            <button
+                                                className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`}
+                                                onClick={() => showModal(user)}
+                                            >
+                                                削除
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
 
 
