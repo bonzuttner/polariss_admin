@@ -53,6 +53,8 @@ function Home({ setLayoutKey }) {
 
   // Flag to control device data fetching
   const shouldFetchDevice = useRef(true);
+  const panToDeviceRef = useRef(null);
+
 
 
   const [showSimulationModal, setShowSimulationModal] = useState(false);
@@ -300,19 +302,25 @@ function Home({ setLayoutKey }) {
     }
   }, [selectedUser, fetchIbcDevices]);
 
-  //active simulations checker (what)
+  //active simulations checker
   useEffect(() => {
     const interval = setInterval(async () => {
       await checkActiveSimulations(
-        activeSimulations,
-        setActiveSimulations,
-        DeviceService.getSimulationById,
-        () => {
-          // ✅ Callback when a simulation ends
-          console.log("Simulation ended, refreshing device data immediately...");
-          shouldFetchDevice.current = true;
-          refreshDeviceData();
-        }
+          activeSimulations,
+          setActiveSimulations,
+          DeviceService.getSimulationById,
+          () => {
+            // ✅ Callback when a simulation ends
+            console.log("Simulation ended, refreshing device data immediately...");
+            shouldFetchDevice.current = true;
+            refreshDeviceData();
+
+            // 🔥 Pan again when simulation stops
+            if (panToDeviceRef.current) {
+              panToDeviceRef.current(device);
+            }
+
+          }
       );
     }, 3000); // every 3 secs
     return () => clearInterval(interval);
@@ -406,6 +414,14 @@ function Home({ setLayoutKey }) {
 
         //re set to default value when we stop the simulation
         setCurrentRefreshInterval(parseInt(INTERVAL || '10000', 10));
+
+
+        // 🔥 Pan again when simulation stops
+        if (panToDeviceRef.current) {
+          panToDeviceRef.current(device);
+        }
+
+
         return updated;
       });
     } catch (err) {
@@ -425,142 +441,155 @@ function Home({ setLayoutKey }) {
 
 
 
-  // Add this function
+
   return (
-    <div id="page-content" key={pageKey}>
-      {!loading && (
-        <div className="hero-section full-screen has-map has-sidebar">
-          <div className="row">
-            <div className="search-responsive" onClick={showBar}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="40"
-                height="40"
-                fill="white"
-                className="bi bi-arrow-bar-right"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8m-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5"
-                />
-              </svg>
-            </div>
+      <div id="page-content" key={pageKey}>
+        {!loading && (
+            <div className="hero-section full-screen has-map has-sidebar">
+              <div className="row">
+                <div className="search-responsive" onClick={showBar}>
+                  <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="40"
+                      height="40"
+                      fill="white"
+                      className="bi bi-arrow-bar-right"
+                      viewBox="0 0 16 16"
+                  >
+                    <path
+                        fillRule="evenodd"
+                        d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8m-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5"
+                    />
+                  </svg>
+                </div>
 
-            <div className={`show-side-bar ${show ? 'show' : 'hide'}`}>
-              {<Sidebar
-                users={users}
-                selectedUser={selectedUser}
-                selectedBike={selectedBike}
-                selectedDevice={selectedDevice}
-                device={device}
-                engine={engine}
-                startDate={startDate}
-                endDate={endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-                handleSelect={handleSelection}
-                handleClick={handleClick}
-                showModal={showModal}
-                showEngModal={showEngModal}
-                handleSimulationModal={handleSimulationModal}
-                activeSimulations={activeSimulations}
-                stopSimulation={stopSimulation}
-                sosActive={SOSIsActive}
-                allDevices={allDevices}
-                onDeviceSelect={handleDeviceSelect}
-              />}
-            </div>
+                <div className={`show-side-bar ${show ? 'show' : 'hide'}`}>
+                  {<Sidebar
+                      users={users}
+                      selectedUser={selectedUser}
+                      selectedBike={selectedBike}
+                      selectedDevice={selectedDevice}
+                      device={device}
+                      engine={engine}
+                      startDate={startDate}
+                      endDate={endDate}
+                      setStartDate={setStartDate}
+                      setEndDate={setEndDate}
+                      handleSelect={handleSelection}
+                      handleClick={handleClick}
+                      showModal={showModal}
+                      showEngModal={showEngModal}
+                      handleSimulationModal={handleSimulationModal}
+                      activeSimulations={activeSimulations}
+                      stopSimulation={stopSimulation}
+                      sosActive={SOSIsActive}
+                      allDevices={allDevices}
+                      onDeviceSelect={handleDeviceSelect}
+                  />}
+                </div>
 
-            <div className={'col col-12 col-md-9 map-col  map-col-fix '}>
-              {!Utils.isEmptyObject(device) && (
-                <APIProvider
-                  apiKey={API_KEY}
-                  libraries={['marker']}
-                >
-                  <CutomMap
+                <div className={'col col-12 col-md-9 map-col  map-col-fix '}>
+                  {!Utils.isEmptyObject(device) && (
+                      <APIProvider
+                          apiKey={API_KEY}
+                          libraries={['marker']}
+                      >
+                        <CutomMap
+                            device={device}
+                            movements={movements}
+                            key={`map-${selectedDevice?.imsi}`}
+                            range={range}
+                            showModal={showModal}
+                            onMapReady={(panFunc) => (panToDeviceRef.current = panFunc)}
+                        />
+                      </APIProvider>
+                  )}
+                </div>
+
+                {<Sidebar
+                    users={users}
+                    selectedUser={selectedUser}
+                    selectedBike={selectedBike}
+                    selectedDevice={selectedDevice}
                     device={device}
-                    movements={movements}
-                    key={`map-${selectedDevice?.imsi}`}
-                    range={range}
+                    engine={engine}
+                    startDate={startDate}
+                    endDate={endDate}
+                    setStartDate={setStartDate}
+                    setEndDate={setEndDate}
+                    handleSelect={handleSelection}
+                    handleClick={handleClick}
                     showModal={showModal}
+                    showEngModal={showEngModal}
+                    handleSimulationModal={handleSimulationModal}
+                    activeSimulations={activeSimulations}
+                    stopSimulation={stopSimulation}
+                    sosActive={SOSIsActive}
+                    allDevices={allDevices}
+                    onDeviceSelect={handleDeviceSelect}
+                />}
+              </div>
+
+              {showMonitoring && (
+                  <MonitoringModal
+                      device={device}
+                      updateRange={updateRange}
+                      range={range}
+                      SOSIsActive={SOSIsActive}
+                      setSOSIsActive={setSOSIsActive}
                   />
-                </APIProvider>
+              )}
+
+              {showEngineModal && (
+                  <EngineModal engine={engine} updateEngine={updateEngine} />
+              )}
+              {showSimulationModal && (
+                  <SimulationModal
+                      selectedBike={selectedBike}
+                      userId={localStorage.getItem('userId')}
+                      currentLocation={currentLocation}
+                      onSimulationStarted={  (simulationId, simulationInterval) => {
+                        console.log("📌 Storing simulation ID for bike:", selectedBike?.id);
+                        console.log("I have recvied the interval ", simulationInterval, ' ms');
+                        console.log("📌 Simulation ID:", simulationId);
+                        setActiveSimulations(prev => {
+                          const updated = {
+                            ...prev,
+                            [selectedBike.id]: {
+                              simulationId,
+                              simulationInterval
+                            }
+                          };
+                          //store the created simulation in the local storage
+                          localStorage.setItem('activeSimulations', JSON.stringify(updated));
+                          return updated;
+                        });
+                        setShowSimulationModal(false);
+                        setCurrentRefreshInterval(simulationInterval);
+
+                        try {
+                          // ✅ Step 1: Refresh the latest location
+                          shouldFetchDevice.current = true;
+                          refreshDeviceData();
+                          console.log("the result 🤐🤐🤐🤐🤐🤐" , panToDeviceRef.current);
+                          // ✅ Step 2: Pan once data is updated
+                          if (panToDeviceRef.current) {
+                            panToDeviceRef.current(device, { animate: true });
+                            console.log("✅ Panned to device after simulation start");
+                          }
+                        } catch (err) {
+                          console.error("❌ Error refreshing or panning after simulation start:", err);
+                        }
+                      }}
+                      onClose={() => setShowSimulationModal(false)}
+                      show={showSimulationModal}
+                      device={device}
+                  />
+
               )}
             </div>
-
-            {<Sidebar
-              users={users}
-              selectedUser={selectedUser}
-              selectedBike={selectedBike}
-              selectedDevice={selectedDevice}
-              device={device}
-              engine={engine}
-              startDate={startDate}
-              endDate={endDate}
-              setStartDate={setStartDate}
-              setEndDate={setEndDate}
-              handleSelect={handleSelection}
-              handleClick={handleClick}
-              showModal={showModal}
-              showEngModal={showEngModal}
-              handleSimulationModal={handleSimulationModal}
-              activeSimulations={activeSimulations}
-              stopSimulation={stopSimulation}
-              sosActive={SOSIsActive}
-              allDevices={allDevices}
-              onDeviceSelect={handleDeviceSelect}
-            />}
-          </div>
-
-          {showMonitoring && (
-            <MonitoringModal
-              device={device}
-              updateRange={updateRange}
-              range={range}
-              SOSIsActive={SOSIsActive}
-              setSOSIsActive={setSOSIsActive}
-            />
-          )}
-
-          {showEngineModal && (
-            <EngineModal engine={engine} updateEngine={updateEngine} />
-          )}
-          {showSimulationModal && (
-            <SimulationModal
-              selectedBike={selectedBike}
-              userId={localStorage.getItem('userId')}
-              currentLocation={currentLocation}
-              onSimulationStarted={(simulationId, simulationInterval) => {
-                console.log("📌 Storing simulation ID for bike:", selectedBike?.id);
-                console.log("I have recvied the interval ", simulationInterval, ' ms');
-                console.log("📌 Simulation ID:", simulationId);
-                setActiveSimulations(prev => {
-                  const updated = {
-                    ...prev,
-                    [selectedBike.id]: {
-                      simulationId,
-                      simulationInterval
-                    }
-                  };
-                  //store the created simulation in the local storage
-                  localStorage.setItem('activeSimulations', JSON.stringify(updated));
-                  return updated;
-                });
-                setShowSimulationModal(false);
-                setCurrentRefreshInterval(simulationInterval);
-
-
-              }}
-              onClose={() => setShowSimulationModal(false)}
-              show={showSimulationModal}
-              device={device}
-            />
-
-          )}
-        </div>
-      )}
-    </div>
+        )}
+      </div>
   );
 }
 

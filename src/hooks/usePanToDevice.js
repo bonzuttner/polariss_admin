@@ -1,21 +1,21 @@
-import { useEffect } from 'react';
+// hooks/usePanToDevice.js
+import { useCallback } from 'react';
 import { useMap } from '@vis.gl/react-google-maps';
 
 const DEFAULT_CENTER = { lat: 36.2223633040231, lng: 137.81848964688243 };
 const DEFAULT_ZOOM_OUT = 8;
 const DEFAULT_ZOOM_IN = 17;
 
-export function usePanToDevice(device, options = {}) {
+export function usePanToDevice() {
     const map = useMap();
-    const {
-        animate = true,
-        duration = 1000,
-        zoomInLevel = DEFAULT_ZOOM_IN,
-        zoomOutLevel = DEFAULT_ZOOM_OUT
-    } = options;
 
-    useEffect(() => {
+    const panToDevice = useCallback((device, options = {}) => {
         if (!map) return;
+        const {
+            animate = true,
+            zoomInLevel = DEFAULT_ZOOM_IN,
+            zoomOutLevel = DEFAULT_ZOOM_OUT
+        } = options;
 
         const position = device?.lastLocation
             ? { lat: device.lastLocation.lat, lng: device.lastLocation.lon }
@@ -24,15 +24,12 @@ export function usePanToDevice(device, options = {}) {
         const zoomLevel = device?.lastLocation ? zoomInLevel : zoomOutLevel;
 
         if (animate) {
-            // Smooth transition to both position and zoom
-            map.moveCamera({
-                center: position,
-                zoom: zoomLevel,
-            });
+            map.moveCamera({ center: position, zoom: zoomLevel });
         } else {
-            // Immediate jump
             map.setCenter(position);
             map.setZoom(zoomLevel);
         }
-    }, [device?.device?.imsi]); // Trigger when device IMSI changes
+    }, [map]);
+
+    return { panToDevice };
 }
