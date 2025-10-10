@@ -235,12 +235,12 @@ function Home({ setLayoutKey }) {
 
   //SOS button toggler (which changes the sos mode in the sidebar)
   useEffect(() => {
-    if (device?.monitoringSettings?.monitoringType === 'mutual') {
+    if (device?.mutual_monitoring_status) {
       setSOSIsActive(true);
     } else {
       setSOSIsActive(false);
     }
-  }, [device?.monitoringSettings?.monitoringType]);
+  }, [device?.mutual_monitoring_status]);
 
   // Initial load and auto-refresh
   useEffect(() => {

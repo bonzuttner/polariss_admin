@@ -33,12 +33,12 @@ export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
             nearbyCirclesRef.current.push(circle);
 
             // Create additional circle for mutual monitoring if needed
-            if (item.device?.hasMutualMonitoring || item.device?.hasSOSEnabled ) {
+            if (item.device?.mutual_monitoring_status || item.device?.sos_status) {
                 const mutualCircle = new maps.Circle({
                     radius: 250,
                     center: { lat: loc.lat, lng: loc.lon },
-                    strokeColor: item.device?.hasSOSEnabled ? '#D7596D' : '#52d71d',
-                    fillColor:  item.device?.hasSOSEnabled ? '#D7596D' : '#52d71d',
+                    strokeColor: item.device?.sos_status ? '#D7596D' : '#52d71d',
+                    fillColor:  item.device?.sos_status ? '#D7596D' : '#52d71d',
                     fillOpacity: 0.1,
                     strokeWeight: 2,
                     map,

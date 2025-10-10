@@ -50,7 +50,7 @@ export function usePolylineAndCircleUpdater({ map, maps, movements, device, mark
             circlesRef.current.push(rangeCircle);
         }
 
-        if (device?.monitoringSettings?.monitoringType === "mutual" || device?.monitoringSettings?.hasSOSEnabled) {
+        if (device?.mutual_monitoring_status || device?.sos_status) {
             const lat = device?.lastLocation?.lat;
             const lng = device?.lastLocation?.lon;
             const geofenceCenter = new google.maps.LatLng(lat, lng);
@@ -58,8 +58,8 @@ export function usePolylineAndCircleUpdater({ map, maps, movements, device, mark
             const mutualCircle = new maps.Circle({
                 radius: 250,
                 center: geofenceCenter,
-                strokeColor: device?.monitoringSettings?.hasSOSEnabled ? '#ff0d0d' : '#52d71d',
-                fillColor:device?.monitoringSettings?.hasSOSEnabled? '#ff0d0d' : '#52d71d',
+                strokeColor: device?.sos_status ? '#ff0d0d' : '#52d71d',
+                fillColor: device?.sos_status ? '#ff0d0d' : '#52d71d',
                 fillOpacity: 0.1,
                 strokeWeight: 2,
                 map,

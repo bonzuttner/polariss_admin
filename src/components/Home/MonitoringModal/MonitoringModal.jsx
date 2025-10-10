@@ -172,18 +172,13 @@ const EngineControl = ({ device, handleConfirm }) => (
 const SOSMode = ({ device, monitoringFields, onUpdate }) => {
   const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
   const [SOSIsActive, setSOSIsActive] = useState(
-    device?.monitoringSettings?.monitoringType === 'mutual');
+    device?.mutual_monitoring_status);
   const handleConfirm = async () => {
 
 
     const turnOn = !SOSIsActive;
 
-    // Block mutual monitoring if self-monitoring is off
-    if (!device?.monitoringActive && turnOn) {
 
-      toast.warning("Self-monitoring must be ON before enabling SOS mode.");
-      return;
-    }
 
 
 
@@ -251,7 +246,7 @@ function MonitoringModal({ device, updateRange, range, setSOSIsActive }) {
     imsi: device?.device.imsi,
     range: device?.monitoringSettings?.range,
     nbrOfNotifications: device?.monitoringSettings?.nbrOfNotifications,
-    SOSIsActive: device.monitoringSettings?.monitoringType,
+    SOSIsActive: device.mutual_monitoring_status,
   };
   const [monitoringFields, setMonitoringFields] = useState(initialDevice);
   const [show, setShow] = useState(true);
@@ -290,9 +285,9 @@ function MonitoringModal({ device, updateRange, range, setSOSIsActive }) {
         : 0;
 
       // 👇 Important logic here
-      if (!returnedDevice.monitoringActive) {
-        setSOSIsActive(false); // Mutual monitoring automatically off
-      }
+      // if (!returnedDevice.monitoringActive) {
+      //   setSOSIsActive(false); // Mutual monitoring automatically off
+      // }
       close(returnedDevice);
     }
   };
