@@ -114,7 +114,7 @@ function UserList({ userUpdate, showModal }) {
 
     return (
         <div className={styles.tableContainer}>
-            <h2 className={styles.h2}>「ロールアサイン待ちリスト」</h2>
+            <h2 className={styles.h2}>全管理者及びユーザー情報</h2>
 
             {users.length === 0 ? (
                 <div className={styles.emptyState}>
