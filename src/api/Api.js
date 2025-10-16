@@ -44,4 +44,32 @@ export default class Api {
       } else return e
     }
   }
+
+
+  // ✅ FormData version for file uploads
+  static callFormData = async (formData, path, method = "post", header) => {
+    const url = path ? `${this.ApiURL}${path}` : this.ApiURL;
+
+    const headers = {
+      auth:
+          header ??
+          localStorage.getItem("userId") ??
+          "",
+      // ❗ No 'Content-Type': axios handles FormData automatically
+    };
+
+    try {
+      const response = await axios({
+        method,
+        url,
+        data: formData,
+        headers,
+        timeout: 1200000,
+      });
+
+      return response;
+    } catch (e) {
+      return e.response || e;
+    }
+  };
 }
