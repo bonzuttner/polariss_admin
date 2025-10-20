@@ -84,6 +84,9 @@ export const DeviceService = {
     toggleMutualMonitoring: async ({ turnOn, imsi }) => {
         return Api.call({ turnOn, imsi }, `devices/monitoringSettings/mutual`, 'put', '');
     },
+    toggleSOSMonitoring: async ({ turnOn, imsi }) => {
+        return Api.call({ turnOn, imsi }, `devices/monitoringSettings/sos`, 'put', '');
+    },
     getAllDevicesWithLastLocation: async ()=> {
         return Api.call({},
             'devices/with-last-location',

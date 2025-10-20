@@ -171,12 +171,11 @@ const EngineControl = ({ device, handleConfirm }) => (
 // Extracted SOS Mode Component
 const SOSMode = ({ device, monitoringFields, onUpdate }) => {
   const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
-  const [SOSIsActive, setSOSIsActive] = useState(
-    device?.mutual_monitoring_status);
+
   const handleConfirm = async () => {
 
 
-    const turnOn = !SOSIsActive;
+    const turnOn = !device.sos_status;
 
 
 
@@ -189,10 +188,9 @@ const SOSMode = ({ device, monitoringFields, onUpdate }) => {
     };
 
     try {
-      const response = await DeviceService.toggleMutualMonitoring(body);
+      const response = await DeviceService.toggleSOSMonitoring(body);
       if (response.data.code === 200) {
         // toggle SOS mode
-        setSOSIsActive(turnOn);
         if (onUpdate) {
           //  update parent with new device state
           onUpdate(response.data.data);
@@ -207,17 +205,16 @@ const SOSMode = ({ device, monitoringFields, onUpdate }) => {
     }
   };
 
-  return (<>
-    <p className={styles.innerLabel}>相互監視</p>
-    <div className={styles.buttonsContainer}>
-      {MONITORING_MODE && (
-        <button className={styles.SOSButton} onClick={handleConfirm}>
-          {SOSIsActive ? '解除中 (ON)' : '監視中 (OFF)'}
-        </button>
-      )}
-    </div>
-  </>
-  );
+  return MONITORING_MODE ? (
+      <>
+        <p className={styles.innerLabel}>相互監視</p>
+        <div className={styles.buttonsContainer}>
+          <button className={styles.SOSButton} onClick={handleConfirm}>
+            {device.sos_status ? '解除中 (ON)' : '監視中 (OFF)'}
+          </button>
+        </div>
+      </>
+  ) : null;
 };
 
 // Extracted Message History Component
