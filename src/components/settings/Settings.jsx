@@ -26,6 +26,7 @@ function Settings(props) {
   let logedInRole = localStorage.getItem('role');
   const [userDetail, setUserDetail] = useState({});
   const [selectedTab, setSelectedTab] = useState('profile');
+  const [loggedUser , setLoggedUser] = useState({});
 
 
 
@@ -97,12 +98,12 @@ function Settings(props) {
       if (logedInRole === 'master') {
         list?.splice(0, 0, {
           admins2: [],
-          email: 'Master',
-          id: '27661ba2-bc20-49a8-a9eb-8089c611d1dc',
-          name1: 'Master',
-          name2: 'Master',
+          email: userDetail.email,
+          id:  userId,
+          name1: userDetail.name1,
+          name2: userDetail.name2,
           nickname: 'Master',
-          role: 'master',
+          role: role,
         });
       } else if (logedInRole === 'admin2') {
         list = list[0].admins2;
