@@ -932,7 +932,7 @@ justify-content: space-between;
 .tooltipContainer:hover .tooltip {
     opacity: 1;
     visibility: visible;
-    transform: translate(-490px, -20px); /* animate upward */
+    transform: translate(490px, -20px); /* animate upward */
 }
 
 @keyframes floatIn {

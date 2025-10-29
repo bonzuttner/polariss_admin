@@ -18,6 +18,7 @@ function CustomerList() {
     const [showTooltip, setShowTooltip] = useState(false);
 
 
+
     // New state for sorting
     const [sortKey, setSortKey] = useState('SIMNumber');
     const [sortDirection, setSortDirection] = useState('ASC');
@@ -107,25 +108,49 @@ function CustomerList() {
         }
     }, []);
     const handleExportCSV = async () => {
+        const loggedId = localStorage.getItem('userId');
+
         try {
+            // Step 1: Get response as text
             const response = await Api.call(
                 {},
                 `customers/export/csv?sort_key=${sortKey}&sort_direction=${sortDirection}`,
                 'get',
-                { responseType: 'blob' } // <-- important to handle file
+                loggedId,
+                'blob'
             );
 
-            const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
+            // Step 2: Convert blob to text (raw CSV string)
+            const csvText = await response.data;
+
+            // Step 3: Ensure proper line endings for Excel
+            const normalizedCsv = csvText.replace(/\r?\n/g, '\r\n');
+
+            // Step 4: Prepend BOM for UTF-8 (important for Japanese)
+            const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+
+            // Step 5: Create Blob with correct MIME type
+            const csvBlob = new Blob([bom, normalizedCsv], {
+                type: 'application/vnd.ms-excel;charset=utf-8;', // Excel-friendly type
+            });
+
+            // Step 6: Create download link
+            const url = window.URL.createObjectURL(csvBlob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `customers_${sortKey}_${sortDirection}.csv`);
+            link.setAttribute(
+                'download',
+                `customers_${sortKey}_${sortDirection}_${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.csv`
+            );
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error("Failed to export CSV:", error);
-            alert("CSVエクスポートに失敗しました。");
+            console.error('Failed to export CSV:', error);
+            alert('CSVエクスポートに失敗しました。');
         }
     };
 
@@ -322,6 +347,15 @@ function CustomerList() {
     const pageNumbers = getPageNumbers();
     const currentSortKeyLabel = sortKeys.find(k => k.value === sortKey)?.label;
 
+    const handleSort = (columnKey) => {
+        if (sortKey === columnKey) {
+            setSortDirection(prev => prev === 'ASC' ? 'DESC' : 'ASC');
+        } else {
+            setSortKey(columnKey);
+            setSortDirection('ASC'); // reset to ASC when switching column
+        }
+    };
+
     return (
         <>
             <h2 className={styles.h2}>顧客リスト</h2>
@@ -329,42 +363,7 @@ function CustomerList() {
             {/* Sorting Controls */}
             <div className={styles.sortingContainer}>
                 <div className={styles.sortingRow}>
-                    <div className={styles.primalContainer}>
-                        <div className={styles.sortControl}>
-                            <label htmlFor="sortKey" className={styles.sortLabel}>
-                                並び替え:
-                            </label>
-                            <select
-                                id="sortKey"
-                                className={styles.sortSelect}
-                                value={sortKey}
-                                onChange={handleSortKeyChange}
-                            >
-                                {sortKeys.map(key => (
-                                    <option key={key.value} value={key.value}>
-                                        {key.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
 
-                        <div className={styles.sortControl}>
-                            <label htmlFor="sortDirection" className={styles.sortLabel}>
-                                順序:
-                            </label>
-                            <button
-                                className={`${styles.sortDirectionButton} ${
-                                    sortDirection === 'ASC' ? styles.sortAsc : styles.sortDesc
-                                }`}
-                                onClick={handleSortDirectionChange}
-                                title={sortDirection === 'ASC' ? '昇順' : '降順'}
-
-                            >
-                                {sortDirection === 'ASC' ? '↑ 昇順' : '↓ 降順'}
-                            </button>
-
-                        </div>
-                    </div>
 
                     {/* New Export CSV Button */}
                     <div className={`${styles.sortControl} ${styles.tooltipContainer}`}>
@@ -459,13 +458,55 @@ function CustomerList() {
                         <table className={styles.modernTable}>
                             <thead>
                             <tr>
-                                <th scope="col">SIM番号</th>
-                                <th scope="col">顧客名</th>
-                                <th scope="col">所属店舗</th>
-                                <th scope="col">契約日</th>
-                                <th scope="col">契約期間(月)</th>
-                                <th scope="col">最終通信</th>
-                                <th scope="col">備考</th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('SIMNumber')}
+                                >
+                                    SIM番号 {sortKey === 'SIMNumber' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('customerName')}
+                                >
+                                    顧客名 {sortKey === 'customerName' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('affiliatedStore')}
+                                >
+                                    所属店舗 {sortKey === 'affiliatedStore' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('contractDate')}
+                                >
+                                    契約日 {sortKey === 'contractDate' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('totalMonths')}
+                                >
+                                    契約期間(月) {sortKey === 'totalMonths' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('lastMovementDt')}
+                                >
+                                    最終通信 {sortKey === 'lastMovementDt' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('Notes')}
+                                >
+                                    備考 {sortKey === 'Notes' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
                                 <th scope="col">操作</th>
                             </tr>
                             </thead>

@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const apiUrl = "https://polarissfintech-cegee7efcuenffhq.japaneast-01.azurewebsites.net/v2/"
+// const apiUrl = "https://polarissfintech-cegee7efcuenffhq.japaneast-01.azurewebsites.net/v2/"
+const apiUrl = import.meta.env.VITE_API_URL
+// const apiUrl = "http://localhost:5000/v2/"
 export default class Api {
   static ApiURL = apiUrl
 
@@ -15,8 +17,12 @@ export default class Api {
         ? localStorage.getItem('userId')
         : '',
     }
+    let axiosConfig = {
+      headers,
+      timeout: 1200000,
+    };
     if (responseType) {
-      headers['responseType'] = responseType;
+      axiosConfig.responseType = responseType;
     }
 
     try {
@@ -28,16 +34,9 @@ export default class Api {
               timeout: 1200000,
             }
           : method === 'delete'
-          ? {
-              headers: headers,
-              data: requestBody,
-
-                }
+          ? { ...axiosConfig, data: requestBody }
           : requestBody,
-        {
-          headers: headers,
-          timeout: 1200000,
-        }
+          axiosConfig
         // , {crossDomain: true}
       )
       return response
