@@ -1,36 +1,62 @@
 import { useState, useEffect, useCallback } from 'react';
 import Api from '../../api/Api';
 import styles from './List.module.css';
-import NotesModal from './NotesModal'; // Import the external component
+import NotesModal from './NotesModal';
 
 function CustomerList() {
-    const [allCustomerData, setAllCustomerData] = useState([]); // Store all customer data
-    const [filteredCustomerList, setFilteredCustomerList] = useState([]); // Filtered data
-    const [displayedCustomerList, setDisplayedCustomerList] = useState([]); // Paginated data
+    const [allCustomerData, setAllCustomerData] = useState([]);
+    const [filteredCustomerList, setFilteredCustomerList] = useState([]);
+    const [displayedCustomerList, setDisplayedCustomerList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(5);
     const [showNotesModal, setShowNotesModal] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [noteText, setNoteText] = useState('');
-    const [searchTerm, setSearchTerm] = useState(''); // Search term state
-    const [searchField, setSearchField] = useState('all'); // Search field selector
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchField, setSearchField] = useState('all');
+    const [showTooltip, setShowTooltip] = useState(false);
 
-    // Pagination calculations
+
+
+    // New state for sorting
+    const [sortKey, setSortKey] = useState('SIMNumber');
+    const [sortDirection, setSortDirection] = useState('ASC');
+
+    // Available sort keys
+    const sortKeys = [
+        { value: "userRole", label: "ユーザー役割" },
+        { value: "userID", label: "ユーザーID" },
+        { value: "parentRole", label: "親役割" },
+        { value: "parentID", label: "親ID" },
+        { value: "grandParentID", label: "祖父ID" },
+        { value: "SIMNumber", label: "SIM番号" },
+        { value: "imsi", label: "IMSI" },
+        { value: "customerName", label: "顧客名" },
+        { value: "affiliatedStore", label: "所属店舗" },
+        { value: "contractDate", label: "契約日" },
+        { value: "totalMonths", label: "契約期間" },
+        { value: "lastMovementDt", label: "最終移動日" },
+        { value: "Notes", label: "備考" }
+    ];
+
     const totalFilteredItems = filteredCustomerList.length;
     const totalPages = Math.ceil(totalFilteredItems / itemsPerPage);
 
-    // Fetch customers from API
-    const fetchCustomers = async (page = 1, pageSize = 1000) => {
+    // Fetch customers from API with sorting - FIXED: use useCallback to prevent infinite re-renders
+    const fetchCustomers = useCallback(async (page = 1, pageSize = 1000, sortKey = 'SIMNumber', sortDirection = 'ASC') => {
         setLoading(true);
         try {
-            const response = await Api.call({}, `customers/list?page=${page}&page_size=${pageSize}`, 'get');
+            const response = await Api.call(
+                {},
+                `customers/list?page=${page}&page_size=${pageSize}&sort_key=${sortKey}&sort_direction=${sortDirection}`,
+                'get'
+            );
 
             if (response.data && response.data.code === 200) {
                 const { customers, pagination } = response.data.data;
                 const totalItems = pagination.total;
 
-                // Transform API data to match component structure
                 let allCustomers = customers.map(customer => ({
                     id: customer.sim_number,
                     SIMNumber: customer.sim_number,
@@ -43,14 +69,15 @@ function CustomerList() {
                     bikeId: customer?.bike_id,
                 }));
 
-                // If there are more items than 1000, fetch the rest
                 if (totalItems > 1000) {
                     const totalPagesToFetch = Math.ceil(totalItems / 1000);
 
-                    // Fetch remaining pages
                     for (let page = 2; page <= totalPagesToFetch; page++) {
-                        const additionalResponse = await Api.call({},
-                            `customers/list?page=${page}&page_size=1000`, 'get');
+                        const additionalResponse = await Api.call(
+                            {},
+                            `customers/list?page=${page}&page_size=1000&sort_key=${sortKey}&sort_direction=${sortDirection}`,
+                            'get'
+                        );
 
                         if (additionalResponse.data && additionalResponse.data.code === 200) {
                             const additionalCustomers = additionalResponse.data.data.customers.map(customer => ({
@@ -60,7 +87,7 @@ function CustomerList() {
                                 affiliatedStore: customer.affiliated_store,
                                 contractDate: customer.contract_date,
                                 totalMonths: customer.total_months,
-                                lastNotificationDate: customer.last_notification,
+                                lastNotificationDate: customer.last_movement_dt,
                                 notes: customer.notes === "None" ? "" : customer.notes,
                                 bikeId: customer?.bike_id,
                             }));
@@ -70,7 +97,7 @@ function CustomerList() {
                 }
 
                 setAllCustomerData(allCustomers);
-                setFilteredCustomerList(allCustomers); // Initially, filtered list is all data
+                setFilteredCustomerList(allCustomers);
             }
         } catch (error) {
             console.error('Failed to fetch customers:', error);
@@ -79,21 +106,66 @@ function CustomerList() {
         } finally {
             setLoading(false);
         }
+    }, []);
+    const handleExportCSV = async () => {
+        const loggedId = localStorage.getItem('userId');
+
+        try {
+            // Step 1: Get response as text
+            const response = await Api.call(
+                {},
+                `customers/export/csv?sort_key=${sortKey}&sort_direction=${sortDirection}`,
+                'get',
+                loggedId,
+                'blob'
+            );
+
+            // Step 2: Convert blob to text (raw CSV string)
+            const csvText = await response.data;
+
+            // Step 3: Ensure proper line endings for Excel
+            const normalizedCsv = csvText.replace(/\r?\n/g, '\r\n');
+
+            // Step 4: Prepend BOM for UTF-8 (important for Japanese)
+            const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+
+            // Step 5: Create Blob with correct MIME type
+            const csvBlob = new Blob([bom, normalizedCsv], {
+                type: 'application/vnd.ms-excel;charset=utf-8;', // Excel-friendly type
+            });
+
+            // Step 6: Create download link
+            const url = window.URL.createObjectURL(csvBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute(
+                'download',
+                `customers_${sortKey}_${sortDirection}_${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.csv`
+            );
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Failed to export CSV:', error);
+            alert('CSVエクスポートに失敗しました。');
+        }
     };
 
-    // Load all customer data on component mount
+    // Load customer data when sort parameters change - FIXED: proper dependencies
     useEffect(() => {
-        fetchCustomers();
-    }, []);
+        fetchCustomers(1, 1000, sortKey, sortDirection);
+    }, [sortKey, sortDirection, fetchCustomers]);
 
-    // Handle search/filter
-    useEffect(() => {
+    // Handle search/filter - FIXED: use useCallback for filter function
+    const filterCustomers = useCallback(() => {
         let filtered = allCustomerData;
 
         if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
             filtered = allCustomerData.filter(customer => {
-                const searchLower = searchTerm.toLowerCase();
-
                 switch (searchField) {
                     case 'sim':
                         return customer.SIMNumber?.toLowerCase().includes(searchLower);
@@ -116,16 +188,29 @@ function CustomerList() {
         }
 
         setFilteredCustomerList(filtered);
-        setCurrentPage(1); // Reset to first page when search changes
+        setCurrentPage(1);
     }, [searchTerm, searchField, allCustomerData]);
 
-    // Update displayed items based on current page and filtered list
+    useEffect(() => {
+        filterCustomers();
+    }, [filterCustomers]);
+
+    // Update displayed items based on current page and filtered list - FIXED: simplified
     useEffect(() => {
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
         const currentItems = filteredCustomerList.slice(indexOfFirstItem, indexOfLastItem);
         setDisplayedCustomerList(currentItems);
     }, [currentPage, filteredCustomerList, itemsPerPage]);
+
+    // Sorting handlers
+    const handleSortKeyChange = (e) => {
+        setSortKey(e.target.value);
+    };
+
+    const handleSortDirectionChange = () => {
+        setSortDirection(prev => prev === 'ASC' ? 'DESC' : 'ASC');
+    };
 
     // Pagination functions
     const paginate = useCallback((pageNumber) => {
@@ -150,7 +235,7 @@ function CustomerList() {
     const goToLastPage = useCallback(() => setCurrentPage(totalPages), [totalPages]);
 
     // Generate page numbers for pagination
-    const getPageNumbers = () => {
+    const getPageNumbers = useCallback(() => {
         const pageNumbers = [];
         const maxVisiblePages = 5;
 
@@ -187,23 +272,20 @@ function CustomerList() {
         }
 
         return pageNumbers;
-    };
+    }, [currentPage, totalPages]);
 
-    // Calculate display range
     const startItem = totalFilteredItems > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0;
     const endItem = Math.min(currentPage * itemsPerPage, totalFilteredItems);
 
-    // Handle search input change
+    // Search handlers
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
 
-    // Handle search field change
     const handleSearchFieldChange = (e) => {
         setSearchField(e.target.value);
     };
 
-    // Clear search
     const clearSearch = () => {
         setSearchTerm('');
     };
@@ -222,9 +304,9 @@ function CustomerList() {
     }, []);
 
     const saveNote = useCallback(async () => {
+        if (!selectedCustomer) return;
+
         try {
-            console.log(selectedCustomer);
-            // Call API to save note
             const response = await Api.call(
                 { notes: noteText },
                 `bikes/${selectedCustomer.bikeId}/updateNotes`,
@@ -232,7 +314,6 @@ function CustomerList() {
             );
 
             if (response.data && response.data.code === 200) {
-                // Update all data arrays
                 const updatedAllData = allCustomerData.map(customer =>
                     customer.SIMNumber === selectedCustomer.SIMNumber
                         ? { ...customer, notes: noteText }
@@ -240,7 +321,6 @@ function CustomerList() {
                 );
                 setAllCustomerData(updatedAllData);
 
-                // Update filtered list
                 const updatedFilteredList = filteredCustomerList.map(customer =>
                     customer.SIMNumber === selectedCustomer.SIMNumber
                         ? { ...customer, notes: noteText }
@@ -264,21 +344,47 @@ function CustomerList() {
         );
     }
 
+    const pageNumbers = getPageNumbers();
+    const currentSortKeyLabel = sortKeys.find(k => k.value === sortKey)?.label;
+
+    const handleSort = (columnKey) => {
+        if (sortKey === columnKey) {
+            setSortDirection(prev => prev === 'ASC' ? 'DESC' : 'ASC');
+        } else {
+            setSortKey(columnKey);
+            setSortDirection('ASC'); // reset to ASC when switching column
+        }
+    };
+
     return (
         <>
             <h2 className={styles.h2}>顧客リスト</h2>
+
+            {/* Sorting Controls */}
+            <div className={styles.sortingContainer}>
+                <div className={styles.sortingRow}>
+
+
+                    {/* New Export CSV Button */}
+                    <div className={`${styles.sortControl} ${styles.tooltipContainer}`}>
+                        <button
+                            className={`${styles.btn}  ${styles.btnSm} ${styles.btnPrimary}`}
+                            onClick={handleExportCSV}
+                        >
+                            CSVエクスポート
+                        </button>
+                        <div className={styles.tooltip}>
+                            CSVをエクスポートする前に、左側のフィルターを指定してください
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Search Input */}
             <div className={styles.searchContainer}>
                 <div className={styles.searchRow}>
                     <div className={styles.searchInputWrapper}>
-                        <svg
-                            className={styles.searchIcon}
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                        >
+                        <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none">
                             <path
                                 d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
                                 stroke="#6c757d"
@@ -301,11 +407,7 @@ function CustomerList() {
                             onChange={handleSearchChange}
                         />
                         {searchTerm && (
-                            <button
-                                className={styles.clearButton}
-                                onClick={clearSearch}
-                                aria-label="Clear search"
-                            >
+                            <button className={styles.clearButton} onClick={clearSearch} aria-label="Clear search">
                                 ×
                             </button>
                         )}
@@ -325,10 +427,11 @@ function CustomerList() {
                 <div className={styles.searchInfo}>
                     全{allCustomerData.length}件中 {filteredCustomerList.length}件を表示
                     {searchTerm && (
-                        <span className={styles.searchTerm}>
-                            （「{searchTerm}」で検索中）
-                        </span>
+                        <span className={styles.searchTerm}>（「{searchTerm}」で検索中）</span>
                     )}
+                    <span className={styles.sortInfo}>
+                        （{currentSortKeyLabel}で{sortDirection === 'ASC' ? '昇順' : '降順'}に並び替え）
+                    </span>
                 </div>
             </div>
 
@@ -337,7 +440,7 @@ function CustomerList() {
                     <div className={styles.emptyState}>
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" className={styles.emptyStateIcon}>
                             <path d="M3 6H21M3 6V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V6M3 6L5 3H19L21 6M10 10H14M10 14H14M10 18H14"
-                                stroke="#4611a7" strokeWidth="2" strokeLinecap="round" />
+                                  stroke="#4611a7" strokeWidth="2" strokeLinecap="round" />
                         </svg>
                         <h3>
                             {searchTerm
@@ -354,48 +457,90 @@ function CustomerList() {
                     <>
                         <table className={styles.modernTable}>
                             <thead>
-                                <tr>
-                                    <th scope="col">SIM番号</th>
-                                    <th scope="col">顧客名</th>
-                                    <th scope="col">所属店舗</th>
-                                    <th scope="col">契約日</th>
-                                    <th scope="col">契約期間(月)</th>
-                                    <th scope="col">最終通信</th>
-                                    <th scope="col">備考</th>
-                                    <th scope="col">操作</th>
-                                </tr>
+                            <tr>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('SIMNumber')}
+                                >
+                                    SIM番号 {sortKey === 'SIMNumber' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('customerName')}
+                                >
+                                    顧客名 {sortKey === 'customerName' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('affiliatedStore')}
+                                >
+                                    所属店舗 {sortKey === 'affiliatedStore' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('contractDate')}
+                                >
+                                    契約日 {sortKey === 'contractDate' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('totalMonths')}
+                                >
+                                    契約期間(月) {sortKey === 'totalMonths' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('lastMovementDt')}
+                                >
+                                    最終通信 {sortKey === 'lastMovementDt' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('Notes')}
+                                >
+                                    備考 {sortKey === 'Notes' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+                                <th scope="col">操作</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                {displayedCustomerList.map((customer, index) => {
-                                    const rowStyle = {
-                                        animationDelay: `${index * 0.05}s`,
-                                        opacity: 0
-                                    };
+                            {displayedCustomerList.map((customer, index) => {
+                                const rowStyle = {
+                                    animationDelay: `${index * 0.05}s`,
+                                    opacity: 0
+                                };
 
-                                    return (
-                                        <tr
-                                            key={customer.SIMNumber}
-                                            className={`${index % 2 === 0 ? styles.evenRow : styles.oddRow} ${styles.tableRowAnimated}`}
-                                            style={rowStyle}
-                                        >
-                                            <td>{customer.SIMNumber}</td>
-                                            <td>{customer.customerName}</td>
-                                            <td>{customer.affiliatedStore || 'None'}</td>
-                                            <td>{customer.contractDate || 'None'}</td>
-                                            <td>{customer.totalMonths || 'None'}</td>
-                                            <td>{customer.lastNotificationDate}</td>
-                                            <td>{customer.notes || 'None'}</td>
-                                            <td>
-                                                <button
-                                                    className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
-                                                    onClick={() => openNotesModal(customer)}
-                                                >
-                                                    備考 {customer.notes ? '✓' : ''}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                return (
+                                    <tr
+                                        key={`${customer.SIMNumber}-${index}`} // FIXED: Added index to key for better uniqueness
+                                        className={`${index % 2 === 0 ? styles.evenRow : styles.oddRow} ${styles.tableRowAnimated}`}
+                                        style={rowStyle}
+                                    >
+                                        <td>{customer.SIMNumber}</td>
+                                        <td>{customer.customerName}</td>
+                                        <td>{customer.affiliatedStore || 'None'}</td>
+                                        <td>{customer.contractDate || 'None'}</td>
+                                        <td>{customer.totalMonths || 'None'}</td>
+                                        <td>{customer.lastNotificationDate}</td>
+                                        <td>{customer.notes || 'None'}</td>
+                                        <td>
+                                            <button
+                                                className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
+                                                onClick={() => openNotesModal(customer)}
+                                            >
+                                                備考 {customer.notes ? '✓' : ''}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             </tbody>
                         </table>
 
@@ -419,15 +564,15 @@ function CustomerList() {
                                     前へ
                                 </button>
 
-                                {getPageNumbers().map((pageNumber, index) => (
+                                {pageNumbers.map((pageNumber, index) => (
                                     <button
-                                        key={index}
+                                        key={`page-${index}-${pageNumber}`} // FIXED: Better key for pagination
                                         className={`${styles.btn} ${styles.btnSm} ${pageNumber === currentPage
                                             ? styles.btnPrimary
                                             : pageNumber === '...'
                                                 ? styles.btnOutline
                                                 : styles.btnOutline
-                                            }`}
+                                        }`}
                                         onClick={() => pageNumber !== '...' && paginate(pageNumber)}
                                         disabled={pageNumber === '...'}
                                         style={{

@@ -20,7 +20,7 @@
     font-weight: 700;
     text-align: left;
     margin-bottom: 30px;
-    margin-left: 8px;
+    margin-left: 2px;
     color: #333;
     font-size: 1.8rem;
 }
@@ -932,7 +932,7 @@ justify-content: space-between;
 .tooltipContainer:hover .tooltip {
     opacity: 1;
     visibility: visible;
-    transform: translate(-490px, -20px); /* animate upward */
+    transform: translate(490px, -20px); /* animate upward */
 }
 
 @keyframes floatIn {

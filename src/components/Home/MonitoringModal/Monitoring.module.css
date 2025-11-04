@@ -427,7 +427,7 @@
     overflow: hidden;
     padding-bottom: 40px;
     padding-left: 20px;
-    height: 10em;
+    height: 9em;
     box-shadow:
             1px 4px 23px rgba(0, 0, 0, 0.4);
 
@@ -532,7 +532,8 @@
     border-bottom: 1px solid #f0f0f0;
 }
 
-.buttonsContainer { display: flex;
+.buttonsContainer {
+    display: flex;
     margin-top: 20px;
     margin-bottom: 20px;
     justify-content: space-evenly;

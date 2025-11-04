@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from 'react';
+import React, {useEffect, useRef} from 'react';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Api from '../../api/Api';
@@ -14,74 +14,107 @@ function Bike(props) {
   const navigate = useNavigate();
   const type = location?.state;
   const [bike, setBike] = useState({});
-  const [user, setUser] = useState({});
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState("");
 
-  const getUserData = async () => {
-    let userId =
-        type === 'info'
-            ? localStorage.getItem('userProfileId')
-            : localStorage.getItem('userId');
-    const responseUser = await Api.call({}, `users/${userId}`, 'get', userId);
-    if (responseUser.data) {
-      let userData = responseUser.data.data;
-      let selectedBike = id
-          ? userData.bikes.find((a) => a.id == id)
-          : userData.bikes[0];
-      setUser(userData);
-      setBike(selectedBike || {});
+
+
+
+  const getBikeData = async () => {
+    if (!id) return;
+
+    const authHeader = localStorage.getItem('userId');
+
+    try {
+      const response = await Api.call({}, `bikes/${id}`, 'get', authHeader);
+
+      if (response?.data?.code === 200) {
+        setBike(response.data.data);
+      } else {
+        setError(response?.data?.message || 'Failed to fetch bike details');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Error fetching bike details');
     }
   };
 
   useEffect(() => {
-    getUserData();
-  }, []);
+    if (id){
+      setIsImageLoading(true);
+      getBikeData();
+      setIsImageLoading(false);
+
+    }
+
+  }, [id]);
+
+
+
+
 
   const handleChange = (value, field) => {
     setBike({ ...bike, [field]: value });
   };
 
   const updateBike = async () => {
-    let path = id ? `bikes/${id}` : `bikes`;
-    let request_type = id ? `put` : `post`;
-    let userId =
+    setLoading(true); // start spinner
+
+    const path = id ? `bikes/${id}` : `bikes`;
+    const request_type = id ? `put` : `post`;
+    console.log("the request", request_type);
+    const userId =
         type === 'info'
             ? localStorage.getItem('userProfileId')
             : localStorage.getItem('userId');
-    bike.userId = userId;
-    bike.type = 1;
-    bike.sortNo = 1;
-    const response = await Api.call(
-        bike,
-        path,
-        request_type,
-        localStorage.getItem('userId')
-    );
-    if (response.data.code === 200) {
-      setError('');
-      if (type === 'info') {
-        navigate('/setting/user-info');
-        window.location.reload(false);
-      } else {
-        if (props.component === 'setup') {
-          props.changeForm();
-        } else {
-          navigate('/setting');
+    console.log("the user id",userId);
+    const authId = localStorage.getItem('userId');
+    const payload = new FormData();
+
+    payload.append('userId', userId);
+    payload.append('name', bike.name || '');
+    payload.append('type', 1);
+    payload.append('sortNo', 1);
+    payload.append('description', bike.description || '');
+
+
+ // if (!bike.image || imagePreview === "") {
+ //      // Case 2: Image was removed
+ //      payload.append('image', imagePreview);
+ //    }
+    // 🧠 Handle image upload/remove logic
+    if (bike.image && typeof bike.image !== "string") {
+      // Case 1: New image file selected
+      payload.append('image', bike.image);
+    }
+
+    try {
+      const response = await Api.callFormData(payload, path, request_type, authId);
+
+      if (response.data.code === 200) {
+        setError('');
+        if (type === 'info') {
+          navigate('/setting/user-info');
           window.location.reload(false);
+        } else {
+          if (props.component === 'setup') {
+            props.changeForm();
+          } else {
+            navigate('/setting');
+            window.location.reload(false);
+          }
         }
+      } else {
+        setError(response.data?.message || 'Error, Please try again!');
       }
-    } else {
-      let modal = document.getElementById('exampleModal');
-      modal.classList.remove('show');
-      let modalBack = document.getElementsByClassName('modal-backdrop');
-      if (modalBack) {
-        for (let i = 0; i < modalBack.length; i++) {
-          modalBack[i]?.classList.remove('show');
-        }
-      }
-      setError(
-          response.data ? response.data.message : 'Error, Please try again!'
-      );
+    } catch (err) {
+      console.error(err);
+      setError('An unexpected error occurred.');
+    } finally {
+      setLoading(false); // stop spinner
     }
   };
 
@@ -95,7 +128,7 @@ function Bike(props) {
 
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h4>顧客名</h4>
+            <h4>顧客名   </h4>
           </div>
 
           <form className={styles.form}>
@@ -111,7 +144,10 @@ function Bike(props) {
                     onChange={(event) => handleChange(event.target.value, 'name')}
                 />
               </div>
+
+
             </div>
+
 
             <div className={styles.formActions}>
               {props.component !== 'setup' && (
@@ -143,19 +179,28 @@ function Bike(props) {
                     <button
                         type="button"
                         className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
-                        data-bs-toggle="modal"
-                        data-bs-target="#exampleModal"
                         onClick={() => updateBike()}
+                        disabled={loading}
+                        style={{ cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}
                     >
-                      更新
+                      {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status"
+                                  aria-hidden="true"></span>
+                            保存中...
+                          </>
+                      ) : (
+                          '更新'
+                      )}
                     </button>
+
                 ) : (
                     <button
                         type="button"
-                        className={`${styles.btn} ${styles.btnPrimary}`}
+                        className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
                         onClick={() => updateBike()}
                     >
-                      更新
+                    更新
                     </button>
                 )}
               </div>
@@ -163,7 +208,8 @@ function Bike(props) {
           </form>
         </div>
 
-        {/* Modal */}
+        {/* Modal */
+        }
         <div
             className="modal fade"
             id="exampleModal"

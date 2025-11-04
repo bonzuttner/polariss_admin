@@ -202,7 +202,7 @@ const Profile = (props) => {
                 </button>
                 <button
                     type="button"
-                    className="btn btn-primary"
+                    className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
                     onClick={() => updateUser()}
                 >
                   更新

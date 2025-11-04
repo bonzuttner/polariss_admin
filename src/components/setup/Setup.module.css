@@ -1,0 +1,505 @@
+
+
+
+
+
+
+
+
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .settingPage {
+        padding: 16px;
+    }
+
+    .formGroup {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .formLabel {
+        margin-bottom: 8px;
+    }
+
+    .navTabs {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .listGroupItem {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .detailListItem {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .itemActions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+
+/* Base button class - applies to all buttons */
+.btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    gap: 4px;
+    white-space: nowrap;
+
+}
+
+/* Button sizes */
+.btnSm {
+    padding: 8px 16px;
+    font-size: 14px;
+    height: 36px;
+}
+
+.btnMd {
+    padding: 12px 20px;
+    font-size: 16px;
+    height: 44px;
+    margin: 0 2px;
+}
+
+.btnLg {
+    padding: 16px 24px;
+    font-size: 18px;
+    height: 52px;
+    margin-right: 3%;
+    margin-left: 3%;
+}
+
+/* Button variants */
+.btnPrimary {
+    background-color: #4611a7;
+    color: white;
+
+}
+
+.btnPrimary:hover {
+    background-color: #9184ff;
+    color: #0a0057;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px #07005a;
+}
+
+.btnSecondary {
+    background-color: #f0f0f0;
+    color: #666;
+    margin-right: 1%;
+    margin-left: 1%;
+}
+
+.btnSecondary:hover {
+    background-color: #e0e0e0;
+    color: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btnOutline {
+    background-color: transparent;
+    border: 2px solid #c3c3c3;
+    color: #3a3a3a;
+}
+
+.btnOutline:hover {
+    background-color: #4611a7;
+    color: white;
+    transform: translateY(-2px);
+}
+
+
+/* Disabled state */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+
+
+
+
+
+/* Danger button variant */
+.btnDanger {
+    composes: btn;
+    background-color: #d32f2f;
+    color: white;
+}
+
+.btnDanger:hover {
+    background-color: #b71c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+}
+
+
+
+/* Fix for dropdown styling */
+.dropdownToggle {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+}
+
+.dropdownToggle:focus {
+    outline: none;
+    border-color: #4611a7;
+    box-shadow: 0 0 0 3px rgba(70, 17, 167, 0.1);
+}
+
+.dropdownMenu {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dropdownItem {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.dropdownItem:hover {
+    background-color: #f5f5f5;
+}
+
+.selected {
+    background-color: #4611a7;
+    color: white;
+}
+
+.secondLevel {
+    padding-left: 20px;
+    background-color: #f9f9f9;
+}
+
+/* Custom Dropdown Styles */
+.customDropdown {
+    position: relative;
+    width: 100%;
+}
+
+.dropdownToggle {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+}
+
+.dropdownToggle:focus {
+    outline: none;
+    border-color: #4611a7;
+    box-shadow: 0 0 0 3px rgba(70, 17, 167, 0.1);
+}
+
+.dropdownArrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.customDropdown.open .dropdownArrow {
+    transform: rotate(180deg);
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+}
+
+.dropdownItem {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdownItem:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdownItem.selected {
+    background-color: #4611a7;
+    color: white;
+}
+
+.secondLevel {
+    padding-left: 20px;
+    background-color: #f9f9f9;
+}
+
+/* Custom Select Styles */
+.customSelect {
+    position: relative;
+    width: 100%;
+}
+
+.selectToggle {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+}
+
+.selectToggle:focus {
+    outline: none;
+    border-color: #4611a7;
+    box-shadow: 0 0 0 3px rgba(70, 17, 167, 0.1);
+}
+
+.selectArrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.customSelect.open .selectArrow {
+    transform: rotate(180deg);
+}
+
+.selectMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+}
+
+.selectItem {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.selectItem:hover {
+    background-color: #f5f5f5;
+}
+
+.selectItem.selected {
+    background-color: #4611a7;
+    color: white;
+}
+
+/* Custom Dropdown Styles (from previous example) */
+.customDropdown {
+    position: relative;
+    width: 100%;
+}
+
+.dropdownToggle {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+}
+
+.dropdownToggle:focus {
+    outline: none;
+    border-color: #4611a7;
+    box-shadow: 0 0 0 3px rgba(70, 17, 167, 0.1);
+}
+
+.dropdownArrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.customDropdown.open .dropdownArrow {
+    transform: rotate(180deg);
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+}
+
+.dropdownItem {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdownItem:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdownItem.selected {
+    background-color: #4611a7;
+    color: white;
+}
+
+.secondLevel {
+    padding-left: 20px;
+    background-color: #f9f9f9;
+}
+
+
+/* Simple Dropdown Styles */
+.simpleDropdown {
+    position: relative;
+    width: 100%;
+}
+
+.simpleDropdownToggle{
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+    margin-bottom: 100px;
+}
+
+.simpleDropdownToggle:focus {
+    outline: none;
+    border-color: #4611a7;
+    box-shadow: 0 0 0 3px rgba(70, 17, 167, 0.1);
+}
+
+.simpleDropdownArrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.simpleDropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+    height: 140px;
+}
+
+.simpleDropdownItem {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.simpleDropdownItem:hover {
+    background-color: #f5f5f5;
+}
+
+.simpleDropdownItem.selected {
+    background-color: #4611a7;
+    color: white;
+}
+
+.simpleSecondLevel {
+    padding-left: 20px;
+    background-color: #f9f9f9;
+}
+
+/* Loading states */
+.loadingValue {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 20px;
+}
+
+.loadingText {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Disabled state for dropdowns during loading */
+.simpleDropdownToggle:disabled,
+.selectToggle:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
