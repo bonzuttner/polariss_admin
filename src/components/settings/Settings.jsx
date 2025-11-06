@@ -122,6 +122,10 @@ function Settings(props) {
                 <p>ユーザー種別</p>
                 <p>{userDetail.role}</p>
               </li>
+              <li className="list-group-item ">
+                <p>LINE IDまたは電話番号</p>
+                <p>{userDetail.description}</p>
+              </li>
             </ul>
           </div>
         );

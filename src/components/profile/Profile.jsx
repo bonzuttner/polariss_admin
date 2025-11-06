@@ -122,6 +122,24 @@ const Profile = (props) => {
               />
             </div>
           </div>
+          <div className="mb-3 row">
+            <label for="description" className="col-sm-4 col-form-label">
+              LINE IDまたは電話番号
+            </label>
+            <div className="col-sm-8">
+              <input
+                className="form-control"
+                id="description"
+                value={user?.description}
+                onChange={(event) => handleChange(event.target.value, 'description')}
+                placeholder="電話番号を入力してください"
+              />
+              <small className="form-text text-muted mt-1">
+                相互監視機能でのみ利用される情報となります。
+                あなたが監視エリア内でSOS対象の車両を見つけ、写真付きレポートを送信した場合に限り、この連絡先がSOS発信者（紛失・盗難の当事者）に共有されます。車両が発見され、あなたのレポートが確認されるまでは共有されません。
+              </small>
+            </div>
+          </div>
           <div
             className={`d-flex ${
               component !== 'setup'
