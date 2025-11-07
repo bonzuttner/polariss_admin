@@ -1,8 +1,7 @@
 import {useEffect, useRef} from "react";
 import Utils from "../components/utils/utils.js";
 
-const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "false";
-
+const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === false ;
 
 export function usePolylineAndCircleUpdater({ map, maps, movements, device, markerPosition, setHasLastLocation }) {
     const polylineRef = useRef(null);
