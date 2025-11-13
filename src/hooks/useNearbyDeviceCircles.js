@@ -1,49 +1,66 @@
 import { useEffect, useRef } from "react";
 
-const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "true";
-
-export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
+export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device, simulationMode }) {
     const nearbyCirclesRef = useRef([]);
 
     useEffect(() => {
-        if (!map || !maps || !window.google || !SIMULATION_MODE) return;
+        if (!map || !maps || !window.google) return;
 
-        // Clear existing circles
+        //  Clear existing circles before drawing new ones
         nearbyCirclesRef.current.forEach(c => c.setMap(null));
         nearbyCirclesRef.current = [];
 
-        nearbyDevices.forEach((item) => {
+        nearbyDevices.forEach(item => {
             const loc = item.device?.location;
             const range = item.device?.range;
             const mainIMSI = device?.device?.imsi;
             const itemId = item.device?.imsi;
+            const hasSOS = item.device?.hasSOSEnabled;
+            const hasMutual = item.device?.hasMutualMonitoring;
 
             if (!loc?.lat || !loc?.lon || !range || mainIMSI === itemId) return;
 
-            // Create primary circle for device range
-            const circle = new maps.Circle({
-                radius: range,
-                center: { lat: loc.lat, lng: loc.lon },
-                strokeColor: '#4611a7',
-                fillColor: '#4611a7',
-                fillOpacity: 0.2,
-                strokeWeight: 2,
-                map,
-            });
-            nearbyCirclesRef.current.push(circle);
-
-            // Create additional circle for mutual monitoring if needed
-            if (item.device?.hasMutualMonitoring || item.device?.hasSOSEnabled ) {
-                const mutualCircle = new maps.Circle({
-                    radius: 250,
+            // 🧠 Simulation Mode: Show all devices, regardless of SOS
+            if (simulationMode) {
+                const circle = new maps.Circle({
+                    radius: range,
                     center: { lat: loc.lat, lng: loc.lon },
-                    strokeColor: item.device?.hasSOSEnabled ? '#D7596D' : '#52d71d',
-                    fillColor:  item.device?.hasSOSEnabled ? '#D7596D' : '#52d71d',
-                    fillOpacity: 0.1,
+                    strokeColor: '#4611a7',
+                    fillColor: '#4611a7',
+                    fillOpacity: 0.2,
                     strokeWeight: 2,
                     map,
                 });
-                nearbyCirclesRef.current.push(mutualCircle);
+                nearbyCirclesRef.current.push(circle);
+
+                // Optional mutual/SOS circle
+                if (hasMutual || hasSOS) {
+                    const mutualCircle = new maps.Circle({
+                        radius: 250,
+                        center: { lat: loc.lat, lng: loc.lon },
+                        strokeColor: hasSOS ? '#D7596D' : '#52d71d',
+                        fillColor: hasSOS ? '#D7596D' : '#52d71d',
+                        fillOpacity: 0.1,
+                        strokeWeight: 2,
+                        map,
+                    });
+                    nearbyCirclesRef.current.push(mutualCircle);
+                }
+                return;
+            }
+
+            // 🧩 Normal user (not simulation): Only show SOS-enabled devices
+            if (hasSOS) {
+                const sosCircle = new maps.Circle({
+                    radius: 250,
+                    center: { lat: loc.lat, lng: loc.lon },
+                    strokeColor: '#D7596D',
+                    fillColor: '#D7596D',
+                    fillOpacity: 0.15,
+                    strokeWeight: 2,
+                    map,
+                });
+                nearbyCirclesRef.current.push(sosCircle);
             }
         });
 
@@ -51,7 +68,7 @@ export function useNearbyDeviceCircles({ map, maps, nearbyDevices, device }) {
             nearbyCirclesRef.current.forEach(c => c.setMap(null));
             nearbyCirclesRef.current = [];
         };
-    }, [map, maps, nearbyDevices, device]);
+    }, [map, maps, nearbyDevices, device, simulationMode]);
 
     return nearbyCirclesRef;
 }

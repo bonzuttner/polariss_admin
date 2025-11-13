@@ -53,7 +53,7 @@ export default function CutomMap(props) {
 
 
   // Use the nearby device circles hook
-  useNearbyDeviceCircles({ map, maps, nearbyDevices, device });
+  useNearbyDeviceCircles({ map, maps, nearbyDevices, device,simulationMode: SIMULATION_MODE });
 
   // usePanToDevice(device, {
   //   animate: true,
@@ -139,14 +139,23 @@ export default function CutomMap(props) {
             </AdvancedMarker>
         )}
 
-        {/*simulation markers if simulation mode is active*/}
-        {SIMULATION_MODE && nearbyDevices.map((item, idx) => {
+        {/*nearby markers if there is any*/}
+        { nearbyDevices.map((item, idx) => {
           const loc = item.device?.location;
           const label = item.device?.bikeName;
           const markerLabel = getMarkerLabel(label);
           const mainIMSI = device?.device?.imsi;
           const itemId = item.device?.imsi;
-          if (!loc?.lat || !loc?.lon || mainIMSI === itemId) return null;
+          // ignore all devices that does not have sos enabled and the locked-on device that got selected in the sidebar
+
+          if (!loc?.lat || !loc?.lon || mainIMSI === itemId ) return null;
+
+          // Show markers:
+          // - Simulation mode → all
+          // - Normal → only SOS ones
+           if (!SIMULATION_MODE && !item.device.hasSOSEnabled) return null;
+
+
           return (
               <AdvancedMarker
                   key={`nearby-${item.device.imsi || idx}`}
