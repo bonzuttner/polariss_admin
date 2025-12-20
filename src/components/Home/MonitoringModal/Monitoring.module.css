@@ -425,9 +425,9 @@
     width: 100%;
     margin: 12px 0 14px;
     overflow: hidden;
-    padding-bottom: 40px;
+    padding-bottom: 20px;
     padding-left: 20px;
-    height: 18em;
+    height: 14em;
     box-shadow:
             1px 4px 23px rgba(0, 0, 0, 0.4);
 
@@ -572,5 +572,3 @@
     border-bottom: none;
     margin-bottom: 2em;
 }
-
-

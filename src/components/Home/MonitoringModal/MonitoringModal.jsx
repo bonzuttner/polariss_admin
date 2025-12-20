@@ -217,25 +217,6 @@ const SOSMode = ({ device, monitoringFields, onUpdate }) => {
   ) : null;
 };
 
-// Extracted Message History Component
-const MessageHistory = () => {
-  const messages = [
-    '2025/06/13 15:33 車両がジオフェンスを退出しました',
-    '2025/06/13 15:12 車両がジオフェンスに入りました',
-    '2025/06/13 11:06 エンジンが起動しました'
-  ];
-
-  return (
-    <div className={styles.messageHistorySection}>
-      <h3 className={styles.sectionTitle}>メッセージ履歴</h3>
-      <ul className={styles.messageList}>
-        {messages.map((message, index) => (
-          <li key={index} className={styles.messageItem}>{message}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
 
 function MonitoringModal({ device, updateRange, range, setSOSIsActive }) {
   const initialDevice = {
@@ -337,7 +318,6 @@ function MonitoringModal({ device, updateRange, range, setSOSIsActive }) {
                 setSOSIsActive={setSOSIsActive}
               />
 
-              <MessageHistory />
             </div>
           </div>
         </>

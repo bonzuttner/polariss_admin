@@ -379,11 +379,6 @@ function Settings(props) {
           {error}
         </div>
       )}
-      <div className="alert">
-        <p>{`・LoginUserID: ${localStorage.getItem('userId')}`}</p>
-        <p>{`・UserProfile.userID: ${userProfileId}`}</p>
-        <p>{`・action: Index`}</p>
-      </div>
       <div className="tabs-section">
         <ul className="nav nav-underline">
           <li className="nav-item">
