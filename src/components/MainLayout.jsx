@@ -7,7 +7,7 @@ function MainLayout(props) {
             <a href="/" className="brand">
               <img
                 className="logo-image"
-                src="https://polarissdevapp.azurewebsites.net/img/logo/polariss_logo01.png"
+                src="../../Assests/polaris_01.png"
                 alt=""
               />
             </a>

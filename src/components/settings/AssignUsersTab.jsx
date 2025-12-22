@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styles from './Settings.module.css';
 import CustomSelect from './CustomSelect';
 import SimpleDropdown from './SimpleDropdown';
 import LoadingButton from './LoadingButton';
-
 
 const AssignUsersTab = ({
                             role,
@@ -15,9 +14,13 @@ const AssignUsersTab = ({
                             navigate,
                             updateUserRoleParent,
                             error,
-                            isUpdating = false
+                            isUpdating = false,
+                            viewOnly,
+                            setViewOnly
                         }) => {
-    // Prepare role options
+
+
+    // ✔ Role options
     const roleOptions = [];
     if (logedInRole === 'master') {
         roleOptions.push({ value: 'admin1', label: 'Admin1' });
@@ -30,14 +33,14 @@ const AssignUsersTab = ({
     return (
         <div className={`${styles.card} ${styles.cardReveal}`}>
             <form className={styles.form}>
+
+                {/* ROLE SELECT */}
                 <div className={styles.formGroup}>
-                    <label htmlFor="type" className={styles.formLabel}>
-                        Role
-                    </label>
+                    <label className={styles.formLabel}>Role</label>
                     <div className={styles.formInput}>
                         <CustomSelect
-                            className={styles.formSelect}
                             id="type"
+                            className={styles.formSelect}
                             onChange={handleRoleChange}
                             value={role}
                             options={roleOptions}
@@ -46,13 +49,24 @@ const AssignUsersTab = ({
                     </div>
                 </div>
 
+                {/* PARENT SELECT */}
                 <div className={styles.formGroup}>
-                    <label htmlFor="parent" className={styles.formLabel}>
-                        Parent
-                    </label>
+                    <label className={styles.formLabel}>Parent</label>
                     <div className={styles.formInput}>
                         <SimpleDropdown
-                            items={list}
+                            items={list.map((u, idx) => {
+                                const isLast = idx === list.length - 1 || list[idx + 1]._level < u._level;
+
+                                const prefix = (() => {
+                                    if (u._level === 0) return "";
+                                    if (u._level === 1) return isLast ? "└── " : "│── ";
+                                    let bars = "";
+                                    for (let i = 1; i < u._level; i++) bars += "│   ";
+                                    return bars + (isLast ? "└── " : "├── ");
+                                })();
+
+                                return { ...u, treeLabel: `${prefix}${u.nickname}` };
+                            })}
                             selectedItem={parent}
                             onSelect={setParentData}
                             placeholder="Select parent"
@@ -60,6 +74,20 @@ const AssignUsersTab = ({
                     </div>
                 </div>
 
+                {/* VIEW ONLY CHECKBOX */}
+                <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>View Only</label>
+                    <div className={styles.formInput}>
+                        <input
+                            type="checkbox"
+                            checked={viewOnly}
+                            disabled={role === "user"}
+                            onChange={(e) => setViewOnly(e.target.checked)}
+                        />
+                    </div>
+                </div>
+
+                {/* ACTION BUTTONS */}
                 <div className={styles.formActions}>
                     <button
                         type="button"
@@ -68,13 +96,14 @@ const AssignUsersTab = ({
                     >
                         戻る
                     </button>
+
                     <LoadingButton
                         type="button"
                         className={`${styles.btn} ${styles.btnPrimary}`}
                         onClick={updateUserRoleParent}
                         isLoading={isUpdating}
-                        spinnerColor="white"
                         disabled={isUpdating}
+                        spinnerColor="white"
                     >
                         更新
                     </LoadingButton>

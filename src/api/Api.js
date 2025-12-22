@@ -6,44 +6,33 @@ const apiUrl = import.meta.env.VITE_API_URL
 export default class Api {
   static ApiURL = apiUrl
 
-  static call = async (requestBody, path, method, header,responseType) => {
-    let url = path ? `${this.ApiURL}${path}` : this.ApiURL
+  static call = async (requestBody, path, method, header, responseType) => {
+    const url = path ? `${this.ApiURL}${path}` : this.ApiURL;
 
-    let headers = {
+    const headers = {
       'Content-Type': 'application/json',
-      auth: header
-        ? header
-        : localStorage.getItem('userId')
-        ? localStorage.getItem('userId')
-        : '',
-    }
-    let axiosConfig = {
+      auth: header ?? localStorage.getItem('userId') ?? '',
+    };
+
+    const axiosConfig = {
       headers,
       timeout: 1200000,
     };
+
     if (responseType) {
       axiosConfig.responseType = responseType;
     }
 
     try {
-      const response = await axios[method](
-        url,
-        method === 'get'
-          ? {
-              headers: headers,
-              timeout: 1200000,
-            }
-          : method === 'delete'
-          ? { ...axiosConfig, data: requestBody }
-          : requestBody,
-          axiosConfig
-        // , {crossDomain: true}
-      )
-      return response
+      if (method === 'get') {
+        return await axios.get(url, axiosConfig);
+      }
+      if (method === 'delete') {
+        return await axios.delete(url, { ...axiosConfig, data: requestBody });
+      }
+      return await axios[method](url, requestBody, axiosConfig);
     } catch (e) {
-      if (e.response) {
-        return e.response
-      } else return e
+      return e.response || e;
     }
   }
 

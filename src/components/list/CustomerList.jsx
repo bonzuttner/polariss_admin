@@ -15,7 +15,6 @@ function CustomerList() {
     const [noteText, setNoteText] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [searchField, setSearchField] = useState('all');
-    const [showTooltip, setShowTooltip] = useState(false);
 
 
 
@@ -67,6 +66,8 @@ function CustomerList() {
                     lastNotificationDate: customer.last_movement_dt,
                     notes: customer.notes === "None" ? "" : customer.notes,
                     bikeId: customer?.bike_id,
+                    parentName: customer.parent_name || "None",
+                    parentId:customer.parent_id
                 }));
 
                 if (totalItems > 1000) {
@@ -121,17 +122,15 @@ function CustomerList() {
             );
 
             // Step 2: Convert blob to text (raw CSV string)
-            const csvText = await response.data;
+            const csvText = await response.data.text();
 
-            // Step 3: Ensure proper line endings for Excel
             const normalizedCsv = csvText.replace(/\r?\n/g, '\r\n');
-
-            // Step 4: Prepend BOM for UTF-8 (important for Japanese)
-            const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
-
-            // Step 5: Create Blob with correct MIME type
-            const csvBlob = new Blob([bom, normalizedCsv], {
-                type: 'application/vnd.ms-excel;charset=utf-8;', // Excel-friendly type
+            const withSep = 'sep=,\r\n' + normalizedCsv;
+            const bom16 = new Uint8Array([0xff, 0xfe]);
+            const utf16le = new Uint16Array(withSep.length);
+            for (let i = 0; i < withSep.length; i++) utf16le[i] = withSep.charCodeAt(i);
+            const csvBlob = new Blob([bom16, utf16le], {
+                type: 'text/csv;charset=utf-16le;',
             });
 
             // Step 6: Create download link
@@ -175,13 +174,16 @@ function CustomerList() {
                         return customer.affiliatedStore?.toLowerCase().includes(searchLower);
                     case 'notes':
                         return customer.notes?.toLowerCase().includes(searchLower);
+                    case 'parent':
+                        return customer.parentName?.toLowerCase().includes(searchLower);
                     case 'all':
                     default:
                         return (
                             customer.SIMNumber?.toLowerCase().includes(searchLower) ||
                             customer.customerName?.toLowerCase().includes(searchLower) ||
                             customer.affiliatedStore?.toLowerCase().includes(searchLower) ||
-                            customer.notes?.toLowerCase().includes(searchLower)
+                            customer.notes?.toLowerCase().includes(searchLower) ||
+                            customer.parentName?.toLowerCase().includes(searchLower)
                         );
                 }
             });
@@ -347,7 +349,7 @@ function CustomerList() {
     const pageNumbers = getPageNumbers();
     const currentSortKeyLabel = sortKeys.find(k => k.value === sortKey)?.label;
 
-    const handleSort = (columnKey) => {
+    const   handleSort = (columnKey) => {
         if (sortKey === columnKey) {
             setSortDirection(prev => prev === 'ASC' ? 'DESC' : 'ASC');
         } else {
@@ -422,6 +424,8 @@ function CustomerList() {
                         <option value="name">顧客名</option>
                         <option value="store">所属店舗</option>
                         <option value="notes">備考</option>
+                        <option value="parent">親ユーザー</option>
+
                     </select>
                 </div>
                 <div className={styles.searchInfo}>
@@ -507,6 +511,14 @@ function CustomerList() {
                                 >
                                     備考 {sortKey === 'Notes' && (sortDirection === 'ASC' ? '↑' : '↓')}
                                 </th>
+                                <th
+                                    scope="col"
+                                    className={styles.sortableHeader}
+                                    onClick={() => handleSort('parentName')}
+                                >
+                                    親ユーザー {sortKey === 'parentName' && (sortDirection === 'ASC' ? '↑' : '↓')}
+                                </th>
+
                                 <th scope="col">操作</th>
                             </tr>
                             </thead>
@@ -530,10 +542,15 @@ function CustomerList() {
                                         <td>{customer.totalMonths || 'None'}</td>
                                         <td>{customer.lastNotificationDate}</td>
                                         <td>{customer.notes || 'None'}</td>
+                                        <td>{customer.parentName}</td>
+
                                         <td>
+
                                             <button
-                                                className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
+                                                className={ customer.parentId === null || customer.parentId === localStorage.getItem('userId') ? `${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`:`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
                                                 onClick={() => openNotesModal(customer)}
+                                                disabled={customer.parentId !== null }
+
                                             >
                                                 備考 {customer.notes ? '✓' : ''}
                                             </button>
