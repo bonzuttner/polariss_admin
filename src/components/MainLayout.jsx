@@ -7,7 +7,7 @@ function MainLayout(props) {
             <a href="/" className="brand">
               <img
                 className="logo-image"
-                src="../../Assests/polaris_01.png"
+                src="/polaris_01.png"
                 alt=""
               />
             </a>
