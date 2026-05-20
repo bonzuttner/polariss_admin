@@ -8,12 +8,13 @@ export default class Api {
 
   static call = async (requestBody, path, method, header, responseType) => {
     const url = path ? `${this.ApiURL}${path}` : this.ApiURL;
-
+    let userId = localStorage.getItem('userId')
+    console.log("userId ", userId);
     const headers = {
       'Content-Type': 'application/json',
-      auth: header ?? localStorage.getItem('userId') ?? '',
+      auth: header || userId || '',
     };
-
+    console.log(localStorage.getItem('userId'))
     const axiosConfig = {
       headers,
       timeout: 1200000,

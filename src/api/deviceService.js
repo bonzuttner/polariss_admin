@@ -78,7 +78,7 @@ export const DeviceService = {
             ? { turnOn, imsi, range, nbrOfNotifications }
             : { turnOn, imsi };
 
-        return Api.call(payload, `devices/monitoringSettings/self`, 'put', '');
+        return Api.call(payload, `devices/monitoringSettings/self`, 'put');
     },
 
     toggleMutualMonitoring: async ({ turnOn, imsi }) => {
