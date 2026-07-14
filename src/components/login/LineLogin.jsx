@@ -17,6 +17,10 @@ function LineLogin() {
     window.location.href = lineLoginUrl.replace('{redirectUri}', redirectUri);
   };
 
+  const botBasicId = import.meta.env.VITE_BOT_BASIC_ID;
+  const lineFriendUrl = `https://line.me/R/ti/p/${botBasicId}`;
+  const lineQrUrl = `https://qr-official.line.me/sid/L/${botBasicId}.png`;
+
   return (
       <>
         {!localStorage.getItem('userId') && (
@@ -57,7 +61,7 @@ function LineLogin() {
                 <div className="line-friend-section">
                   <p className="line-friend-text">LINEの友達追加をお願いします</p>
                   <div className="line-friend-buttons">
-                    <a href="https://shorturl.at/iyAD0" className="line-friend-btn">
+                    <a href={lineFriendUrl} className="line-friend-btn">
                       <img
                           src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png"
                           alt="友だち追加"
@@ -87,7 +91,7 @@ function LineLogin() {
                       <div className="floating-qr-code">
                         <div className="qr-code-content">
                           <h3>友達追加用QRコード</h3>
-                          <img src="https://qr-official.line.me/sid/L/812travn.png" alt="LINE QRコード" />
+                          <img src={lineQrUrl} alt="LINE QRコード" />
                           <p>QRコードをスキャンして友達追加</p>
                         </div>
                       </div>
