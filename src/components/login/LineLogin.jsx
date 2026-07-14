@@ -18,7 +18,7 @@ function LineLogin() {
   };
 
   const botBasicId = import.meta.env.VITE_BOT_BASIC_ID;
-  const lineFriendUrl = `https://line.me/R/ti/p/${botBasicId}`;
+  const lineFriendUrl = `https://line.me/R/ti/p/@${botBasicId}`;
   const lineQrUrl = `https://qr-official.line.me/sid/L/${botBasicId}.png`;
 
   return (
