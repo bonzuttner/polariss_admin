@@ -63,10 +63,10 @@ export default function CutomMap(props) {
   // });
   // ✅ Expose panToDevice to parent once map is ready
   useEffect(() => {
-    if (onMapReady && typeof onMapReady === 'function') {
+    if (onMapReady && typeof onMapReady === 'function' && map) {
       onMapReady(panToDevice);
     }
-  }, [onMapReady, panToDevice]);
+  }, [map, onMapReady, panToDevice]);
 
   // // Initial pan when device changes
   // useEffect(() => {

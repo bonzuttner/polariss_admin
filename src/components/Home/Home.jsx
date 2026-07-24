@@ -34,6 +34,7 @@ function Home({ setLayoutKey }) {
   const [pageKey, setPageKey] = useState(Utils.unique());
   const [engine, setEngine] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isDateRangeLoading, setIsDateRangeLoading] = useState(false);
   const [currentRefreshInterval, setCurrentRefreshInterval] = useState(parseInt(INTERVAL || '10000', 10));
 
 
@@ -54,6 +55,8 @@ function Home({ setLayoutKey }) {
   // Flag to control device data fetching
   const shouldFetchDevice = useRef(true);
   const panToDeviceRef = useRef(null);
+  const isDateRangeLoadingRef = useRef(false);
+  const autoRefreshInFlightRef = useRef(false);
 
 
 
@@ -75,14 +78,27 @@ function Home({ setLayoutKey }) {
   const {
     device,
     movements,
+    crossedKilometers,
     range,
     loading: deviceLoading,
-    refresh: refreshDeviceData
+    refresh: refreshDeviceData,
   } = useDeviceData(selectedDevice, backendStartDate, backendEndDate);
+
+  const isSelectedDeviceAligned =
+      !selectedDevice?.imsi ||
+      !device?.device?.imsi ||
+      selectedDevice.imsi === device.device.imsi;
+
+  const displayedMovements = isSelectedDeviceAligned ? movements : [];
+  const displayedCrossedKilometers = isSelectedDeviceAligned ? crossedKilometers : 0;
 
   const [SOSIsActive, setSOSIsActive] = useState(false);
 
   console.log("the SOS in home is : " + SOSIsActive);
+
+  useEffect(() => {
+    isDateRangeLoadingRef.current = isDateRangeLoading;
+  }, [isDateRangeLoading]);
 
   // Handle Line authentication
   useEffect(() => {
@@ -283,17 +299,22 @@ function Home({ setLayoutKey }) {
   useEffect(() => {
     const interval = setInterval(async () => {
       if (!selectedDevice?.imsi) return;
+      if (isDateRangeLoadingRef.current) return;
+      if (autoRefreshInFlightRef.current) return;
 
       try {
         console.log(`🔄 Refreshing every ${currentRefreshInterval}ms`);
-        refreshDeviceData();
+        autoRefreshInFlightRef.current = true;
+        await refreshDeviceData();
       } catch (err) {
         console.error('Error refreshing last location:', err);
+      } finally {
+        autoRefreshInFlightRef.current = false;
       }
     }, currentRefreshInterval);
 
     return () => clearInterval(interval);
-  }, [selectedDevice, currentRefreshInterval]);
+  }, [selectedDevice, currentRefreshInterval, refreshDeviceData]);
 
   // Fetch IBC devices when user changes
   useEffect(() => {
@@ -343,13 +364,21 @@ function Home({ setLayoutKey }) {
 
 
 
-  const handleClick = () => {
+  const handleClick = async () => {
     console.log("Start Date (Raw):", startDate); // Check raw Date object
     console.log("Start Date (ISO):", startDate?.toISOString()); // ISO format
     console.log("Start Date (Locale):", startDate?.toString()); // Local time string
+    if (!startDate || !endDate) return;
+
+    setIsDateRangeLoading(true);
     shouldFetchDevice.current = true;
-    refreshDeviceData();
-    setShow(false);
+
+    try {
+      await refreshDeviceData();
+      setShow(false);
+    } finally {
+      setIsDateRangeLoading(false);
+    }
   };
 
   const showModal = useCallback((e) => {
@@ -485,6 +514,8 @@ function Home({ setLayoutKey }) {
                       sosActive={SOSIsActive}
                       allDevices={allDevices}
                       onDeviceSelect={handleDeviceSelect}
+                      crossedKilometers={displayedCrossedKilometers}
+                      isDateRangeLoading={isDateRangeLoading}
                   />}
                 </div>
 
@@ -496,7 +527,7 @@ function Home({ setLayoutKey }) {
                       >
                         <CutomMap
                             device={device}
-                            movements={movements}
+                            movements={displayedMovements}
                             key={`map-${selectedDevice?.imsi}`}
                             range={range}
                             showModal={showModal}
@@ -527,6 +558,8 @@ function Home({ setLayoutKey }) {
                     sosActive={SOSIsActive}
                     allDevices={allDevices}
                     onDeviceSelect={handleDeviceSelect}
+                    crossedKilometers={displayedCrossedKilometers}
+                    isDateRangeLoading={isDateRangeLoading}
                 />}
               </div>
 

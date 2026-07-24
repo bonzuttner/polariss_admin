@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Modal, Button, Form, InputGroup, Badge, Card } from 'react-bootstrap';
 import { APIProvider, Map } from '@vis.gl/react-google-maps';
 import MiniMap from './MiniMap.jsx';
 import { DeviceService } from '../../api/deviceService.js';
 import { toast } from "react-toastify";
+import { calculateCrossedKilometers } from '../utils/movementDistance.js';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, show, device }) {
     const [startPoint, setStartPoint] = useState(null);
     const [endPoint, setEndPoint] = useState(null);
+    const [hoverPoint, setHoverPoint] = useState(null);
     const [speedKmph, setSpeedKmph] = useState(10);
     const [intervalMs, setIntervalMs] = useState(10000);
     const [isCreating, setIsCreating] = useState(false);
@@ -29,11 +31,11 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
 
     const handleCreateSimulation = async () => {
         if (!selectedBike?.id) {
-            toast.error('Please select a bike first');
+            toast.error('先にバイクを選択してください');
             return;
         }
         if (!endPoint) {
-            toast.warning('Please select an end point on the map');
+            toast.warning('地図上で終了地点を選択してください');
             return;
         }
 
@@ -58,10 +60,10 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                 console.log("the simulation interval is : ", simulationInterval);
                 onSimulationStarted(simulationId, simulationInterval);
             } else {
-                toast.error(response.data.message || 'Failed to create simulation');
+                toast.error(response.data.message || 'シミュレーションの作成に失敗しました');
             }
         } catch (error) {
-            toast.error('An error occurred while creating the simulation');
+            toast.error('シミュレーションの作成中にエラーが発生しました');
             console.error('Simulation creation error:', error);
         } finally {
             setIsCreating(false);
@@ -75,30 +77,47 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
     // helpers for pretty coords
     const fmt = (n) => (typeof n === 'number' ? n.toFixed(5) : '—');
 
+    const estimatedDistanceKm = useMemo(() => {
+        if (!startPoint) return null;
+
+        const target = endPoint || hoverPoint;
+        if (!target) return null;
+
+        return calculateCrossedKilometers([
+            { lat: startPoint[0], lon: startPoint[1] },
+            { lat: target[0], lon: target[1] }
+        ]);
+    }, [endPoint, hoverPoint, startPoint]);
+
+    const formattedEstimatedDistanceKm =
+        typeof estimatedDistanceKm === 'number'
+            ? estimatedDistanceKm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : '—';
+
     return (
         <Modal show={show} onHide={close} size="lg" centered>
             <Modal.Header closeButton className="border-0 pb-0">
                 <div className="w-100 d-flex justify-content-between align-items-start">
                     <div>
-                        <Modal.Title className="fw-semibold">Create Bike Simulation</Modal.Title>
+                        <Modal.Title className="fw-semibold">バイクシミュレーション作成</Modal.Title>
                         <div className="text-muted small mt-1">
                             {selectedBike?.name ? (
-                                <>Bike: <Badge bg="secondary">{selectedBike.name}</Badge></>
+                                <>バイク: <Badge bg="secondary">{selectedBike.name}</Badge></>
                             ) : (
-                                <>No bike selected</>
+                                <>バイクが選択されていません</>
                             )}
                         </div>
                     </div>
                     <div className="text-end">
                         <div className="small text-muted">
                             {device?.lastLocation ? (
-                                <>Device last fix:&nbsp;
+                                <>デバイス最終位置:&nbsp;
                                     <Badge bg="light" text="dark">
                                         {fmt(device.lastLocation.lat)}, {fmt(device.lastLocation.lon)}
                                     </Badge>
                                 </>
                             ) : (
-                                <span className="small text-muted">Using Tokyo default</span>
+                                <span className="small text-muted">東京をデフォルトとして使用</span>
                             )}
                         </div>
                     </div>
@@ -111,7 +130,7 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                     <Card.Body>
                         <div className="row g-3 align-items-end">
                             <div className="col-md-6">
-                                <Form.Label className="fw-medium">Speed</Form.Label>
+                                <Form.Label className="fw-medium">速度</Form.Label>
                                 <InputGroup>
                                     <Form.Control
                                         type="number"
@@ -120,7 +139,7 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                                         onChange={(e) => setSpeedKmph(Number(e.target.value) || 10)}
                                         min="1"
                                         max="100"
-                                        aria-label="Speed (km/h)"
+                                        aria-label="速度 (km/h)"
                                     />
                                     <InputGroup.Text>km/h</InputGroup.Text>
                                 </InputGroup>
@@ -136,7 +155,7 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                             </div>
 
                             <div className="col-md-6">
-                                <Form.Label className="fw-medium">Update Interval</Form.Label>
+                                <Form.Label className="fw-medium">更新間隔</Form.Label>
                                 <InputGroup>
                                     <Form.Control
                                         type="number"
@@ -145,7 +164,7 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                                         onChange={(e) => setIntervalMs(Number(e.target.value) || 10000)}
                                         min="1000"
                                         max="100000"
-                                        aria-label="Update interval (ms)"
+                                        aria-label="更新間隔 (ms)"
                                     />
                                     <InputGroup.Text>ms</InputGroup.Text>
                                 </InputGroup>
@@ -164,15 +183,25 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                         {/* Live selection summary */}
                         <div className="d-flex flex-wrap gap-3 mt-3">
                             <div className="small">
-                                Start:&nbsp;
+                                開始:&nbsp;
                                 <Badge bg={startPoint ? "success" : "secondary"}>
-                                    {startPoint ? `${fmt(startPoint[0])}, ${fmt(startPoint[1])}` : "auto (Tokyo/random)"}
+                                    {startPoint ? `${fmt(startPoint[0])}, ${fmt(startPoint[1])}` : "自動 (東京/ランダム)"}
                                 </Badge>
                             </div>
                             <div className="small">
-                                End:&nbsp;
+                                終了:&nbsp;
                                 <Badge bg={endPoint ? "primary" : "warning"} text={endPoint ? undefined : "dark"}>
-                                    {endPoint ? `${fmt(endPoint[0])}, ${fmt(endPoint[1])}` : "pick on map"}
+                                    {endPoint ? `${fmt(endPoint[0])}, ${fmt(endPoint[1])}` : "地図で選択"}
+                                </Badge>
+                            </div>
+                            <div className="small">
+                                Distance:&nbsp;
+                                <Badge bg={startPoint && endPoint ? "info" : "secondary"} text={startPoint && endPoint ? "dark" : undefined}>
+                                    {startPoint && endPoint
+                                        ? `${formattedEstimatedDistanceKm} km`
+                                        : startPoint && hoverPoint
+                                            ? `~ ${formattedEstimatedDistanceKm} km`
+                                            : "select 2 points"}
                                 </Badge>
                             </div>
                         </div>
@@ -183,9 +212,9 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                 <Card className="border-0 shadow-sm">
                     <Card.Header className="bg-white border-0 pt-3">
                         <div className="d-flex justify-content-between align-items-center">
-                            <div className="fw-medium">Select Path (click on map)</div>
+                            <div className="fw-medium">経路を選択（地図をクリック）</div>
                             <div className="small text-muted">
-                                {device?.lastLocation ? 'Zoomed to device last location' : 'Zoomed out (Tokyo area)'}
+                                {device?.lastLocation ? 'デバイスの最終位置にズーム' : 'ズームアウト（東京エリア）'}
                             </div>
                         </div>
                     </Card.Header>
@@ -206,8 +235,16 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                                     disableDefaultUI
                                 >
                                     <MiniMap
-                                        onStartChange={setStartPoint}
-                                        onEndChange={setEndPoint}
+                                        onStartChange={(point) => {
+                                            setStartPoint(point);
+                                            setEndPoint(null);
+                                            setHoverPoint(null);
+                                        }}
+                                        onEndChange={(point) => {
+                                            setEndPoint(point);
+                                            setHoverPoint(null);
+                                        }}
+                                        onHoverChange={setHoverPoint}
                                         device={device}
                                     />
                                 </Map>
@@ -216,7 +253,7 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                     </Card.Body>
                     <Card.Footer className="bg-white border-0 pt-0">
                         <div className="small text-muted">
-                            Tip: First click sets <strong>start</strong>, second click sets <strong>end</strong>. Click again to adjust.
+                            ヒント: 最初のクリックで<strong>開始地点</strong>、2回目のクリックで<strong>終了地点</strong>を設定します。再度クリックすると調整できます。
                         </div>
                     </Card.Footer>
                 </Card>
@@ -224,7 +261,7 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
 
             <Modal.Footer className="border-0" style={{ zIndex: 2 }}>
                 <Button variant="secondary" onClick={close} disabled={isCreating}>
-                    Cancel
+                    キャンセル
                 </Button>
                 <Button
                     variant="primary"
@@ -239,7 +276,7 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                             aria-hidden="true"
                         />
                     )}
-                    {isCreating ? 'Creating...' : 'Start Simulation'}
+                    {isCreating ? '作成中...' : 'シミュレーション開始'}
                 </Button>
             </Modal.Footer>
         </Modal>

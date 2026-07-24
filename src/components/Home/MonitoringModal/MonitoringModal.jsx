@@ -154,7 +154,7 @@ const EngineControl = ({ device, handleConfirm }) => (
         disabled={device?.monitoringActive}
         onClick={handleConfirm}
       >
-        ON
+        オン
       </button>
       <button
         className={`${styles.primaryButton} ${!device?.monitoringActive ? styles.disabledButton : styles.inactiveButton
@@ -162,7 +162,7 @@ const EngineControl = ({ device, handleConfirm }) => (
         disabled={!device?.monitoringActive}
         onClick={handleConfirm}
       >
-        OFF
+        オフ
       </button>
     </div>
   </>
@@ -198,10 +198,10 @@ const SOSMode = ({ device, monitoringFields, onUpdate }) => {
 
 
       } else {
-        toast.warning(response.data.message || 'Operation failed.');
+        toast.warning(response.data.message || '操作に失敗しました。');
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || 'An error occurred.');
+      toast.error(error?.response?.data?.message || 'エラーが発生しました。');
     }
   };
 
@@ -210,7 +210,7 @@ const SOSMode = ({ device, monitoringFields, onUpdate }) => {
         <p className={styles.innerLabel}>相互監視</p>
         <div className={styles.buttonsContainer}>
           <button className={styles.SOSButton} onClick={handleConfirm}>
-            {device.sos_status ? '解除中 (ON)' : '監視中 (OFF)'}
+            {device.sos_status ? '解除中 (オン)' : '監視中 (オフ)'}
           </button>
         </div>
       </>

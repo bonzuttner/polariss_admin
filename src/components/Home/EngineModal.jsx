@@ -45,7 +45,7 @@ function EngineModal({ engine, updateEngine }) {
           className="btn btn-danger btn-sm"
           onClick={() => handleConfirm()}
         >
-          {engine?.engineStatus === 'ON' ? 'OFF' : 'ON'}
+          {engine?.engineStatus === 'ON' ? 'オフ' : 'オン'}
         </Button>
       </Modal.Footer>
     </Modal>

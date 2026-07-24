@@ -2,11 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMap, AdvancedMarker, Pin, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { DeviceService } from '../../api/deviceService.js';
-const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
+const MiniMap = ({ onStartChange, onEndChange, onHoverChange, initialStart, device }) => {
     const map = useMap();
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const clickListenerRef = useRef(null);
+    const moveListenerRef = useRef(null);
+    const moveRafRef = useRef(null);
+    const latestMoveRef = useRef(null);
     //other devices markers set
     const [devices, setDevices] = useState([]);
     // default center  if the device doesnt exists
@@ -47,9 +50,11 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
                 if (!start) {
                     setStart(position);
                     onStartChange([position.lat(), position.lng()]);
+                    if (typeof onHoverChange === 'function') onHoverChange(null);
                 } else if (!end) {
                     setEnd(position);
                     onEndChange([position.lat(), position.lng()]);
+                    if (typeof onHoverChange === 'function') onHoverChange(null);
                 }
             }
         );
@@ -59,7 +64,44 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
                 google.maps.event.removeListener(clickListenerRef.current);
             }
         };
-    }, [map, start, end, onStartChange, onEndChange]);
+    }, [map, start, end, onStartChange, onEndChange, onHoverChange]);
+
+    useEffect(() => {
+        if (!map) return;
+        if (typeof onHoverChange !== 'function') return;
+
+        const shouldTrackHover = Boolean(start) && !end;
+
+        if (!shouldTrackHover) {
+            onHoverChange(null);
+            return;
+        }
+
+        moveListenerRef.current = google.maps.event.addListener(map, 'mousemove', (event) => {
+            if (!event?.latLng) return;
+            latestMoveRef.current = event.latLng;
+
+            if (moveRafRef.current) return;
+            moveRafRef.current = requestAnimationFrame(() => {
+                moveRafRef.current = null;
+                const pos = latestMoveRef.current;
+                if (!pos) return;
+                onHoverChange([pos.lat(), pos.lng()]);
+            });
+        });
+
+        return () => {
+            if (moveListenerRef.current) {
+                google.maps.event.removeListener(moveListenerRef.current);
+                moveListenerRef.current = null;
+            }
+            if (moveRafRef.current) {
+                cancelAnimationFrame(moveRafRef.current);
+                moveRafRef.current = null;
+            }
+            latestMoveRef.current = null;
+        };
+    }, [map, start, end, onHoverChange]);
 
     //get the devices
     useEffect(() => {
@@ -82,7 +124,9 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
     const clearMarkers = () => {
         setEnd(null);
         setStart(null);
+        onStartChange(null);
         onEndChange(null);
+        if (typeof onHoverChange === 'function') onHoverChange(null);
     };
 
 
@@ -165,7 +209,7 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
                     className="btn btn-sm btn-danger"
                     style={{ opacity: 0.8 }}
                 >
-                    Clear End Point
+                    終了地点をクリア
                 </button>
             </div>
 
@@ -173,17 +217,17 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
             <div style={{ position: 'absolute', bottom: '10px', left: '10px', zIndex: 1, background: 'rgba(255,255,255,0.8)', padding: '5px', borderRadius: '4px' }}>
                 {start && (
                     <div className="text-muted small">
-                        <strong>Start:</strong> {start.lat().toFixed(6)}, {start.lng().toFixed(6)}
+                        <strong>開始:</strong> {start.lat().toFixed(6)}, {start.lng().toFixed(6)}
                     </div>
                 )}
                 {end && (
                     <div className="text-muted small">
-                        <strong>End:</strong> {end.lat().toFixed(6)}, {end.lng().toFixed(6)}
+                        <strong>終了:</strong> {end.lat().toFixed(6)}, {end.lng().toFixed(6)}
                     </div>
                 )}
                 {!end && start && (
                     <div className="text-muted small">
-                        Click to set end point
+                        クリックして終了地点を設定
                     </div>
                 )}
             </div>

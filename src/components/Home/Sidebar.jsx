@@ -28,7 +28,9 @@ function Sidebar({
     stopSimulation,
     sosActive,
     allDevices,
-    onDeviceSelect
+    onDeviceSelect,
+    crossedKilometers,
+    isDateRangeLoading
 }) {
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +53,10 @@ function Sidebar({
 
     const disabled = !startDate || !endDate;
     const hasQuery = Boolean(searchQuery);
+    const formattedCrossedKilometers = Number(crossedKilometers || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 
     return (
         <div className={`col col-md-3 results-wrapper p-2`} style={{ backgroundColor: '#f3f3f3' }}>
@@ -61,14 +67,14 @@ function Sidebar({
                     <div className="card-body">
                         <form onSubmit={(e) => e.preventDefault()}>
                             <div className="d-flex align-items-center justify-content-between mb-3">
-                                <h5 className="mb-0">Select</h5>
+                                <h5 className="mb-0">選択</h5>
                             </div>
 
                             <div className="row g-3">
                                 {/* From */}
                                 <div className="col-12 col-md-6">
                                     <label className="form-label fw-semibold" htmlFor="from-date">
-                                        From date
+                                        開始日
                                     </label>
                                     <DatePicker
                                         id="from-date"
@@ -78,8 +84,8 @@ function Sidebar({
                                         timeFormat="HH:mm"
                                         timeIntervals={15}
                                         dateFormat="yyyy-MM-dd HH:mm"
-                                        timeCaption="Time"
-                                        placeholderText="Select start date & time"
+                                        timeCaption="時刻"
+                                        placeholderText="開始日時を選択"
                                         showMonthDropdown
                                         showYearDropdown
                                         dropdownMode="select"
@@ -93,7 +99,7 @@ function Sidebar({
                                 {/* To */}
                                 <div className="col-12 col-md-6">
                                     <label className="form-label fw-semibold" htmlFor="to-date">
-                                        To date
+                                        終了日
                                     </label>
                                     <DatePicker
                                         id="to-date"
@@ -103,8 +109,8 @@ function Sidebar({
                                         timeFormat="HH:mm"
                                         timeIntervals={15}
                                         dateFormat="yyyy-MM-dd HH:mm"
-                                        timeCaption="Time"
-                                        placeholderText="Select end date & time"
+                                        timeCaption="時刻"
+                                        placeholderText="終了日時を選択"
                                         showMonthDropdown
                                         showYearDropdown
                                         dropdownMode="select"
@@ -117,15 +123,36 @@ function Sidebar({
                                 </div>
                             </div>
 
+                            <div className="rounded bg-light border px-3 py-2 mt-4">
+                                <div className="small text-muted">走行距離</div>
+                                <div className="d-flex align-items-center gap-2 fw-semibold mt-1">
+                                    {isDateRangeLoading && (
+                                        <span
+                                            className="spinner-border spinner-border-sm text-primary"
+                                            role="status"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                    <span>{isDateRangeLoading ? '計算中...' : `${formattedCrossedKilometers} km`}</span>
+                                </div>
+                            </div>
+
                             <div className="d-flex justify-content-end mt-4">
                                 <button
                                     type="submit"
                                     className="btn btn-primary px-4"
                                     onClick={handleClick}
-                                    disabled={disabled}
-                                    title={disabled ? "Please select both start and end dates" : ""}
+                                    disabled={disabled || isDateRangeLoading}
+                                    title={disabled ? "開始日と終了日の両方を選択してください" : ""}
                                 >
-                                    更新
+                                    {isDateRangeLoading && (
+                                        <span
+                                            className="spinner-border spinner-border-sm me-2"
+                                            role="status"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                    {isDateRangeLoading ? '更新中...' : '更新'}
                                 </button>
                             </div>
                         </form>
@@ -139,7 +166,7 @@ function Sidebar({
                                 <div className="card-body">
                                     {/* Global Search Box */}
                                     <label htmlFor="device-global-search" className="form-label fw-semibold">
-                                        Search all devices
+                                        全デバイスを検索
                                     </label>
 
                                     <div className="input-group">
@@ -150,7 +177,7 @@ function Sidebar({
                                             id="device-global-search"
                                             type="text"
                                             className="form-control"
-                                            placeholder="Search all devices... / デバイスを検索..."
+                                            placeholder="デバイスを検索..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             lang="ja"
@@ -164,7 +191,7 @@ function Sidebar({
                                                 type="button"
                                                 className="btn btn-outline-secondary"
                                                 onClick={() => setSearchQuery("")}
-                                                aria-label="Clear search"
+                                                aria-label="検索をクリア"
                                             >
                                                 <FaTimes />
                                             </button>
@@ -200,7 +227,7 @@ function Sidebar({
                                                     })}
                                                 </ul>
                                             ) : (
-                                                <div className="text-muted small py-2 px-1">No devices found</div>
+                                                <div className="text-muted small py-2 px-1">デバイスが見つかりません</div>
                                             )}
                                         </div>
                                     )}
@@ -300,7 +327,7 @@ function Sidebar({
                                                 handleClick();
                                             }}
                                         >
-                                            Stop Simulation
+                                            シミュレーション停止
                                         </button>
                                     ) : (
                                         <button
@@ -308,7 +335,7 @@ function Sidebar({
                                             className="btn btn-primary w-100"
                                             onClick={handleSimulationModal}
                                         >
-                                            Create Simulation
+                                            シミュレーション作成
                                         </button>
                                     )}
                                 </div>
@@ -322,7 +349,7 @@ function Sidebar({
                     <form onSubmit={(e) => e.preventDefault()}>
                         {/* Device Status */}
                         <div className="row align-items-center mt-3 px-1">
-                            <div className="col-6">Device Status：</div>
+                            <div className="col-6">デバイスステータス：</div>
                             <div className="col-6 text-end text-md-start">
                                 <span
                                     className={`pill ${device?.deviceStatus === '要確認' ? 'pill-warning' : 'pill-muted'
@@ -347,7 +374,7 @@ function Sidebar({
                                             // toggle/handle here if needed
                                         }}
                                     >
-                                        ON
+                                        オン
                                     </button>
                                 ) : (
                                     <button
@@ -359,7 +386,7 @@ function Sidebar({
                                             // toggle/handle here if needed
                                         }}
                                     >
-                                        OFF
+                                        オフ
                                     </button>
                                 )}
                             </div>
@@ -404,7 +431,7 @@ function Sidebar({
                                                 e.stopPropagation();
                                             }}
                                         >
-                                            ON
+                                            オン
                                         </button>
                                     ) : (
                                         <button
@@ -415,7 +442,7 @@ function Sidebar({
                                                 e.stopPropagation();
                                             }}
                                         >
-                                            OFF
+                                            オフ
                                         </button>
                                     )}
                                 </div>

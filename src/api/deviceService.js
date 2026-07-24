@@ -78,11 +78,11 @@ export const DeviceService = {
             ? { turnOn, imsi, range, nbrOfNotifications }
             : { turnOn, imsi };
 
-        return Api.call(payload, `devices/monitoringSettings/self`, 'put', '');
+        return Api.call(payload, `devices/monitoringSettings/self`, 'put', localStorage.getItem('userId'));
     },
 
     toggleMutualMonitoring: async ({ turnOn, imsi }) => {
-        return Api.call({ turnOn, imsi }, `devices/monitoringSettings/mutual`, 'put', '');
+        return Api.call({ turnOn, imsi }, `devices/monitoringSettings/mutual`, 'put', localStorage.getItem('userId'));
     },
     toggleSOSMonitoring: async ({ turnOn, imsi }) => {
         return Api.call({ turnOn, imsi }, `devices/monitoringSettings/sos`, 'put', '');
