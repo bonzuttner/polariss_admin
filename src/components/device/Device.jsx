@@ -1,10 +1,19 @@
-import React, { Suspense, useEffect } from 'react';
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Api from '../../api/Api';
-import { useNavigate, useParams } from 'react-router-dom';
 import ModalComponent from '../common/ModalComponent';
-import Utils from "../utils/utils.js";
+import Utils from '../utils/utils.js';
+import Card from '../common/Card.jsx';
+import { Button } from '../common/Button.jsx';
+import Dialog from '../common/Dialog.jsx';
+import FormRow from '../common/FormRow.jsx';
+import PageLoader from '../common/PageLoader.jsx';
+import ErrorState from '../common/ErrorState.jsx';
+import ErrorBanner from '../common/ErrorBanner.jsx';
+import { inputClass } from '../../styles/formClasses.js';
+import { getApiErrorMessage } from '../../utils/apiError.js';
+
 function Device(props) {
   const component = props.component;
   const location = useLocation();
@@ -13,29 +22,42 @@ function Device(props) {
   const type = location?.state;
   const [device, setDevice] = useState({});
   const [user, setUser] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [error, setError] = useState('');
   const [show, setShow] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const getUserData = async () => {
     let userId =
       type === 'info'
         ? localStorage.getItem('userProfileId')
         : localStorage.getItem('userId');
-    const responseUser = await Api.call(
-      {},
-      `users/${userId}`,
-      'get',
-      localStorage.getItem('userId')
-    );
+    try {
+      setPageLoading(true);
+      setLoadError(null);
+      const responseUser = await Api.call(
+        {},
+        `users/${userId}`,
+        'get',
+        localStorage.getItem('userId')
+      );
 
-    if (responseUser.data) {
-      let userData = responseUser.data.data;
-      let selectedDevice = id ? userData.devices.find((a) => a.imsi == id) : {};
-      selectedDevice.userId = userId;
-      setUser(userData);
-      setDevice(selectedDevice);
-      setLoading(false);
+      if (responseUser.data?.code === 200) {
+        let userData = responseUser.data.data;
+        let selectedDevice = id ? userData.devices.find((a) => a.imsi == id) : {};
+        selectedDevice.userId = userId;
+        setUser(userData);
+        setDevice(selectedDevice);
+      } else {
+        setLoadError(getApiErrorMessage(responseUser, 'デバイス情報の取得に失敗しました。'));
+      }
+    } catch (err) {
+      console.error('Error fetching device:', err);
+      setLoadError('デバイス情報の取得に失敗しました。通信状態を確認してください。');
+    } finally {
+      setPageLoading(false);
     }
   };
 
@@ -49,7 +71,6 @@ function Device(props) {
 
   const updateDevice = async () => {
     let path = `devices`;
-    // id ? `devices/${id}` : `devices`
     let request_type = id ? `put` : `post`;
     let userId =
       type === 'info'
@@ -61,258 +82,161 @@ function Device(props) {
     if (!device.bikeId) {
       device.bikeId = user.bikes[0].id;
     }
-    const response = await Api.call(
-      device,
-      path,
-      request_type,
-      localStorage.getItem('userId')
-    );
-    if (response.data.code === 200) {
-      setError('');
-      if (props.component === 'setup') {
-        props.changeForm();
-        navigate('/setting');
-        window.location.reload(false);
-      } else {
-        navigate('/setting');
-        window.location.reload(false);
-      }
-    } else {
-      let modal = document.getElementById('exampleModal');
-      modal.classList.remove('show');
-      let modalBack = document.getElementsByClassName('modal-backdrop');
-      if (modalBack) {
-        for (let i = 0; i < modalBack.length; i++) {
-          modalBack[i]?.classList.remove('show');
-        }
-      }
-      setError(
-        response.data ? response.data.message : 'Error, Please try again!'
+    setSubmitting(true);
+    try {
+      const response = await Api.call(
+        device,
+        path,
+        request_type,
+        localStorage.getItem('userId')
       );
+      if (response.data?.code === 200) {
+        setError('');
+        setShowConfirm(false);
+        if (props.component === 'setup') {
+          props.changeForm();
+          navigate('/setting');
+          window.location.reload(false);
+        } else {
+          navigate('/setting');
+          window.location.reload(false);
+        }
+      } else {
+        setShowConfirm(false);
+        const message = getApiErrorMessage(response, 'デバイス情報の保存に失敗しました。');
+        setError(message);
+        toast.error(message);
+      }
+    } catch (err) {
+      console.error('Error saving device:', err);
+      setShowConfirm(false);
+      setError('デバイス情報の保存に失敗しました。');
+      toast.error('デバイス情報の保存に失敗しました。');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  return (
-    <div className="edit-card">
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      )}
+  if (pageLoading) {
+    return <PageLoader label="デバイス情報を読み込み中..." className="py-24" />;
+  }
 
-      <div className="card">
-        <div className="card-header p-3">
-          <h4>デバイスデータ</h4>
-        </div>
-        {!loading && (
-          <form className="p-4">
-            <div className="mb-3 row">
-              <label for="userId" className="col-sm-4 col-form-label">
-                userID
-              </label>
-              <div className="col-sm-8">
-                <input
-                  className="form-control"
-                  id="userId"
-                  value={device?.userId}
-                  onChange={(event) =>
-                    handleChange(event.target.value, 'userId')
-                  }
-                />
-              </div>
-            </div>
-            <div className="mb-3 row">
-              <label for="name" className="col-sm-4 col-form-label">
-                Sim Number
-              </label>
-              <div className="col-sm-8">
-                <input
-                  className="form-control"
-                  id="name"
-                  value={device?.name}
-                  onChange={(event) => handleChange(event.target.value, 'name')}
-                />
-              </div>
-            </div>
-            {id && (
-              <div className="mb-3 row">
-                <label for="sortNo" className="col-sm-4 col-form-label">
-                  imsi
-                </label>
-                <div className="col-sm-8">
-                  <input
-                    className="form-control"
-                    id="imsi"
-                    disabled
-                    value={device?.imsi}
-                    onChange={(event) =>
-                      handleChange(event.target.value, 'imsi')
-                    }
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="mb-3 row">
-              <label for="type" className="col-sm-4 col-form-label">
-                deviceType
-              </label>
-              <div className="col-sm-8">
-                <select
-                  className="form-select"
-                  aria-label="Default select example"
-                  id="type"
-                  onChange={(event) => handleChange(event.target.value, 'type')}
-                  value={device?.type}
-                  disabled
-                >
-                  <option key={Utils.unique()} value="SKB001"> SKB001 </option>
-                  <option key={Utils.unique()} value="SKG001"> SKG001 </option>
-                  <option key={Utils.unique()}  value="SKGM01" selected>
-                    SKGM01
-                  </option>
-                  <option  key={Utils.unique()} value="SKGTL01"> SKGTL01 </option>
-                </select>
-              </div>
-            </div>
-
-            <div className="mb-3 row">
-              <label for="bikeId" className="col-sm-4 col-form-label">
-                bikeID
-              </label>
-              <div className="col-sm-8">
-                <select
-                  className="form-select"
-                  aria-label="Default select example"
-                  id="bikeId"
-                  onChange={(event) =>
-                    handleChange(parseInt(event.target.value), 'bikeId')
-                  }
-                  value={device?.bikeId}
-                >
-                  {user?.bikes.map((bike) => {
-                    return <option key={Utils.unique()} value={bike.id}>{bike.name}</option>;
-                  })}
-                </select>
-              </div>
-            </div>
-
-            <div className="mb-3 row">
-              <label for="stopFLG" className="col-sm-4 col-form-label">
-                stopFLG
-              </label>
-              <div className="col-sm-8">
-                <select
-                  className="form-select"
-                  aria-label="Default select example"
-                  id="stopFLG"
-                  value={device?.stopFLG}
-                  disabled
-                >
-                  <option key={Utils.unique()} value="0" selected="">
-                    有効
-                  </option>
-                  <option key={Utils.unique()} value="9"> 停止 </option>
-                </select>
-              </div>
-            </div>
-
-            <div
-              className={`d-flex ${
-                props.component !== 'setup'
-                  ? 'justify-content-between'
-                  : 'justify-content-end'
-              }`}
-            >
-              {props.component !== 'setup' && (
-                <button
-                  type="button"
-                  className="btn btn-outline-primary btn-sm px-3"
-                  onClick={() =>
-                    navigate(
-                      `${type === 'info' ? '/setting/user-info' : '/setting'}`
-                    )
-                  }
-                >
-                  戻る
-                </button>
-              )}
-              <div className="d-flex justify-content-between">
-                {id && (
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm mx-3 px-2"
-                    onClick={() => setShow(true)}
-                  >
-                    削除
-                  </button>
-                )}
-
-                {component !== 'setup' ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#exampleModal"
-                  >
-                    更新
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => updateDevice()}
-                  >
-                    更新
-                  </button>
-                )}
-              </div>
-            </div>
-          </form>
-        )}
+  if (loadError) {
+    return (
+      <div className="mx-auto my-10 w-full max-w-xl px-4">
+        <ErrorState message={loadError} onRetry={getUserData} />
       </div>
-      <div
-        className="modal fade"
-        id="exampleModal"
-        tabIndex="-1"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="exampleModalLabel">
-                確認
-              </h1>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <p>更新を実施します</p>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline-primary"
-                data-bs-dismiss="modal"
+    );
+  }
+
+  return (
+    <div className="mx-auto my-10 w-full max-w-xl px-4">
+      <ErrorBanner>{error}</ErrorBanner>
+
+      <Card>
+        <Card.Header>
+          <h4 className="text-lg font-semibold text-text">デバイスデータ</h4>
+        </Card.Header>
+
+        <Card.Body className="flex flex-col gap-4">
+          <FormRow label="userID" htmlFor="userId">
+            <input
+              className={inputClass}
+              id="userId"
+              value={device?.userId || ''}
+              onChange={(event) => handleChange(event.target.value, 'userId')}
+            />
+          </FormRow>
+
+          <FormRow label="Sim Number" htmlFor="name">
+            <input
+              className={inputClass}
+              id="name"
+              value={device?.name || ''}
+              onChange={(event) => handleChange(event.target.value, 'name')}
+            />
+          </FormRow>
+
+          {id && (
+            <FormRow label="imsi" htmlFor="imsi">
+              <input className={inputClass} id="imsi" disabled value={device?.imsi || ''} />
+            </FormRow>
+          )}
+
+          <FormRow label="deviceType" htmlFor="type">
+            <select
+              className={inputClass}
+              id="type"
+              value={device?.type || 'SKGM01'}
+              disabled
+              onChange={() => {}}
+            >
+              <option key={Utils.unique()} value="SKB001"> SKB001 </option>
+              <option key={Utils.unique()} value="SKG001"> SKG001 </option>
+              <option key={Utils.unique()} value="SKGM01"> SKGM01 </option>
+              <option key={Utils.unique()} value="SKGTL01"> SKGTL01 </option>
+            </select>
+          </FormRow>
+
+          <FormRow label="bikeID" htmlFor="bikeId">
+            <select
+              className={inputClass}
+              id="bikeId"
+              onChange={(event) => handleChange(parseInt(event.target.value), 'bikeId')}
+              value={device?.bikeId || ''}
+            >
+              {user?.bikes?.map((bike) => (
+                <option key={Utils.unique()} value={bike.id}>{bike.name}</option>
+              ))}
+            </select>
+          </FormRow>
+
+          <FormRow label="stopFLG" htmlFor="stopFLG">
+            <select className={inputClass} id="stopFLG" value={device?.stopFLG || '0'} disabled onChange={() => {}}>
+              <option key={Utils.unique()} value="0"> 有効 </option>
+              <option key={Utils.unique()} value="9"> 停止 </option>
+            </select>
+          </FormRow>
+
+          <div className={`mt-2 flex ${props.component !== 'setup' ? 'justify-between' : 'justify-end'}`}>
+            {props.component !== 'setup' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(type === 'info' ? '/setting/user-info' : '/setting')}
+                disabled={submitting}
               >
                 戻る
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => updateDevice()}
+              </Button>
+            )}
+            <div className="flex items-center gap-3">
+              {id && (
+                <Button variant="danger" size="sm" onClick={() => setShow(true)} disabled={submitting}>
+                  削除
+                </Button>
+              )}
+              <Button
+                onClick={() => (component === 'setup' ? updateDevice() : setShowConfirm(true))}
+                loading={component === 'setup' && submitting}
               >
                 更新
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
-      </div>
+        </Card.Body>
+      </Card>
+
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm} size="sm">
+        <Dialog.Header onClose={() => setShowConfirm(false)}>確認</Dialog.Header>
+        <Dialog.Body>更新を実施します</Dialog.Body>
+        <Dialog.Footer>
+          <Button variant="outline" onClick={() => setShowConfirm(false)} disabled={submitting}>
+            戻る
+          </Button>
+          <Button onClick={updateDevice} loading={submitting}>更新</Button>
+        </Dialog.Footer>
+      </Dialog>
+
       {show && (
         <ModalComponent
           name={'devices'}

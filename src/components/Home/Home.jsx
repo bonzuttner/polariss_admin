@@ -1,6 +1,7 @@
 import React, {Suspense, useCallback, useState, useEffect, useRef, useMemo} from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import './Home.css';
+import { toast } from 'react-toastify';
+import { FaBars, FaTimes } from 'react-icons/fa';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import 'react-datepicker/dist/react-datepicker.css';
 import Utils from '../utils/utils.js';
@@ -14,13 +15,16 @@ import { DeviceService } from '../../api/deviceService';
 import SimulationModal from "../simulationModal/SimulationModal.jsx";
 import { startOfDay, endOfDay } from 'date-fns';
 import { formatBackendDate } from '../utils/dateFormatter.js';
+import PageLoader from '../common/PageLoader.jsx';
+import ErrorState from '../common/ErrorState.jsx';
+import { getApiErrorMessage } from '../../utils/apiError.js';
 
 
 
 
 
 const CutomMap = React.lazy(() => import('./Map.jsx'));
-const API_KEY = import.meta.env.API_KEY;
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const INTERVAL = import.meta.env.VITE_REFRESH_INTERVAL_MS;
 
 function Home({ setLayoutKey }) {
@@ -34,6 +38,7 @@ function Home({ setLayoutKey }) {
   const [pageKey, setPageKey] = useState(Utils.unique());
   const [engine, setEngine] = useState({});
   const [loading, setLoading] = useState(true);
+  const [homeError, setHomeError] = useState(null);
   const [isDateRangeLoading, setIsDateRangeLoading] = useState(false);
   const [currentRefreshInterval, setCurrentRefreshInterval] = useState(parseInt(INTERVAL || '10000', 10));
 
@@ -81,8 +86,17 @@ function Home({ setLayoutKey }) {
     crossedKilometers,
     range,
     loading: deviceLoading,
+    error: deviceError,
     refresh: refreshDeviceData,
   } = useDeviceData(selectedDevice, backendStartDate, backendEndDate);
+
+  useEffect(() => {
+    if (deviceError) {
+      toast.error('デバイス情報の取得に失敗しました。通信状態を確認してください。', {
+        toastId: 'device-fetch-error',
+      });
+    }
+  }, [deviceError]);
 
   const isSelectedDeviceAligned =
       !selectedDevice?.imsi ||
@@ -93,6 +107,7 @@ function Home({ setLayoutKey }) {
   const displayedCrossedKilometers = isSelectedDeviceAligned ? crossedKilometers : 0;
 
   const [SOSIsActive, setSOSIsActive] = useState(false);
+  const prevSosRef = useRef(null);
 
   console.log("the SOS in home is : " + SOSIsActive);
 
@@ -108,15 +123,20 @@ function Home({ setLayoutKey }) {
       try {
         setLoading(true);
         const response = await DeviceService.lineAuth(searchParams.get('code'));
-        if (response.data.code === 200) {
+        if (response.data?.code === 200) {
           const { accessToken, profile } = response.data.data;
           localStorage.setItem('userId', accessToken);
           if (profile?.name1) localStorage.setItem('user-name', profile.name1);
           setLayoutKey(Utils.unique());
           navigate('/');
+        } else {
+          toast.error(getApiErrorMessage(response, 'ログインに失敗しました。もう一度お試しください。'));
+          navigate('/login');
         }
       } catch (error) {
         console.error('Line authentication failed:', error);
+        toast.error('ログインに失敗しました。もう一度お試しください。');
+        navigate('/login');
       } finally {
         setLoading(false);
       }
@@ -129,8 +149,9 @@ function Home({ setLayoutKey }) {
   const fetchHomeData = useCallback(async () => {
     try {
       setLoading(true);
+      setHomeError(null);
       const response = await DeviceService.getHomePageData();
-      if (response.data.code === 200) {
+      if (response.data?.code === 200) {
         const users = response.data.data;
         setUsers(users);
 
@@ -159,9 +180,12 @@ function Home({ setLayoutKey }) {
           navigate('/setup');
           localStorage.setItem('type', 'not-registered');
         }
+      } else {
+        setHomeError(getApiErrorMessage(response, 'データの取得に失敗しました。'));
       }
     } catch (error) {
       console.error('Error fetching home data:', error);
+      setHomeError('データの取得に失敗しました。通信状態を確認してもう一度お試しください。');
     } finally {
       setLoading(false);
     }
@@ -251,11 +275,17 @@ function Home({ setLayoutKey }) {
 
   //SOS button toggler (which changes the sos mode in the sidebar)
   useEffect(() => {
-    if (device?.mutual_monitoring_status) {
-      setSOSIsActive(true);
-    } else {
-      setSOSIsActive(false);
+    const isActive = Boolean(device?.mutual_monitoring_status);
+
+    // Alert only on a real OFF -> ON transition (not on initial load)
+    if (prevSosRef.current === false && isActive) {
+      toast.error('SOSが起動しました。デバイスの状態を確認してください。', {
+        toastId: 'sos-activated',
+      });
     }
+    prevSosRef.current = isActive;
+
+    setSOSIsActive(isActive);
   }, [device?.mutual_monitoring_status]);
 
   // Initial load and auto-refresh
@@ -462,6 +492,7 @@ function Home({ setLayoutKey }) {
       } else {
         console.error(err);
       }
+      toast.error('シミュレーションの停止に失敗しました。もう一度お試しください。');
     }
   }, [activeSimulations]);
 
@@ -471,105 +502,112 @@ function Home({ setLayoutKey }) {
 
 
 
+  const sidebarProps = {
+    users,
+    selectedUser,
+    selectedBike,
+    selectedDevice,
+    device,
+    movements: displayedMovements,
+    engine,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+    handleSelect: handleSelection,
+    handleClick,
+    showModal,
+    showEngModal,
+    handleSimulationModal,
+    activeSimulations,
+    stopSimulation,
+    sosActive: SOSIsActive,
+    allDevices,
+    onDeviceSelect: handleDeviceSelect,
+    crossedKilometers: displayedCrossedKilometers,
+    isDateRangeLoading,
+  };
+
   return (
-      <div id="page-content" key={pageKey}>
-        {!loading && (
-            <div className="hero-section full-screen has-map has-sidebar">
-              <div className="row">
-                <div className="search-responsive" onClick={showBar}>
-                  <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="40"
-                      height="40"
-                      fill="white"
-                      className="bi bi-arrow-bar-right"
-                      viewBox="0 0 16 16"
-                  >
-                    <path
-                        fillRule="evenodd"
-                        d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8m-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5"
-                    />
-                  </svg>
-                </div>
+      <div key={pageKey}>
+        {loading && <PageLoader label="データを読み込み中..." className="h-[calc(100vh-4rem)]" />}
 
-                <div className={`show-side-bar ${show ? 'show' : 'hide'}`}>
-                  {<Sidebar
-                      users={users}
-                      selectedUser={selectedUser}
-                      selectedBike={selectedBike}
-                      selectedDevice={selectedDevice}
-                      device={device}
-                      engine={engine}
-                      startDate={startDate}
-                      endDate={endDate}
-                      setStartDate={setStartDate}
-                      setEndDate={setEndDate}
-                      handleSelect={handleSelection}
-                      handleClick={handleClick}
-                      showModal={showModal}
-                      showEngModal={showEngModal}
-                      handleSimulationModal={handleSimulationModal}
-                      activeSimulations={activeSimulations}
-                      stopSimulation={stopSimulation}
-                      sosActive={SOSIsActive}
-                      allDevices={allDevices}
-                      onDeviceSelect={handleDeviceSelect}
-                      crossedKilometers={displayedCrossedKilometers}
-                      isDateRangeLoading={isDateRangeLoading}
-                  />}
-                </div>
+        {!loading && homeError && (
+            <div className="flex h-[calc(100vh-4rem)] items-center justify-center px-4">
+              <ErrorState message={homeError} onRetry={fetchHomeData} className="w-full max-w-md" />
+            </div>
+        )}
 
-                <div className={'col col-12 col-md-9 map-col  map-col-fix '}>
-                  {!Utils.isEmptyObject(device) && (
-                      <APIProvider
-                          apiKey={API_KEY}
-                          libraries={['marker']}
-                      >
-                        <CutomMap
-                            device={device}
-                            movements={displayedMovements}
-                            key={`map-${selectedDevice?.imsi}`}
-                            range={range}
-                            showModal={showModal}
-                            onMapReady={(panFunc) => (panToDeviceRef.current = panFunc)}
-                        />
-                      </APIProvider>
-                  )}
-                </div>
+        {!loading && !homeError && (
+            <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+              {/* Map */}
+              <div className="relative min-w-0 flex-1 bg-bg p-3">
+                <button
+                    type="button"
+                    onClick={showBar}
+                    aria-label="Open sidebar"
+                    className="absolute left-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-surface text-text shadow-lg lg:hidden"
+                >
+                  <FaBars size={16} />
+                </button>
 
-                {<Sidebar
-                    users={users}
-                    selectedUser={selectedUser}
-                    selectedBike={selectedBike}
-                    selectedDevice={selectedDevice}
-                    device={device}
-                    engine={engine}
-                    startDate={startDate}
-                    endDate={endDate}
-                    setStartDate={setStartDate}
-                    setEndDate={setEndDate}
-                    handleSelect={handleSelection}
-                    handleClick={handleClick}
-                    showModal={showModal}
-                    showEngModal={showEngModal}
-                    handleSimulationModal={handleSimulationModal}
-                    activeSimulations={activeSimulations}
-                    stopSimulation={stopSimulation}
-                    sosActive={SOSIsActive}
-                    allDevices={allDevices}
-                    onDeviceSelect={handleDeviceSelect}
-                    crossedKilometers={displayedCrossedKilometers}
-                    isDateRangeLoading={isDateRangeLoading}
-                />}
+                {deviceLoading && (
+                    <div className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-text-muted shadow-lg">
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      更新中...
+                    </div>
+                )}
+
+                {!Utils.isEmptyObject(device) && (
+                    <APIProvider
+                        apiKey={API_KEY}
+                        libraries={['marker']}
+                    >
+                      <CutomMap
+                          device={device}
+                          movements={displayedMovements}
+                          key={`map-${selectedDevice?.imsi}`}
+                          range={range}
+                          showModal={showModal}
+                          onMapReady={(panFunc) => (panToDeviceRef.current = panFunc)}
+                      />
+                    </APIProvider>
+                )}
               </div>
+
+              {/* Desktop sidebar */}
+              <div className="hidden w-96 shrink-0 overflow-y-auto border-l border-border bg-bg lg:block">
+                <Sidebar {...sidebarProps} />
+              </div>
+
+              {/* Mobile sidebar drawer */}
+              {show && (
+                  <div className="fixed inset-x-0 bottom-0 top-16 z-30 lg:hidden">
+                    <div
+                        className="absolute inset-0 bg-slate-950/50"
+                        onClick={showBar}
+                    />
+                    <div className="absolute inset-y-0 right-0 w-[85%] max-w-sm overflow-y-auto bg-bg shadow-2xl">
+                      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                        <span className="text-sm font-semibold text-text">Menu</span>
+                        <button
+                            type="button"
+                            onClick={showBar}
+                            aria-label="Close sidebar"
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted hover:bg-surface-hover"
+                        >
+                          <FaTimes size={14} />
+                        </button>
+                      </div>
+                      <Sidebar {...sidebarProps} />
+                    </div>
+                  </div>
+              )}
 
               {showMonitoring && (
                   <MonitoringModal
                       device={device}
                       updateRange={updateRange}
-                      range={range}
-                      SOSIsActive={SOSIsActive}
-                      setSOSIsActive={setSOSIsActive}
                   />
               )}
 

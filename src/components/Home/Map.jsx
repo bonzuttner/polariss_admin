@@ -1,5 +1,5 @@
 // Refactored CutomMap.jsx with helper functions
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import {
   Map,
   useMap,
@@ -7,13 +7,18 @@ import {
   AdvancedMarker,
   useAdvancedMarkerRef,
   Pin,
+  MapControl,
+  ControlPosition,
 } from '@vis.gl/react-google-maps';
+import { FaPlus, FaMinus, FaCrosshairs, FaBicycle } from 'react-icons/fa';
 import { DeviceService } from '../../api/deviceService.js';
 import {
   getMarkerLabel,
   getMarkerPosition,
 } from "../utils/mapUtils.js";
 import { renderDeviceInfoWindow } from "./renderInfoWindow.jsx";
+import { useTheme } from '../../context/ThemeContext.jsx';
+import { PageLoader } from '../common/PageLoader.jsx';
 
 // necessary hooks
 import { useFetchNearbyDevices } from "../../hooks/useFetchNearbyDevices.js";
@@ -21,6 +26,12 @@ import { usePolylineAndCircleUpdater } from "../../hooks/usePolylineAndCircleUpd
 import { useNearbyDeviceCircles } from "../../hooks/useNearbyDeviceCircles.js";
 import { useMapIdleListener } from "../../hooks/useMapIdleListner.js";
 import { usePanToDevice } from "../../hooks/usePanToDevice.js";
+
+function readCssColor(varName, fallback) {
+  if (typeof document === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return value ? `rgb(${value})` : fallback;
+}
 
 
 const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === 'true';
@@ -50,6 +61,22 @@ export default function CutomMap(props) {
   const maps = useMapsLibrary('maps');
   const [markerRef, marker] = useAdvancedMarkerRef();
   const { panToDevice } = usePanToDevice();
+  const { theme } = useTheme();
+
+  const markerColors = useMemo(() => ({
+    background: readCssColor('--token-primary', '#4611a7'),
+    borderColor: readCssColor('--token-primary-fg', '#ffffff'),
+    glyphColor: readCssColor('--token-primary-fg', '#ffffff'),
+  }), [theme]);
+
+  const nearbyMarkerColors = useMemo(() => {
+    const fg = readCssColor('--token-primary-fg', '#ffffff');
+    return {
+      sos: { background: readCssColor('--token-danger', '#dc2626'), borderColor: fg, glyphColor: fg },
+      mutual: { background: readCssColor('--token-success', '#16a34a'), borderColor: fg, glyphColor: fg },
+      neutral: { background: readCssColor('--token-text-muted', '#64748b'), borderColor: fg, glyphColor: fg },
+    };
+  }, [theme]);
 
 
   // Use the nearby device circles hook
@@ -116,25 +143,83 @@ export default function CutomMap(props) {
   useAnimationCleanup(animationRef);
   usePolylineAndCircleUpdater({ map, maps, movements, device, markerPosition, setHasLastLocation });
 
-  if (!maps) return null;
+  const handleZoomIn = useCallback(() => {
+    if (!map) return;
+    map.setZoom((map.getZoom() ?? DEFAULT_ZOOM_IN) + 1);
+  }, [map]);
+
+  const handleZoomOut = useCallback(() => {
+    if (!map) return;
+    map.setZoom((map.getZoom() ?? DEFAULT_ZOOM_IN) - 1);
+  }, [map]);
+
+  const handleRecenter = useCallback(() => {
+    panToDevice(device, { animate: true, zoomInLevel: DEFAULT_ZOOM_IN });
+  }, [panToDevice, device]);
+
+  if (!maps) {
+    return (
+        <div className="flex h-full w-full items-center justify-center rounded-2xl border border-border bg-surface">
+          <PageLoader label="地図を読み込み中..." />
+        </div>
+    );
+  }
 
   return (
       <Map
+          className="relative h-full w-full overflow-hidden rounded-2xl border border-border shadow-xl"
           defaultCenter={center}
           defaultZoom={zoom}
           gestureHandling={'greedy'}
-          disableDefaultUI={false}
+          disableDefaultUI={true}
+          clickableIcons={false}
+          colorScheme={theme === 'dark' ? 'DARK' : 'LIGHT'}
           mapId="4504f8b37365c3d0"
           reuseMaps={true}
       >
+        <MapControl position={ControlPosition.RIGHT_BOTTOM}>
+          <div className="mb-2 mr-3 flex flex-col items-end gap-2">
+            <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
+              <button
+                  type="button"
+                  onClick={handleZoomIn}
+                  aria-label="ズームイン"
+                  className="flex h-9 w-9 items-center justify-center text-text transition hover:bg-surface-hover"
+              >
+                <FaPlus size={12} />
+              </button>
+              <div className="h-px bg-border" />
+              <button
+                  type="button"
+                  onClick={handleZoomOut}
+                  aria-label="ズームアウト"
+                  className="flex h-9 w-9 items-center justify-center text-text transition hover:bg-surface-hover"
+              >
+                <FaMinus size={12} />
+              </button>
+            </div>
+
+            {shouldShowMarker && (
+                <button
+                    type="button"
+                    onClick={handleRecenter}
+                    aria-label="デバイスの位置に戻る"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-text shadow-lg transition hover:bg-surface-hover"
+                >
+                  <FaCrosshairs size={14} />
+                </button>
+            )}
+          </div>
+        </MapControl>
+
         {shouldShowMarker && (
             <AdvancedMarker
                 position={markerPosition}
                 ref={markerRef}
                 title={markerLabel}
                 onClick={() => setMarkerInfo(true)}>
-              <Pin background={'#4611a7'} borderColor={'white'} glyphColor={'white'}>
-                {markerLabel}
+              <Pin {...markerColors} scale={1.1}>
+                <FaBicycle color={markerColors.glyphColor} size={14} />
               </Pin>
             </AdvancedMarker>
         )}
@@ -155,6 +240,11 @@ export default function CutomMap(props) {
           // - Normal → only SOS ones
            if (!SIMULATION_MODE && !item.device.hasSOSEnabled) return null;
 
+          const nearbyColors = item.device?.hasSOSEnabled
+              ? nearbyMarkerColors.sos
+              : item.device?.hasMutualMonitoring
+                  ? nearbyMarkerColors.mutual
+                  : nearbyMarkerColors.neutral;
 
           return (
               <AdvancedMarker
@@ -162,14 +252,14 @@ export default function CutomMap(props) {
                   position={{ lat: loc.lat, lng: loc.lon }}
                   title={markerLabel}
               >
-                <Pin background={'#4611a7'} borderColor={'white'} glyphColor={'white'}>
-                  {markerLabel}
+                <Pin {...nearbyColors} scale={0.85}>
+                  <FaBicycle color={nearbyColors.glyphColor} size={11} />
                 </Pin>
               </AdvancedMarker>
           );
         })}
 
-        {markerInfo && renderDeviceInfoWindow({ device, marker, handleClose: () => setMarkerInfo(false), showModal })}
+        {markerInfo && renderDeviceInfoWindow({ device, movements, marker, handleClose: () => setMarkerInfo(false), showModal })}
       </Map>
   );
 }

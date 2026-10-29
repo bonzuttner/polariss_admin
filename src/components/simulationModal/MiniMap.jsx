@@ -132,7 +132,7 @@ const MiniMap = ({ onStartChange, onEndChange, onHoverChange, initialStart, devi
 
 
     return (
-        <div style={{ position: 'relative', height: '100%' }}>
+        <div className="relative h-full">
             {/*conditional reordering for the device marker if exits*/}
             {devices.map((item, idx) => {
                 const loc = item.device?.location;
@@ -157,7 +157,7 @@ const MiniMap = ({ onStartChange, onEndChange, onHoverChange, initialStart, devi
                         title={markerLabel}
                     >
                         <Pin
-                            background={'#007bff'}
+                            background={'#64748b'}
                             borderColor={'white'}
                             glyphColor={'white'}
 
@@ -172,7 +172,7 @@ const MiniMap = ({ onStartChange, onEndChange, onHoverChange, initialStart, devi
                     lng: device.lastLocation.lon
                 } : DEFAULT_CENTER}  >
                     <Pin
-                        background={'purple'}
+                        background={'#4611a7'}
                         borderColor={'white'}
                         glyphColor={'white'}
                         style={{ zIndex: 2000 }}
@@ -203,31 +203,30 @@ const MiniMap = ({ onStartChange, onEndChange, onHoverChange, initialStart, devi
             )}
 
             {/* Clear Button */}
-            <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 100000 }}>
+            <div className="absolute right-2.5 top-2.5 z-[100000]">
                 <button
                     onClick={clearMarkers}
-                    className="btn btn-sm btn-danger"
-                    style={{ opacity: 0.8 }}
+                    className="rounded-md bg-red-600/90 px-3 py-1.5 text-xs font-medium text-white shadow transition hover:bg-red-600"
                 >
-                    終了地点をクリア
+                    Clear End Point
                 </button>
             </div>
 
             {/* Coordinates Display */}
-            <div style={{ position: 'absolute', bottom: '10px', left: '10px', zIndex: 1, background: 'rgba(255,255,255,0.8)', padding: '5px', borderRadius: '4px' }}>
+            <div className="absolute bottom-2.5 left-2.5 z-[1] rounded-md bg-white/90 px-2.5 py-1.5 shadow">
                 {start && (
-                    <div className="text-muted small">
-                        <strong>開始:</strong> {start.lat().toFixed(6)}, {start.lng().toFixed(6)}
+                    <div className="text-xs text-slate-600">
+                        <strong className="text-slate-800">Start:</strong> {start.lat().toFixed(6)}, {start.lng().toFixed(6)}
                     </div>
                 )}
                 {end && (
-                    <div className="text-muted small">
-                        <strong>終了:</strong> {end.lat().toFixed(6)}, {end.lng().toFixed(6)}
+                    <div className="text-xs text-slate-600">
+                        <strong className="text-slate-800">End:</strong> {end.lat().toFixed(6)}, {end.lng().toFixed(6)}
                     </div>
                 )}
                 {!end && start && (
-                    <div className="text-muted small">
-                        クリックして終了地点を設定
+                    <div className="text-xs text-slate-600">
+                        Click to set end point
                     </div>
                 )}
             </div>

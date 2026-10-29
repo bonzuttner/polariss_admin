@@ -1,12 +1,67 @@
 import { useState, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import Utils from '../utils/utils.js';
-import { FaSearch, FaTimes } from 'react-icons/fa';
+import {
+    FaSearch,
+    FaTimes,
+    FaMotorcycle,
+    FaCompass,
+    FaClock,
+    FaShieldAlt,
+    FaBell,
+    FaExclamationTriangle,
+    FaCalendarAlt,
+    FaChevronDown,
+} from 'react-icons/fa';
+import Card from '../common/Card.jsx';
+import { Button, Spinner } from '../common/Button.jsx';
+import Pill from '../common/Pill.jsx';
+import SpeedHeadingIndicator from '../common/SpeedHeadingIndicator.jsx';
+import { getDeviceSpeedKmph, getDeviceHeadingDeg } from '../utils/motionUtils.js';
+import { inputClass, labelClass } from '../../styles/formClasses.js';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
 const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "true";
 const MONITORING_MODE = import.meta.env.VITE_MONITORING_MODE === "true";
+
+function StatusRow({ icon: Icon, label, children }) {
+    return (
+        <div className="flex items-center justify-between gap-3">
+            <span className="flex items-center gap-2 text-sm text-text-muted">
+                <Icon className="text-text-faint" size={13} />
+                {label}
+            </span>
+            {children}
+        </div>
+    );
+}
+
+function SwitcherSelect({ label, value, onChange, options, disabled }) {
+    return (
+        <div className="relative min-w-0 flex-1 px-3 py-2">
+            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-text-faint">
+                {label}
+            </div>
+            <select
+                className="w-full appearance-none truncate bg-transparent pr-4 text-sm font-medium text-text outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                value={value}
+                onChange={onChange}
+                disabled={disabled}
+            >
+                {options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                    </option>
+                ))}
+            </select>
+            <FaChevronDown
+                size={9}
+                className="pointer-events-none absolute bottom-2.5 right-3 text-text-faint"
+            />
+        </div>
+    );
+}
 
 function Sidebar({
     users,
@@ -14,6 +69,7 @@ function Sidebar({
     selectedBike,
     selectedDevice,
     device,
+    movements,
     engine,
     startDate,
     endDate,
@@ -58,412 +114,318 @@ function Sidebar({
         maximumFractionDigits: 2
     });
 
+    const statusIsWarning = device?.deviceStatus === '要確認';
+
     return (
-        <div className={`col col-md-3 results-wrapper p-2`} style={{ backgroundColor: '#f3f3f3' }}>
-
-            <div className="row sidebar-wrapper p-4">
-                {/* Date Picker Section */}
-                <div className="card shadow-sm border-0">
-                    <div className="card-body">
-                        <form onSubmit={(e) => e.preventDefault()}>
-                            <div className="d-flex align-items-center justify-content-between mb-3">
-                                <h5 className="mb-0">選択</h5>
+        <div className="flex flex-col gap-4 p-4">
+            {/* Identity + switcher */}
+            <Card className="overflow-hidden py-0">
+                <div className="bg-gradient-to-br from-primary to-accent px-4 py-5 text-primary-fg">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl ring-1 ring-white/25">
+                            <FaMotorcycle />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="truncate text-lg font-semibold leading-tight">
+                                {selectedBike?.name || 'バイク未選択'}
                             </div>
-
-                            <div className="row g-3">
-                                {/* From */}
-                                <div className="col-12 col-md-6">
-                                    <label className="form-label fw-semibold" htmlFor="from-date">
-                                        開始日
-                                    </label>
-                                    <DatePicker
-                                        id="from-date"
-                                        selected={startDate}
-                                        onChange={(date) => setStartDate(date)}
-                                        showTimeSelect
-                                        timeFormat="HH:mm"
-                                        timeIntervals={15}
-                                        dateFormat="yyyy-MM-dd HH:mm"
-                                        timeCaption="時刻"
-                                        placeholderText="開始日時を選択"
-                                        showMonthDropdown
-                                        showYearDropdown
-                                        dropdownMode="select"
-                                        isClearable
-                                        className="form-control form-control-sm"
-                                        wrapperClassName="w-100"
-                                        popperPlacement="bottom-start"
-                                    />
-                                </div>
-
-                                {/* To */}
-                                <div className="col-12 col-md-6">
-                                    <label className="form-label fw-semibold" htmlFor="to-date">
-                                        終了日
-                                    </label>
-                                    <DatePicker
-                                        id="to-date"
-                                        selected={endDate}
-                                        onChange={(date) => setEndDate(date)}
-                                        showTimeSelect
-                                        timeFormat="HH:mm"
-                                        timeIntervals={15}
-                                        dateFormat="yyyy-MM-dd HH:mm"
-                                        timeCaption="時刻"
-                                        placeholderText="終了日時を選択"
-                                        showMonthDropdown
-                                        showYearDropdown
-                                        dropdownMode="select"
-                                        isClearable
-                                        minDate={startDate}
-                                        className="form-control form-control-sm"
-                                        wrapperClassName="w-100"
-                                        popperPlacement="bottom-end"
-                                    />
-                                </div>
+                            <div className="truncate text-xs text-primary-fg/75">
+                                {selectedUser?.nickname || '-'} ・ {selectedDevice?.name || 'デバイス未選択'}
                             </div>
-
-                            <div className="rounded bg-light border px-3 py-2 mt-4">
-                                <div className="small text-muted">走行距離</div>
-                                <div className="d-flex align-items-center gap-2 fw-semibold mt-1">
-                                    {isDateRangeLoading && (
-                                        <span
-                                            className="spinner-border spinner-border-sm text-primary"
-                                            role="status"
-                                            aria-hidden="true"
-                                        />
-                                    )}
-                                    <span>{isDateRangeLoading ? '計算中...' : `${formattedCrossedKilometers} km`}</span>
-                                </div>
-                            </div>
-
-                            <div className="d-flex justify-content-end mt-4">
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary px-4"
-                                    onClick={handleClick}
-                                    disabled={disabled || isDateRangeLoading}
-                                    title={disabled ? "開始日と終了日の両方を選択してください" : ""}
-                                >
-                                    {isDateRangeLoading && (
-                                        <span
-                                            className="spinner-border spinner-border-sm me-2"
-                                            role="status"
-                                            aria-hidden="true"
-                                        />
-                                    )}
-                                    {isDateRangeLoading ? '更新中...' : '更新'}
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
 
-                {allDevices.length > 1 && (
-                    <div className="row justify-content-center mt-5">
-                        <div className="col-12">
-                            <div className="card shadow-sm border-0">
-                                <div className="card-body">
-                                    {/* Global Search Box */}
-                                    <label htmlFor="device-global-search" className="form-label fw-semibold">
-                                        全デバイスを検索
-                                    </label>
-
-                                    <div className="input-group">
-                                        <span className="input-group-text">
-                                            <FaSearch />
-                                        </span>
-                                        <input
-                                            id="device-global-search"
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="デバイスを検索..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            lang="ja"
-                                            inputMode="text"
-                                            style={{ fontFamily: 'Arial, "Hiragino Sans", Meiryo, sans-serif' }}
-                                            aria-describedby="device-search-help"
-                                            autoComplete="off"
-                                        />
-                                        {hasQuery && (
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-secondary"
-                                                onClick={() => setSearchQuery("")}
-                                                aria-label="検索をクリア"
-                                            >
-                                                <FaTimes />
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {/* Search Results */}
-                                    {hasQuery && (
-                                        <div className="device-results mt-3">
-                                            {filteredDevices.length > 0 ? (
-                                                <ul className="list-group list-group-flush">
-                                                    {filteredDevices.map((device) => {
-                                                        const isActive = device.imsi === selectedDevice?.imsi;
-                                                        return (
-                                                            <li
-                                                                key={`${device.userId}-${device.bikeId}-${device.imsi}`}
-                                                                className={`list-group-item d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-1 pointer ${isActive ? "active" : ""}`}
-                                                                role="button"
-                                                                onClick={() => {
-                                                                    onDeviceSelect(device);
-                                                                    setSearchQuery("");
-                                                                }}
-                                                            >
-                                                                <div className="fw-semibold text-truncate">
-                                                                    {device.userName} <span className="text-muted">&gt;</span> {device.bikeName}{" "}
-                                                                    <span className="text-muted">&gt;</span> {device.name}
-                                                                </div>
-                                                                <div className={`small ${isActive ? "text-white-50" : "text-muted"}`}>
-                                                                    IMSI: {device.imsi}
-                                                                </div>
-                                                            </li>
-                                                        );
-                                                    })}
-                                                </ul>
-                                            ) : (
-                                                <div className="text-muted small py-2 px-1">デバイスが見つかりません</div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Selection Dropdowns */}
-                <div className="search-form-container mt-4">
-                    <form>
-                        {/* User Selection */}
-                        <div className="form-group mb-3">
-                            <select
-                                className="form-control"
-                                name="user"
-                                value={selectedUser?.id || ''}
-                                onChange={(event) => handleLocalSelect('user', event)}
-                            >
-                                {users.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.nickname}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Bike Selection */}
-                        <div className="form-group mb-3">
-                            <select
-                                className="form-control"
-                                name="bike"
-                                onChange={(event) => handleLocalSelect('bike', event)}
-                                value={selectedBike?.id || ''}
-                            >
-                                {selectedUser?.bikes?.map((bike) => (
-                                    <option key={bike.id} value={bike.id}>
-                                        {bike.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Device Selection */}
-                        <div className="form-group mb-0">
-                            <select
-                                className="form-control"
-                                name="device"
-                                onChange={(event) => handleLocalSelect('device', event)}
-                                value={selectedDevice?.id || ''}
-                            >
-                                {selectedBike?.devices?.map((device) => (
-                                    <option key={device.id} value={device.id}>
-                                        {device.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </form>
+                <div className="flex divide-x divide-border border-t border-border">
+                    <SwitcherSelect
+                        label="User"
+                        value={selectedUser?.id || ''}
+                        onChange={(event) => handleLocalSelect('user', event)}
+                        options={users.map((user) => ({ value: user.id, label: user.nickname }))}
+                    />
+                    <SwitcherSelect
+                        label="Bike"
+                        value={selectedBike?.id || ''}
+                        onChange={(event) => handleLocalSelect('bike', event)}
+                        options={(selectedUser?.bikes || []).map((bike) => ({ value: bike.id, label: bike.name }))}
+                        disabled={!selectedUser?.bikes?.length}
+                    />
+                    <SwitcherSelect
+                        label="Device"
+                        value={selectedDevice?.id || ''}
+                        onChange={(event) => handleLocalSelect('device', event)}
+                        options={(selectedBike?.devices || []).map((d) => ({ value: d.id, label: d.name }))}
+                        disabled={!selectedBike?.devices?.length}
+                    />
                 </div>
+            </Card>
 
-                {/* Simulation Section */}
-                {SIMULATION_MODE && (
-                    <div className="simulation-form-container">
-                        <form>
-                            {/* Engine Control */}
-                            {!Utils.isEmptyObject(engine) && (
-                                <div className="row align-items-center mb-3">
-                                    <div className="col-6 fw-bold">エンジン制御：</div>
-                                    <div className="col-6">
-                                        <button
-                                            type="button"
-                                            onClick={showEngModal}
-                                            className={`btn w-100 ${engine?.engineStatus === 'OFF'
-                                                ? 'btn-outline-primary'
-                                                : 'btn-primary'
-                                                }`}
-                                        >
-                                            {engine?.engineStatus}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+            {/* Global device search */}
+            {allDevices.length > 1 && (
+                <Card>
+                    <Card.Body>
+                        <label htmlFor="device-global-search" className={labelClass}>
+                            Search all devices
+                        </label>
 
-                            <hr />
-
-                            {/* Simulation Controls */}
-                            <div className="row mt-3">
-                                <div className="col-12">
-                                    {activeSimulations[selectedBike?.id] ? (
-                                        <button
-                                            type="button"
-                                            className="btn btn-danger w-100"
-                                            onClick={async () => {
-                                                await stopSimulation(selectedBike.id);
-                                                handleClick();
-                                            }}
-                                        >
-                                            シミュレーション停止
-                                        </button>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            className="btn btn-primary w-100"
-                                            onClick={handleSimulationModal}
-                                        >
-                                            シミュレーション作成
-                                        </button>
-                                    )}
-                                </div>
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-faint" size={13} />
+                                <input
+                                    id="device-global-search"
+                                    type="text"
+                                    className={`${inputClass} pl-9`}
+                                    placeholder="Search all devices... / デバイスを検索..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    lang="ja"
+                                    inputMode="text"
+                                    aria-describedby="device-search-help"
+                                    autoComplete="off"
+                                />
                             </div>
-                        </form>
-                    </div>
-                )}
-
-                {/* Device Status Section */}
-                <div className="device-card">
-                    <form onSubmit={(e) => e.preventDefault()}>
-                        {/* Device Status */}
-                        <div className="row align-items-center mt-3 px-1">
-                            <div className="col-6">デバイスステータス：</div>
-                            <div className="col-6 text-end text-md-start">
-                                <span
-                                    className={`pill ${device?.deviceStatus === '要確認' ? 'pill-warning' : 'pill-muted'
-                                        }`}
-                                >
-                                    {device?.deviceStatus ?? '-'}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* 通知受付 */}
-                        <div className="row align-items-center mt-4 px-1">
-                            <div className="col-6">通知受付:</div>
-                            <div className="col-6">
-                                {device?.monitoringActive ? (
-                                    <button
-                                        type="button"
-                                        className="btn btn-success w-100"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            // toggle/handle here if needed
-                                        }}
-                                    >
-                                        オン
-                                    </button>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        className="btn btn-secondary w-100"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            // toggle/handle here if needed
-                                        }}
-                                    >
-                                        オフ
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* 通信日時 */}
-                        <div className="row align-items-center mt-4">
-                            <div className="col-6">通信日時</div>
-                            <div className="col-6 text-end text-md-start">
-                                <span className="text-muted">
-                                    {device?.lastLocation?.dt?.replace('T', ' ') || '-'}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* 監視モード */}
-                        <div className="row align-items-center mt-4">
-                            <div className="col-6">監視モード：</div>
-                            <div className="col-6">
+                            {hasQuery && (
                                 <button
                                     type="button"
-                                    className={`btn w-100 ${device?.monitoringActive ? 'btn-outline-primary' : 'btn-primary'
-                                        }`}
-                                    onClick={showModal}
+                                    onClick={() => setSearchQuery("")}
+                                    aria-label="Clear search"
+                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-text-muted transition hover:bg-surface-hover"
                                 >
-                                    {device?.monitoringActive ? '監視中' : '解除中'}
+                                    <FaTimes size={13} />
                                 </button>
+                            )}
+                        </div>
+
+                        {hasQuery && (
+                            <div className="mt-3 max-h-72 overflow-y-auto rounded-lg border border-border">
+                                {filteredDevices.length > 0 ? (
+                                    <ul className="divide-y divide-border">
+                                        {filteredDevices.map((d) => {
+                                            const isActive = d.imsi === selectedDevice?.imsi;
+                                            return (
+                                                <li
+                                                    key={`${d.userId}-${d.bikeId}-${d.imsi}`}
+                                                    role="button"
+                                                    onClick={() => {
+                                                        onDeviceSelect(d);
+                                                        setSearchQuery("");
+                                                    }}
+                                                    className={`flex cursor-pointer flex-col gap-0.5 px-3 py-2 transition ${
+                                                        isActive
+                                                            ? 'bg-primary text-primary-fg'
+                                                            : 'hover:bg-surface-hover'
+                                                    }`}
+                                                >
+                                                    <div className="truncate text-sm font-medium">
+                                                        {d.userName} <span className="opacity-60">&gt;</span> {d.bikeName}{" "}
+                                                        <span className="opacity-60">&gt;</span> {d.name}
+                                                    </div>
+                                                    <div className={`text-xs ${isActive ? 'text-primary-fg/70' : 'text-text-muted'}`}>
+                                                        IMSI: {d.imsi}
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                ) : (
+                                    <div className="px-3 py-3 text-sm text-text-muted">No devices found</div>
+                                )}
+                            </div>
+                        )}
+                    </Card.Body>
+                </Card>
+            )}
+
+            {/* Date range */}
+            <Card>
+                <Card.Body>
+                    <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-text">
+                        <FaCalendarAlt className="text-text-faint" size={13} />
+                        Select range
+                    </h2>
+
+                    <div className="grid grid-cols-1 gap-3">
+                        <div>
+                            <label className={labelClass} htmlFor="from-date">From date</label>
+                            <div className="relative">
+                                <FaCalendarAlt className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-text-faint" size={13} />
+                                <DatePicker
+                                    id="from-date"
+                                    selected={startDate}
+                                    onChange={(date) => setStartDate(date)}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="yyyy-MM-dd HH:mm"
+                                    timeCaption="Time"
+                                    placeholderText="Select start date & time"
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                    isClearable
+                                    className={`${inputClass} pl-9`}
+                                    wrapperClassName="w-full"
+                                    popperPlacement="bottom-start"
+                                    portalId="datepicker-portal"
+                                />
                             </div>
                         </div>
 
-                        {/* SOS (only in MONITORING_MODE) */}
-                        {MONITORING_MODE && (
-                            <div className="row align-items-center mt-4">
-                                <div className="col-6">MM：</div>
-                                <div className="col-6">
-                                    {sosActive ? (
-                                        <button
-                                            type="button"
-                                            className="btn btn-danger w-100"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            オン
-                                        </button>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline-danger w-100"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            オフ
-                                        </button>
-                                    )}
-                                </div>
+                        <div>
+                            <label className={labelClass} htmlFor="to-date">To date</label>
+                            <div className="relative">
+                                <FaCalendarAlt className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-text-faint" size={13} />
+                                <DatePicker
+                                    id="to-date"
+                                    selected={endDate}
+                                    onChange={(date) => setEndDate(date)}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="yyyy-MM-dd HH:mm"
+                                    timeCaption="Time"
+                                    placeholderText="Select end date & time"
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                    isClearable
+                                    minDate={startDate}
+                                    className={`${inputClass} pl-9`}
+                                    wrapperClassName="w-full"
+                                    popperPlacement="bottom-end"
+                                    portalId="datepicker-portal"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 rounded-lg border border-border bg-bg px-3 py-2">
+                        <div className="text-xs text-text-muted">Crossed distance</div>
+                        <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-text">
+                            {isDateRangeLoading && <Spinner className="text-primary" />}
+                            <span>{isDateRangeLoading ? 'Calculating...' : `${formattedCrossedKilometers} km`}</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex justify-end">
+                        <Button
+                            type="submit"
+                            onClick={handleClick}
+                            disabled={disabled || isDateRangeLoading}
+                            loading={isDateRangeLoading}
+                            title={disabled ? "Please select both start and end dates" : ""}
+                        >
+                            {isDateRangeLoading ? 'Updating...' : '更新'}
+                        </Button>
+                    </div>
+                </Card.Body>
+            </Card>
+
+            {/* Simulation */}
+            {SIMULATION_MODE && (
+                <Card>
+                    <Card.Body className="flex flex-col gap-3">
+                        {!Utils.isEmptyObject(engine) && (
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-sm font-semibold text-text">エンジン制御：</span>
+                                <Button
+                                    variant={engine?.engineStatus === 'OFF' ? 'outline' : 'primary'}
+                                    onClick={showEngModal}
+                                >
+                                    {engine?.engineStatus}
+                                </Button>
                             </div>
                         )}
 
-                        {/* バッテリー */}
-                        <div className="row align-items-center mt-4">
-                            <div className="col-6">バッテリー：</div>
-                            <div className="col-6 text-end text-md-start">
-                                <span className="pill pill-muted">
-                                    {device?.lastLocation?.bat ?? '-'}
-                                </span>
-                            </div>
-                        </div>
+                        {activeSimulations[selectedBike?.id] ? (
+                            <Button
+                                variant="danger"
+                                fullWidth
+                                onClick={async () => {
+                                    await stopSimulation(selectedBike.id);
+                                    handleClick();
+                                }}
+                            >
+                                Stop Simulation
+                            </Button>
+                        ) : (
+                            <Button fullWidth onClick={handleSimulationModal}>
+                                Create Simulation
+                            </Button>
+                        )}
+                    </Card.Body>
+                </Card>
+            )}
 
-                        <hr className="my-4" />
-                    </form>
-                </div>
+            {/* Device status */}
+            <Card>
+                <Card.Header className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-text">Device Status</span>
+                    <span className="flex items-center gap-1.5">
+                        <span
+                            className={`h-2 w-2 rounded-full ${
+                                statusIsWarning ? 'bg-warning' : 'bg-success'
+                            }`}
+                        />
+                        <Pill tone={statusIsWarning ? 'warning' : 'success'}>
+                            {device?.deviceStatus ?? '-'}
+                        </Pill>
+                    </span>
+                </Card.Header>
 
-            </div>
+                <Card.Body className="flex flex-col gap-4">
+                    <StatusRow icon={FaBell} label="通知受付">
+                        <Button
+                            variant={device?.monitoringActive ? 'success' : 'secondary'}
+                            className="min-w-[6rem]"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                        >
+                            {device?.monitoringActive ? 'ON' : 'OFF'}
+                        </Button>
+                    </StatusRow>
+
+                    <StatusRow icon={FaClock} label="通信日時">
+                        <span className="text-sm text-text-muted">
+                            {device?.lastLocation?.dt?.replace('T', ' ') || '-'}
+                        </span>
+                    </StatusRow>
+
+                    <StatusRow icon={FaShieldAlt} label="監視モード">
+                        <Button
+                            variant={device?.monitoringActive ? 'outline' : 'primary'}
+                            className="min-w-[6rem]"
+                            onClick={showModal}
+                        >
+                            {device?.monitoringActive ? '監視中' : '解除中'}
+                        </Button>
+                    </StatusRow>
+
+                    {MONITORING_MODE && (
+                        <StatusRow icon={FaExclamationTriangle} label="MM">
+                            <Button
+                                variant={sosActive ? 'danger' : 'outline-danger'}
+                                className="min-w-[6rem]"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                }}
+                            >
+                                {sosActive ? 'ON' : 'OFF'}
+                            </Button>
+                        </StatusRow>
+                    )}
+
+                    <StatusRow icon={FaCompass} label="速度・方位">
+                        <SpeedHeadingIndicator
+                            speedKmph={getDeviceSpeedKmph(device, movements)}
+                            headingDeg={getDeviceHeadingDeg(device, movements)}
+                        />
+                    </StatusRow>
+                </Card.Body>
+            </Card>
         </div>
     );
 }

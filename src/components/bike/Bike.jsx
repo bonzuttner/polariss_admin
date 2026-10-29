@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Api from '../../api/Api';
 import ModalComponent from '../common/ModalComponent';
+import Card from '../common/Card.jsx';
+import { Button } from '../common/Button.jsx';
+import FormRow from '../common/FormRow.jsx';
+import PageLoader from '../common/PageLoader.jsx';
+import ErrorState from '../common/ErrorState.jsx';
+import ErrorBanner from '../common/ErrorBanner.jsx';
+import { inputClass } from '../../styles/formClasses.js';
+import { getApiErrorMessage } from '../../utils/apiError.js';
+import { FaCamera } from 'react-icons/fa';
 
 function Bike(props) {
   const { component } = props;
@@ -11,32 +21,32 @@ function Bike(props) {
   const type = location?.state;
 
   const [bike, setBike] = useState({});
-  const [user, setUser] = useState({});
   const [error, setError] = useState('');
   const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(''); // for local image state
-  const [imageLoading, setImageLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(Boolean(id));
+  const [loadError, setLoadError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
 
-  // ✅ Fetch bike details from /v2/bikes/<id>
   const getBikeDetails = async () => {
     if (!id) return;
     try {
-      setLoading(true);
-       const authHeader = localStorage.getItem('userId');
-
-
-        const response = await Api.call({}, `bikes/${id}`, 'get', authHeader);
-      if (response?.data?.data) {
+      setPageLoading(true);
+      setLoadError(null);
+      const authHeader = localStorage.getItem('userId');
+      const response = await Api.call({}, `bikes/${id}`, 'get', authHeader);
+      if (response?.data?.code === 200) {
         const bikeData = response.data.data;
         setBike(bikeData);
         setImageUrl(bikeData.image || '');
+      } else {
+        setLoadError(getApiErrorMessage(response, 'バイク情報の取得に失敗しました。'));
       }
     } catch (err) {
       console.error('Error fetching bike:', err);
-      setError('Failed to fetch bike details');
+      setLoadError('バイク情報の取得に失敗しました。通信状態を確認してください。');
     } finally {
-      setLoading(false);
+      setPageLoading(false);
     }
   };
 
@@ -55,13 +65,8 @@ function Bike(props) {
     }
   };
 
-  const handleRemoveImage = () => {
-    setImageUrl('');
-    setBike({ ...bike, image: '' });
-  };
-
   const updateBike = async () => {
-    setLoading(true); // start spinner
+    setSubmitting(true);
 
     const path = id ? `bikes/${id}` : `bikes`;
     const request_type = id ? `put` : `post`;
@@ -79,21 +84,14 @@ function Bike(props) {
     payload.append('sortNo', 1);
     payload.append('description', bike.description || '');
 
-
-    // if (!bike.image || imagePreview === "") {
-    //      // Case 2: Image was removed
-    //      payload.append('image', imagePreview);
-    //    }
-    // 🧠 Handle image upload/remove logic
     if (bike.image && typeof bike.image !== "string") {
-      // Case 1: New image file selected
       payload.append('image', bike.image);
     }
 
     try {
       const response = await Api.callFormData(payload, path, request_type, authId);
 
-      if (response.data.code === 200) {
+      if (response.data?.code === 200) {
         setError('');
         if (type === 'info') {
           navigate('/setting/user-info');
@@ -107,228 +105,121 @@ function Bike(props) {
           }
         }
       } else {
-        setError(response.data?.message || 'Error, Please try again!');
+        const message = getApiErrorMessage(response, 'バイク情報の保存に失敗しました。');
+        setError(message);
+        toast.error(message);
       }
     } catch (err) {
-      setError('An unexpected error occurred.');
+      console.error('Error saving bike:', err);
+      setError('バイク情報の保存に失敗しました。');
+      toast.error('バイク情報の保存に失敗しました。');
     } finally {
-      setLoading(false); // stop spinner
+      setSubmitting(false);
     }
   };
 
+  if (pageLoading) {
+    return <PageLoader label="バイク情報を読み込み中..." className="py-24" />;
+  }
+
+  if (loadError) {
+    return (
+      <div className="mx-auto my-10 w-full max-w-xl px-4">
+        <ErrorState message={loadError} onRetry={getBikeDetails} />
+      </div>
+    );
+  }
+
   return (
-      <div className="edit-card position-relative">
-        {loading && (
-            <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundColor: 'rgba(255,255,255,0.6)',
-                  zIndex: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'wait',
-                }}
-            >
-              <div className="spinner-border text-primary" role="status"></div>
-            </div>
-        )}
+      <div className="mx-auto my-10 w-full max-w-xl px-4">
+        <ErrorBanner>{error}</ErrorBanner>
 
-        {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-        )}
+        <Card>
+          <Card.Header>
+            <h4 className="text-lg font-semibold text-text">バイクデータ</h4>
+          </Card.Header>
 
-        <div className="card">
-          <div className="card-header p-3">
-            <h4>バイクデータ</h4>
-          </div>
+          <Card.Body className="flex flex-col gap-4">
+            <FormRow label="バイク名" htmlFor="name">
+              <input
+                  className={inputClass}
+                  id="name"
+                  value={bike?.name || ''}
+                  onChange={(event) => handleChange(event.target.value, 'name')}
+              />
+            </FormRow>
 
-          <form className="p-4">
-            {/* 🏍️ Bike Name */}
-            <div className="mb-3 row">
-              <label htmlFor="name" className="col-sm-4 col-form-label">
-                バイク名
-              </label>
-              <div className="col-sm-8">
-                <input
-                    className="form-control"
-                    id="name"
-                    value={bike?.name || ''}
-                    onChange={(event) => handleChange(event.target.value, 'name')}
-                />
+            <FormRow label="説明" htmlFor="description">
+              <input
+                  className={inputClass}
+                  id="description"
+                  value={bike?.description || ''}
+                  onChange={(event) => handleChange(event.target.value, 'description')}
+              />
+            </FormRow>
+
+            <FormRow label="画像">
+              <div
+                  className="group relative h-36 w-36 cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-border bg-bg transition hover:border-primary"
+                  onClick={() => document.getElementById('imageInput').click()}
+              >
+                {imageUrl ? (
+                    <>
+                      <img
+                          src={imageUrl}
+                          alt="Preview"
+                          className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-slate-950/50 opacity-0 transition group-hover:opacity-100">
+                        <span className="flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-medium text-slate-900">
+                          <FaCamera size={12} />
+                          置き換える
+                        </span>
+                      </div>
+                    </>
+                ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-text-faint">
+                      <FaCamera size={20} />
+                      <span className="text-center text-xs">クリックしてアップロード</span>
+                    </div>
+                )}
               </div>
-            </div>
 
-            {/* 📝 Description */}
-            <div className="mb-3 row">
-              <label htmlFor="description" className="col-sm-4 col-form-label">
-                説明
-              </label>
-              <div className="col-sm-8">
-                <input
-                    className="form-control"
-                    id="description"
-                    value={bike?.description || ''}
-                    onChange={(event) =>
-                        handleChange(event.target.value, 'description')
-                    }
-                />
-              </div>
-            </div>
+              <input
+                  type="file"
+                  id="imageInput"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e.target.files[0])}
+                  className="hidden"
+              />
+            </FormRow>
 
-            {/* 🖼️ Image Upload */}
-            <div className="mb-3 row">
-              <label htmlFor="image" className="col-sm-4 col-form-label">
-                画像
-              </label>
-              <div className="col-sm-8">
-                <div
-                    style={{
-                      position: 'relative',
-                      width: '150px',
-                      height: '150px',
-                      border: imageUrl ? 'none' : '2px dashed #ccc',
-                      borderRadius: '10px',
-                      backgroundColor: imageUrl ? 'transparent' : '#f8f9fa',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                    }}
-                    onClick={() => document.getElementById('imageInput').click()}
-                >
-                  {imageLoading ? (
-                      <div className="spinner-border text-primary" role="status" />
-                  ) : imageUrl ? (
-                      <>
-                        <img
-                            src={imageUrl}
-                            alt="Preview"
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              borderRadius: '10px',
-                            }}
-                        />
-                        <div
-                            className="image-overlay"
-                            style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              backgroundColor: 'rgba(0,0,0,0.5)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              opacity: 0,
-                              transition: 'opacity 0.3s',
-                            }}
-                            onMouseEnter={(e) =>
-                                (e.currentTarget.style.opacity = 1)
-                            }
-                            onMouseLeave={(e) =>
-                                (e.currentTarget.style.opacity = 0)
-                            }
-                        >
-                          <button
-                              className="btn btn-light btn-sm me-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                document.getElementById('imageInput').click();
-                              }}
-                          >
-                            置き換える
-                          </button>
-                          {/*<button*/}
-                          {/*    className="btn btn-danger btn-sm"*/}
-                          {/*    onClick={(e) => {*/}
-                          {/*      e.stopPropagation();*/}
-                          {/*      handleRemoveImage();*/}
-                          {/*    }}*/}
-                          {/*>*/}
-                          {/*  削除*/}
-                          {/*</button>*/}
-                        </div>
-                      </>
-                  ) : (
-                      <span style={{ color: '#999', fontSize: '14px' }}>
-                    クリックしてアップロード
-                  </span>
-                  )}
-                </div>
-
-                <input
-                    type="file"
-                    id="imageInput"
-                    accept="image/*"
-                    onChange={(e) => handleImageChange(e.target.files[0])}
-                    style={{ display: 'none' }}
-                />
-              </div>
-            </div>
-
-            {/* 🧭 Buttons */}
-            <div
-                className={`d-flex ${
-                    component !== 'setup'
-                        ? 'justify-content-between'
-                        : 'justify-content-end'
-                }`}
-            >
+            <div className={`mt-2 flex ${component !== 'setup' ? 'justify-between' : 'justify-end'}`}>
               {component !== 'setup' && (
-                  <button
-                      type="button"
-                      className="btn btn-outline-primary btn-sm px-3"
-                      onClick={() =>
-                          navigate(type === 'info' ? '/setting/user-info' : '/setting')
-                      }
+                  <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(type === 'info' ? '/setting/user-info' : '/setting')}
+                      disabled={submitting}
                   >
                     戻る
-                  </button>
+                  </Button>
               )}
 
-              <div className="d-flex justify-content-between">
+              <div className="flex items-center gap-3">
                 {id && (
-                    <button
-                        type="button"
-                        className="btn btn-danger btn-sm mx-3 px-2"
-                        onClick={() => setShow(true)}
-                    >
+                    <Button variant="danger" size="sm" onClick={() => setShow(true)} disabled={submitting}>
                       削除
-                    </button>
+                    </Button>
                 )}
 
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => updateBike()}
-                    disabled={loading}
-                    style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
-                >
-                  {loading ? (
-                      <>
-                    <span
-                        className="spinner-border spinner-border-sm me-2"
-                        role="status"
-                        aria-hidden="true"
-                    ></span>
-                        保存中...
-                      </>
-                  ) : (
-                      '更新'
-                  )}
-                </button>
+                <Button onClick={updateBike} loading={submitting}>
+                  {submitting ? '保存中...' : '更新'}
+                </Button>
               </div>
             </div>
-          </form>
-        </div>
+          </Card.Body>
+        </Card>
 
         {show && (
             <ModalComponent

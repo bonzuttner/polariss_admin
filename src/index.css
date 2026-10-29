@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles/datepicker-overrides.css";
+@import "./styles/map-overrides.css";
+
+/* Class-based dark mode: toggled via ThemeContext on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bg: rgb(var(--token-bg));
+  --color-surface: rgb(var(--token-surface));
+  --color-surface-raised: rgb(var(--token-surface-raised));
+  --color-surface-hover: rgb(var(--token-surface-hover));
+  --color-border: rgb(var(--token-border));
+  --color-border-strong: rgb(var(--token-border-strong));
+
+  --color-text: rgb(var(--token-text));
+  --color-text-muted: rgb(var(--token-text-muted));
+  --color-text-faint: rgb(var(--token-text-faint));
+
+  --color-primary: rgb(var(--token-primary));
+  --color-primary-hover: rgb(var(--token-primary-hover));
+  --color-primary-fg: rgb(var(--token-primary-fg));
+
+  --color-accent: rgb(var(--token-accent));
+
+  --color-success: rgb(var(--token-success));
+  --color-success-bg: rgb(var(--token-success-bg));
+  --color-warning: rgb(var(--token-warning));
+  --color-warning-bg: rgb(var(--token-warning-bg));
+  --color-danger: rgb(var(--token-danger));
+  --color-danger-bg: rgb(var(--token-danger-bg));
+
+  --font-sans: 'Inter', 'Hiragino Sans', 'Yu Gothic', Meiryo, system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: rgb(var(--token-bg));
+  color: rgb(var(--token-text));
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100%;
+  overflow-x: hidden;
+}

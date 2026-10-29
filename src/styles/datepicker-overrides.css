@@ -1,0 +1,176 @@
+/* react-datepicker renders its own internal DOM that Tailwind utility
+   classes can't reach directly, so it's themed here with the same design
+   tokens (src/styles/tokens.css) used everywhere else. */
+
+.react-datepicker-wrapper {
+  width: 100%;
+  display: block;
+}
+
+.react-datepicker-popper {
+  z-index: 60;
+}
+
+/* Animated on the inner box, not .react-datepicker-popper itself - that
+   outer element has its position set via an inline `transform` from
+   Popper.js, and a CSS animation on the same property would fight it,
+   causing the calendar to flash in the wrong spot before snapping into
+   place. */
+@keyframes datepicker-pop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.react-datepicker {
+  animation: datepicker-pop 0.12s ease-out;
+  font-family: inherit;
+  border: 1px solid rgb(var(--token-border));
+  border-radius: 1rem;
+  background-color: rgb(var(--token-surface));
+  color: rgb(var(--token-text));
+  box-shadow: 0 16px 40px rgba(var(--token-shadow) / 0.18);
+  overflow: hidden;
+  padding-bottom: 0.5rem;
+  /* .react-datepicker__month-container and .react-datepicker__time-container
+     are floated side by side with no shared flex/grid parent sizing them, so
+     when this box has no declared width it shrink-wraps to whatever space
+     its positioning context happens to offer (e.g. the width of the sidebar
+     column it's anchored to) - if that's narrower than both floats combined,
+     the time column wraps onto its own line below the calendar. A min-width
+     covering both floats' combined width guarantees they always fit side by
+     side regardless of where the popup is anchored. */
+  min-width: 25rem;
+}
+
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+/* Header */
+.react-datepicker__header {
+  background-color: rgb(var(--token-surface));
+  border-bottom: 1px solid rgb(var(--token-border));
+  padding: 0.85rem 0.75rem 0.85rem;
+}
+
+.react-datepicker__current-month {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--token-text));
+  margin-bottom: 0.5rem;
+}
+
+.react-datepicker__day-name {
+  width: 1.85rem;
+  line-height: 1.85rem;
+  margin: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgb(var(--token-text-faint));
+}
+
+/* Navigation arrows */
+.react-datepicker__navigation {
+  top: 0.85rem;
+  border-radius: 9999px;
+  transition: background-color 0.15s ease;
+}
+
+.react-datepicker__navigation:hover {
+  background-color: rgb(var(--token-surface-hover));
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: rgb(var(--token-text-muted));
+  border-width: 2px 2px 0 0;
+}
+
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: rgb(var(--token-primary));
+}
+
+/* Day grid */
+.react-datepicker__month {
+  margin: 0.6rem 0.5rem 0.25rem;
+}
+
+.react-datepicker__day,
+.react-datepicker__time-name {
+  width: 1.85rem;
+  line-height: 1.85rem;
+  margin: 0.15rem;
+  border-radius: 9999px;
+  color: rgb(var(--token-text));
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.react-datepicker__day--outside-month {
+  color: rgb(var(--token-text-faint));
+}
+
+.react-datepicker__day--disabled {
+  color: rgb(var(--token-text-faint));
+  opacity: 0.5;
+}
+
+.react-datepicker__day:hover,
+.react-datepicker__time-list-item:hover {
+  background-color: rgb(var(--token-surface-hover)) !important;
+}
+
+.react-datepicker__day--today {
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1.5px rgb(var(--token-primary) / 0.5);
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__time-list-item--selected {
+  background-color: rgb(var(--token-primary)) !important;
+  color: rgb(var(--token-primary-fg)) !important;
+  font-weight: 600;
+}
+
+/* Month / year dropdowns */
+.react-datepicker__header__dropdown {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.react-datepicker__month-select,
+.react-datepicker__year-select {
+  border-radius: 0.5rem;
+  border: 1px solid rgb(var(--token-border));
+  background-color: rgb(var(--token-surface));
+  color: rgb(var(--token-text));
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Time panel */
+.react-datepicker__time-container,
+.react-datepicker__time-container .react-datepicker__time {
+  background-color: rgb(var(--token-surface));
+  border-left: 1px solid rgb(var(--token-border));
+}
+
+.react-datepicker-time__header {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgb(var(--token-text));
+}
+
+.react-datepicker__time-list-item {
+  border-radius: 0.5rem;
+  margin: 0 0.4rem;
+  padding: 0.35rem 0.5rem !important;
+}
+
+.react-datepicker__close-icon::after {
+  background-color: rgb(var(--token-primary)) !important;
+  border-radius: 9999px;
+}

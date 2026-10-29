@@ -1,38 +1,46 @@
-import React from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
+import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import Api from '../../api/Api';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Dialog from './Dialog.jsx';
+import { Button } from './Button.jsx';
+import { getApiErrorMessage } from '../../utils/apiError.js';
 
 function ModalComponent({ name, id, close, userId }) {
   const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
 
   const handleConfirm = async () => {
-    const response = await Api.call({}, `${name}/${id}`, 'delete', userId);
-    if (response.data) {
-      navigate(`${name === 'users' ? '/setting/list' : '/setting'}`);
-      window.location.reload();
+    setSubmitting(true);
+    try {
+      const response = await Api.call({}, `${name}/${id}`, 'delete', userId);
+      if (response.data?.code === 200) {
+        navigate(`${name === 'users' ? '/setting/list' : '/setting'}`);
+        window.location.reload();
+      } else {
+        toast.error(getApiErrorMessage(response, '削除に失敗しました。'));
+        setSubmitting(false);
+      }
+    } catch (err) {
+      console.error('Error deleting:', err);
+      toast.error('削除に失敗しました。');
+      setSubmitting(false);
     }
   };
 
   return (
-    <Modal show={true} onHide={close}>
-      <Modal.Header closeButton>
-        <Modal.Title>Modal title</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>削除を実施します</Modal.Body>
-      <Modal.Footer>
-        <Button variant="outline-primary" onClick={() => close()}>
+    <Dialog open onOpenChange={(open) => !open && !submitting && close()} size="sm">
+      <Dialog.Header onClose={close} showClose={!submitting}>削除の確認</Dialog.Header>
+      <Dialog.Body>削除を実施します</Dialog.Body>
+      <Dialog.Footer>
+        <Button variant="outline" onClick={close} disabled={submitting}>
           戻る
         </Button>
-        <Button
-          className="btn btn-danger btn-sm"
-          onClick={() => handleConfirm()}
-        >
+        <Button variant="danger" onClick={handleConfirm} loading={submitting}>
           削除
         </Button>
-      </Modal.Footer>
-    </Modal>
+      </Dialog.Footer>
+    </Dialog>
   );
 }
 

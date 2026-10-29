@@ -9,6 +9,7 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
     const [crossedKilometers, setCrossedKilometers] = useState(0);
     const [range, setRange] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Device ID ref for comparison
     const prevDeviceIdRef = useRef(null);
@@ -45,6 +46,7 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
 
         const requestId = ++rangeRequestIdRef.current;
         setLoading(true);
+        setError(null);
         try {
             const { device: deviceInfo, movements: movementData } =
                 await DeviceService.getDeviceInfo(
@@ -96,9 +98,10 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
             setMovements(nextMovements);
             setCrossedKilometers(nextTotalKm);
             prevDeviceIdRef.current = selectedDevice.id; // Update ref
-        } catch (error) {
+        } catch (err) {
             if (rangeRequestIdRef.current !== requestId) return;
-            console.error('Error fetching device data:', error);
+            console.error('Error fetching device data:', err);
+            setError(err);
         } finally {
             if (rangeRequestIdRef.current === requestId) {
                 setLoading(false);
@@ -111,5 +114,5 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
         return fetchData();
     }, [fetchData]);
 
-    return { device, movements, crossedKilometers, range, loading, refresh };
+    return { device, movements, crossedKilometers, range, loading, error, refresh };
 }

@@ -1,10 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, Button, Form, InputGroup, Badge, Card } from 'react-bootstrap';
 import { APIProvider, Map } from '@vis.gl/react-google-maps';
 import MiniMap from './MiniMap.jsx';
 import { DeviceService } from '../../api/deviceService.js';
 import { toast } from "react-toastify";
 import { calculateCrossedKilometers } from '../utils/movementDistance.js';
+import Dialog from '../common/Dialog.jsx';
+import { Button } from '../common/Button.jsx';
+import Card from '../common/Card.jsx';
+import Pill from '../common/Pill.jsx';
+import { inputClass, labelClass } from '../../styles/formClasses.js';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -16,12 +20,11 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
     const [intervalMs, setIntervalMs] = useState(10000);
     const [isCreating, setIsCreating] = useState(false);
 
-    // Set random Tokyo coordinates as default
     const getRandomTokyoLocation = () => {
         const baseLat = 35.681236;
         const baseLng = 139.767125;
         return [
-            baseLat + (Math.random() * 0.02 - 0.01), // ±0.01 degree variation
+            baseLat + (Math.random() * 0.02 - 0.01),
             baseLng + (Math.random() * 0.02 - 0.01)
         ];
     };
@@ -31,11 +34,11 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
 
     const handleCreateSimulation = async () => {
         if (!selectedBike?.id) {
-            toast.error('先にバイクを選択してください');
+            toast.error('Please select a bike first');
             return;
         }
         if (!endPoint) {
-            toast.warning('地図上で終了地点を選択してください');
+            toast.warning('Please select an end point on the map');
             return;
         }
 
@@ -50,20 +53,16 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                 intervalMs: intervalMs
             };
 
-            console.log("Creating simulation with payload:", payload);
             const response = await DeviceService.createSimulation(payload);
 
             if (response.data.code === 200) {
                 const simulationId = response.data.simulationId;
-                const simulationInterval = payload.intervalMs;
-                console.log("✅ Simulation created with ID:", simulationId);
-                console.log("the simulation interval is : ", simulationInterval);
-                onSimulationStarted(simulationId, simulationInterval);
+                onSimulationStarted(simulationId, payload.intervalMs);
             } else {
-                toast.error(response.data.message || 'シミュレーションの作成に失敗しました');
+                toast.error(response.data.message || 'Failed to create simulation');
             }
         } catch (error) {
-            toast.error('シミュレーションの作成中にエラーが発生しました');
+            toast.error('An error occurred while creating the simulation');
             console.error('Simulation creation error:', error);
         } finally {
             setIsCreating(false);
@@ -74,7 +73,6 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
         if (typeof onClose === 'function') onClose();
     };
 
-    // helpers for pretty coords
     const fmt = (n) => (typeof n === 'number' ? n.toFixed(5) : '—');
 
     const estimatedDistanceKm = useMemo(() => {
@@ -95,82 +93,70 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
             : '—';
 
     return (
-        <Modal show={show} onHide={close} size="lg" centered>
-            <Modal.Header closeButton className="border-0 pb-0">
-                <div className="w-100 d-flex justify-content-between align-items-start">
-                    <div>
-                        <Modal.Title className="fw-semibold">バイクシミュレーション作成</Modal.Title>
-                        <div className="text-muted small mt-1">
-                            {selectedBike?.name ? (
-                                <>バイク: <Badge bg="secondary">{selectedBike.name}</Badge></>
-                            ) : (
-                                <>バイクが選択されていません</>
-                            )}
-                        </div>
-                    </div>
-                    <div className="text-end">
-                        <div className="small text-muted">
-                            {device?.lastLocation ? (
-                                <>デバイス最終位置:&nbsp;
-                                    <Badge bg="light" text="dark">
-                                        {fmt(device.lastLocation.lat)}, {fmt(device.lastLocation.lon)}
-                                    </Badge>
-                                </>
-                            ) : (
-                                <span className="small text-muted">東京をデフォルトとして使用</span>
-                            )}
-                        </div>
+        <Dialog open={show} onOpenChange={(open) => !open && close()} size="lg">
+            <Dialog.Header onClose={close}>
+                <div>
+                    <div>Create Bike Simulation</div>
+                    <div className="mt-1 text-xs font-normal text-text-muted">
+                        {selectedBike?.name ? (
+                            <>Bike: <Pill tone="muted">{selectedBike.name}</Pill></>
+                        ) : (
+                            'No bike selected'
+                        )}
+                        {device?.lastLocation && (
+                            <span className="ml-3">
+                                Device last fix: <Pill tone="muted">{fmt(device.lastLocation.lat)}, {fmt(device.lastLocation.lon)}</Pill>
+                            </span>
+                        )}
                     </div>
                 </div>
-            </Modal.Header>
+            </Dialog.Header>
 
-            <Modal.Body className="pt-3">
-                {/* Controls Card */}
-                <Card className="mb-3 shadow-sm border-0">
-                    <Card.Body>
-                        <div className="row g-3 align-items-end">
-                            <div className="col-md-6">
-                                <Form.Label className="fw-medium">速度</Form.Label>
-                                <InputGroup>
-                                    <Form.Control
+            <Dialog.Body className="flex flex-col gap-4">
+                <Card>
+                    <Card.Body className="flex flex-col gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label className={labelClass}>Speed</label>
+                                <div className="flex items-center gap-2">
+                                    <input
                                         type="number"
-                                        className="form-control"
+                                        className={inputClass}
                                         value={speedKmph}
                                         onChange={(e) => setSpeedKmph(Number(e.target.value) || 10)}
                                         min="1"
                                         max="100"
-                                        aria-label="速度 (km/h)"
+                                        aria-label="Speed (km/h)"
                                     />
-                                    <InputGroup.Text>km/h</InputGroup.Text>
-                                </InputGroup>
-                                {/* keep numeric input but add a linked range for UX */}
-                                <Form.Range
-                                    className="mt-2"
+                                    <span className="shrink-0 text-xs text-text-muted">km/h</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    className="mt-2 w-full accent-[rgb(var(--token-primary))]"
                                     min={1}
                                     max={100}
                                     value={speedKmph}
                                     onChange={(e) => setSpeedKmph(Number(e.target.value))}
                                 />
-
                             </div>
 
-                            <div className="col-md-6">
-                                <Form.Label className="fw-medium">更新間隔</Form.Label>
-                                <InputGroup>
-                                    <Form.Control
+                            <div>
+                                <label className={labelClass}>Update Interval</label>
+                                <div className="flex items-center gap-2">
+                                    <input
                                         type="number"
-                                        className="form-control"
+                                        className={inputClass}
                                         value={intervalMs}
                                         onChange={(e) => setIntervalMs(Number(e.target.value) || 10000)}
                                         min="1000"
                                         max="100000"
-                                        aria-label="更新間隔 (ms)"
+                                        aria-label="Update interval (ms)"
                                     />
-                                    <InputGroup.Text>ms</InputGroup.Text>
-                                </InputGroup>
-                                {/* keep numeric input but add a linked range for UX */}
-                                <Form.Range
-                                    className="mt-2"
+                                    <span className="shrink-0 text-xs text-text-muted">ms</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    className="mt-2 w-full accent-[rgb(var(--token-primary))]"
                                     min={1000}
                                     max={100000}
                                     step={500}
@@ -180,47 +166,42 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                             </div>
                         </div>
 
-                        {/* Live selection summary */}
-                        <div className="d-flex flex-wrap gap-3 mt-3">
-                            <div className="small">
-                                開始:&nbsp;
-                                <Badge bg={startPoint ? "success" : "secondary"}>
-                                    {startPoint ? `${fmt(startPoint[0])}, ${fmt(startPoint[1])}` : "自動 (東京/ランダム)"}
-                                </Badge>
+                        <div className="flex flex-wrap gap-3">
+                            <div className="text-xs text-text-muted">
+                                Start:&nbsp;
+                                <Pill tone={startPoint ? 'success' : 'muted'}>
+                                    {startPoint ? `${fmt(startPoint[0])}, ${fmt(startPoint[1])}` : 'auto (Tokyo/random)'}
+                                </Pill>
                             </div>
-                            <div className="small">
-                                終了:&nbsp;
-                                <Badge bg={endPoint ? "primary" : "warning"} text={endPoint ? undefined : "dark"}>
-                                    {endPoint ? `${fmt(endPoint[0])}, ${fmt(endPoint[1])}` : "地図で選択"}
-                                </Badge>
+                            <div className="text-xs text-text-muted">
+                                End:&nbsp;
+                                <Pill tone={endPoint ? 'primary' : 'warning'}>
+                                    {endPoint ? `${fmt(endPoint[0])}, ${fmt(endPoint[1])}` : 'pick on map'}
+                                </Pill>
                             </div>
-                            <div className="small">
+                            <div className="text-xs text-text-muted">
                                 Distance:&nbsp;
-                                <Badge bg={startPoint && endPoint ? "info" : "secondary"} text={startPoint && endPoint ? "dark" : undefined}>
+                                <Pill tone={startPoint && endPoint ? 'primary' : 'muted'}>
                                     {startPoint && endPoint
                                         ? `${formattedEstimatedDistanceKm} km`
                                         : startPoint && hoverPoint
                                             ? `~ ${formattedEstimatedDistanceKm} km`
-                                            : "select 2 points"}
-                                </Badge>
+                                            : 'select 2 points'}
+                                </Pill>
                             </div>
                         </div>
                     </Card.Body>
                 </Card>
 
-                {/* Map Card */}
-                <Card className="border-0 shadow-sm">
-                    <Card.Header className="bg-white border-0 pt-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                            <div className="fw-medium">経路を選択（地図をクリック）</div>
-                            <div className="small text-muted">
-                                {device?.lastLocation ? 'デバイスの最終位置にズーム' : 'ズームアウト（東京エリア）'}
-                            </div>
-                        </div>
+                <Card>
+                    <Card.Header className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-text">Select Path (click on map)</span>
+                        <span className="text-xs text-text-muted">
+                            {device?.lastLocation ? 'Zoomed to device last location' : 'Zoomed out (Tokyo area)'}
+                        </span>
                     </Card.Header>
-                    <Card.Body style={{ paddingTop: 0 }}>
-                        <div style={{ height: '320px', position: 'relative', borderRadius: 8 }}>
-
+                    <Card.Body className="p-0!">
+                        <div className="relative h-80 overflow-hidden rounded-b-xl">
                             <APIProvider apiKey={API_KEY}>
                                 <Map
                                     mapId="minimap"
@@ -251,35 +232,21 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                             </APIProvider>
                         </div>
                     </Card.Body>
-                    <Card.Footer className="bg-white border-0 pt-0">
-                        <div className="small text-muted">
-                            ヒント: 最初のクリックで<strong>開始地点</strong>、2回目のクリックで<strong>終了地点</strong>を設定します。再度クリックすると調整できます。
-                        </div>
-                    </Card.Footer>
+                    <div className="border-t border-border px-4 py-2.5 text-xs text-text-muted">
+                        Tip: First click sets <strong className="text-text">start</strong>, second click sets <strong className="text-text">end</strong>. Click again to adjust.
+                    </div>
                 </Card>
-            </Modal.Body>
+            </Dialog.Body>
 
-            <Modal.Footer className="border-0" style={{ zIndex: 2 }}>
+            <Dialog.Footer>
                 <Button variant="secondary" onClick={close} disabled={isCreating}>
-                    キャンセル
+                    Cancel
                 </Button>
-                <Button
-                    variant="primary"
-                    onClick={handleCreateSimulation}
-                    disabled={isCreating || !endPoint}
-                    className="d-inline-flex align-items-center"
-                >
-                    {isCreating && (
-                        <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                            aria-hidden="true"
-                        />
-                    )}
-                    {isCreating ? '作成中...' : 'シミュレーション開始'}
+                <Button onClick={handleCreateSimulation} disabled={isCreating || !endPoint} loading={isCreating}>
+                    {isCreating ? 'Creating...' : 'Start Simulation'}
                 </Button>
-            </Modal.Footer>
-        </Modal>
+            </Dialog.Footer>
+        </Dialog>
     );
 }
 
