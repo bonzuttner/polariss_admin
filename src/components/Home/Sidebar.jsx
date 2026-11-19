@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import Utils from '../utils/utils.js';
 import {
@@ -63,6 +63,109 @@ function SwitcherSelect({ label, value, onChange, options, disabled }) {
     );
 }
 
+const MONTHS = Array.from({ length: 12 }, (_, i) =>
+    new Date(2000, i, 1).toLocaleString('en-US', { month: 'long' })
+);
+
+// Small dropdown with a fixed-height scrollable list. Used instead of a native <select>,
+// whose popup was slow to open on phones and overlapped the header arrows.
+function ScrollSelect({ label, valueLabel, options, selected, open, onToggle, onPick, className = '' }) {
+    const listRef = useRef(null);
+    useEffect(() => {
+        if (!open || !listRef.current) return;
+        const active = listRef.current.querySelector('[aria-selected="true"]');
+        if (active) {
+            listRef.current.scrollTop = active.offsetTop - listRef.current.clientHeight / 2 + active.clientHeight / 2;
+        }
+    }, [open]);
+    return (
+        <div className={`dp-select ${className}`}>
+            <button type="button" className="dp-select-btn" aria-haspopup="listbox" aria-expanded={open} onClick={onToggle}>
+                {valueLabel}<FaChevronDown size={8} aria-hidden="true" />
+            </button>
+            {open && (
+                <ul className="dp-select-list" role="listbox" aria-label={label} ref={listRef}>
+                    {options.map((o) => (
+                        <li
+                            key={o.value}
+                            role="option"
+                            aria-selected={o.value === selected}
+                            className={o.value === selected ? 'is-selected' : ''}
+                            onClick={() => onPick(o.value)}
+                        >
+                            {o.label}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
+
+// Calendar header: [<] [Month v][Year v] [>] on one row, dropdowns grouped in the middle.
+function CompactHeader({ date, selected, minDate, onSelect, changeMonth, changeYear, decreaseMonth, increaseMonth }) {
+    const [openMenu, setOpenMenu] = useState(null); // 'month' | 'year' | null
+    const thisYear = new Date().getFullYear();
+    const year = date.getFullYear();
+    const from = Math.min(thisYear - 20, year);
+    const to = Math.max(thisYear + 1, year);
+    const years = Array.from({ length: to - from + 1 }, (_, i) => ({ value: to - i, label: String(to - i) }));
+    const months = MONTHS.map((m, i) => ({ value: i, label: m }));
+    const toggle = (name) => setOpenMenu((cur) => (cur === name ? null : name));
+
+    // react-datepicker's changeYear/changeMonth only move the visible month; the picked
+    // value itself stays unchanged. Commit the new year/month to the value as well
+    // (keeping day and time, clamped to the month length and to minDate).
+    const commit = (nextYear, nextMonth) => {
+        const base = selected ? new Date(selected) : new Date(date);
+        const lastDay = new Date(nextYear, nextMonth + 1, 0).getDate();
+        let next = new Date(nextYear, nextMonth, Math.min(base.getDate(), lastDay), base.getHours(), base.getMinutes());
+        if (minDate && next < minDate) next = new Date(minDate);
+        onSelect(next);
+    };
+
+    return (
+        <div className="dp-compact-header">
+            <button type="button" className="dp-nav" onClick={decreaseMonth} aria-label="Previous month">&#8249;</button>
+            <div className="dp-selects">
+                <ScrollSelect
+                    label="Month"
+                    className="dp-select-month"
+                    valueLabel={MONTHS[date.getMonth()]}
+                    options={months}
+                    selected={date.getMonth()}
+                    open={openMenu === 'month'}
+                    onToggle={() => toggle('month')}
+                    onPick={(v) => { changeMonth(v); commit(year, v); setOpenMenu(null); }}
+                />
+                <ScrollSelect
+                    label="Year"
+                    className="dp-select-year"
+                    valueLabel={String(year)}
+                    options={years}
+                    selected={year}
+                    open={openMenu === 'year'}
+                    onToggle={() => toggle('year')}
+                    onPick={(v) => { changeYear(v); commit(v, date.getMonth()); setOpenMenu(null); }}
+                />
+            </div>
+            <button type="button" className="dp-nav" onClick={increaseMonth} aria-label="Next month">&#8250;</button>
+        </div>
+    );
+}
+
+function useMediaQuery(query) {
+    const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+    useEffect(() => {
+        const mql = window.matchMedia(query);
+        const onChange = (e) => setMatches(e.matches);
+        setMatches(mql.matches);
+        mql.addEventListener('change', onChange);
+        return () => mql.removeEventListener('change', onChange);
+    }, [query]);
+    return matches;
+}
+
 function Sidebar({
     users,
     selectedUser,
@@ -90,11 +193,27 @@ function Sidebar({
 }) {
 
     const [searchQuery, setSearchQuery] = useState('');
+    // On phones the calendar opens as a centered dialog instead of a popper anchored to the input.
+    const isPhone = useMediaQuery('(max-width: 639.98px)');
+    // Same header (scrollable 20-year list, value-committing) on every screen size;
+    // only the presentation differs: dialog on phones, anchored popper elsewhere.
+    const pickerLayout = (selected, onSelect, minDate) => ({
+        ...(isPhone ? { withPortal: true } : { portalId: 'datepicker-portal' }),
+        renderCustomHeader: (p) => (
+            <CompactHeader {...p} selected={selected} onSelect={onSelect} minDate={minDate} />
+        ),
+    });
 
     const handleLocalSelect = (field, event) => {
         event.preventDefault();
         handleSelect(field, event);
     };
+
+    const role = localStorage.getItem('role');
+    const isAdmin = role === 'master' || role === 'admin1' || role === 'admin2';
+    const showUserSwitcher = isAdmin && users.length > 1;
+    const showBikeSwitcher = (selectedUser?.bikes?.length || 0) > 1;
+    const showDeviceSwitcher = (selectedBike?.devices?.length || 0) > 1;
 
     const filteredDevices = useMemo(() => {
         if (!searchQuery) return [];
@@ -136,28 +255,36 @@ function Sidebar({
                     </div>
                 </div>
 
-                <div className="flex divide-x divide-border border-t border-border">
-                    <SwitcherSelect
-                        label="User"
-                        value={selectedUser?.id || ''}
-                        onChange={(event) => handleLocalSelect('user', event)}
-                        options={users.map((user) => ({ value: user.id, label: user.nickname }))}
-                    />
-                    <SwitcherSelect
-                        label="Bike"
-                        value={selectedBike?.id || ''}
-                        onChange={(event) => handleLocalSelect('bike', event)}
-                        options={(selectedUser?.bikes || []).map((bike) => ({ value: bike.id, label: bike.name }))}
-                        disabled={!selectedUser?.bikes?.length}
-                    />
-                    <SwitcherSelect
-                        label="Device"
-                        value={selectedDevice?.id || ''}
-                        onChange={(event) => handleLocalSelect('device', event)}
-                        options={(selectedBike?.devices || []).map((d) => ({ value: d.id, label: d.name }))}
-                        disabled={!selectedBike?.devices?.length}
-                    />
-                </div>
+                {(showUserSwitcher || showBikeSwitcher || showDeviceSwitcher) && (
+                    <div className="flex divide-x divide-border border-t border-border">
+                        {showUserSwitcher && (
+                            <SwitcherSelect
+                                label="User"
+                                value={selectedUser?.id || ''}
+                                onChange={(event) => handleLocalSelect('user', event)}
+                                options={users.map((user) => ({ value: user.id, label: user.nickname }))}
+                            />
+                        )}
+                        {showBikeSwitcher && (
+                            <SwitcherSelect
+                                label="Bike"
+                                value={selectedBike?.id || ''}
+                                onChange={(event) => handleLocalSelect('bike', event)}
+                                options={(selectedUser?.bikes || []).map((bike) => ({ value: bike.id, label: bike.name }))}
+                                disabled={!selectedUser?.bikes?.length}
+                            />
+                        )}
+                        {showDeviceSwitcher && (
+                            <SwitcherSelect
+                                label="Device"
+                                value={selectedDevice?.id || ''}
+                                onChange={(event) => handleLocalSelect('device', event)}
+                                options={(selectedBike?.devices || []).map((d) => ({ value: d.id, label: d.name }))}
+                                disabled={!selectedBike?.devices?.length}
+                            />
+                        )}
+                    </div>
+                )}
             </Card>
 
             {/* Global device search */}
@@ -266,7 +393,7 @@ function Sidebar({
                                     className={`${inputClass} pl-9`}
                                     wrapperClassName="w-full"
                                     popperPlacement="bottom-start"
-                                    portalId="datepicker-portal"
+                                    {...pickerLayout(startDate, setStartDate)}
                                 />
                             </div>
                         </div>
@@ -293,7 +420,7 @@ function Sidebar({
                                     className={`${inputClass} pl-9`}
                                     wrapperClassName="w-full"
                                     popperPlacement="bottom-end"
-                                    portalId="datepicker-portal"
+                                    {...pickerLayout(endDate, setEndDate, startDate)}
                                 />
                             </div>
                         </div>

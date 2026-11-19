@@ -23,7 +23,7 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
         lastMovements: []
     });
 
-    const getRangeKey = () => `${selectedDevice?.id ?? ''}|${startDate ?? ''}|${endDate ?? ''}`;
+    const getRangeKey = (start, end) => `${selectedDevice?.id ?? ''}|${start ?? ''}|${end ?? ''}`;
 
     const findLastValidMovement = (movementArray) => {
         for (let i = movementArray.length - 1; i >= 0; i -= 1) {
@@ -37,8 +37,12 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
         return null;
     };
 
-    const fetchData = useCallback(async () => {
+    // `override` ({ start, end }) lets the caller fetch a range that hasn't been
+    // committed to state yet (e.g. right after the 更新 button is pressed).
+    const fetchData = useCallback(async (override) => {
         if (!selectedDevice?.imsi) return;
+        const rangeStart = override?.start ?? startDate;
+        const rangeEnd = override?.end ?? endDate;
 
 
         // Skip if device hasn't changed
@@ -51,15 +55,15 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
             const { device: deviceInfo, movements: movementData } =
                 await DeviceService.getDeviceInfo(
                     selectedDevice.imsi,
-                    startDate,
-                    endDate
+                    rangeStart,
+                    rangeEnd
                 );
 
             if (rangeRequestIdRef.current !== requestId) return;
             setDevice(deviceInfo);
             setRange(deviceInfo?.monitoringActive ? deviceInfo?.monitoringSettings?.range : 0);
             const nextMovements = Array.isArray(movementData) ? movementData : [];
-            const rangeKey = getRangeKey();
+            const rangeKey = getRangeKey(rangeStart, rangeEnd);
             const cache = distanceCacheRef.current;
 
             let nextTotalKm = 0;
@@ -109,9 +113,10 @@ export default function useDeviceData(selectedDevice, startDate, endDate) {
         }
     }, [endDate, selectedDevice?.id, selectedDevice?.imsi, startDate]);
 
-    const refresh = useCallback(() => {
+    const refresh = useCallback((override) => {
         prevDeviceIdRef.current = null; // Reset to force refresh
-        return fetchData();
+        const isRange = override && typeof override === 'object' && 'start' in override && 'end' in override;
+        return fetchData(isRange ? override : undefined);
     }, [fetchData]);
 
     return { device, movements, crossedKilometers, range, loading, error, refresh };

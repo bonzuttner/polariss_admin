@@ -174,3 +174,140 @@
   background-color: rgb(var(--token-primary)) !important;
   border-radius: 9999px;
 }
+
+/* Phones: calendar opens as a centered dialog (withPortal). react-datepicker's
+   own portal styles blow day cells up to 3rem and the header to 1.44rem, and the
+   desktop min-width (25rem) is wider than a 320-375px screen, so re-size it all. */
+.react-datepicker__portal {
+  background-color: rgba(var(--token-shadow) / 0.4);
+  padding: 0.35rem;
+  overflow: auto;
+}
+
+.react-datepicker__portal .react-datepicker {
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+  max-height: calc(100dvh - 1.5rem);
+  overflow-y: auto;
+}
+
+.react-datepicker__portal .react-datepicker__current-month,
+.react-datepicker__portal .react-datepicker-time__header {
+  font-size: 0.85rem;
+}
+
+.react-datepicker__portal .react-datepicker__day-name,
+.react-datepicker__portal .react-datepicker__day,
+.react-datepicker__portal .react-datepicker__time-name {
+  width: 1.9rem;
+  line-height: 1.9rem;
+  margin: 0.1rem;
+}
+
+.react-datepicker__portal .react-datepicker__time-container {
+  width: 4.75rem;
+}
+
+.react-datepicker__portal .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+  width: 100%;
+}
+
+@media (max-width: 360px) {
+  .react-datepicker__portal .react-datepicker__day-name,
+  .react-datepicker__portal .react-datepicker__day,
+  .react-datepicker__portal .react-datepicker__time-name {
+    width: 1.65rem;
+    line-height: 1.65rem;
+    margin: 0.08rem;
+  }
+  .react-datepicker__portal .react-datepicker__time-container {
+    width: 4.25rem;
+  }
+}
+
+/* Phone header: arrows at the edges, month + year grouped in the middle */
+.dp-compact-header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+}
+
+.dp-compact-header .dp-nav {
+  flex: 0 0 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: rgb(var(--token-text-muted));
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.dp-compact-header .dp-nav:active {
+  background-color: rgb(var(--token-surface-hover));
+}
+
+.dp-selects {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.dp-select {
+  position: relative;
+}
+
+.dp-select-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 2rem;
+  padding: 0 0.55rem;
+  border: 1px solid rgb(var(--token-border));
+  border-radius: 0.5rem;
+  background-color: rgb(var(--token-surface));
+  color: rgb(var(--token-text));
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.dp-select-btn svg {
+  color: rgb(var(--token-text-faint));
+}
+
+.dp-select-list {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 10;
+  min-width: 100%;
+  max-height: 11rem;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgb(var(--token-border));
+  border-radius: 0.5rem;
+  background-color: rgb(var(--token-surface));
+  box-shadow: 0 8px 20px rgba(var(--token-shadow) / 0.18);
+}
+
+.dp-select-list li {
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.4rem;
+  font-size: 0.8rem;
+  text-align: center;
+  white-space: nowrap;
+  color: rgb(var(--token-text));
+}
+
+.dp-select-list li.is-selected {
+  background-color: rgb(var(--token-primary));
+  color: rgb(var(--token-primary-fg));
+}

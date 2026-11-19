@@ -1,7 +1,7 @@
 import React, {Suspense, useCallback, useState, useEffect, useRef, useMemo} from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import 'react-datepicker/dist/react-datepicker.css';
 import Utils from '../utils/utils.js';
@@ -56,6 +56,12 @@ function Home({ setLayoutKey }) {
 
 
 
+  // The range actually used for fetching. It only changes when 更新 is pressed, so
+  // editing the pickers (or the periodic auto-refresh) never loads a half-edited range.
+  const [appliedRange, setAppliedRange] = useState(() => ({
+    start: backendStartDate,
+    end: backendEndDate,
+  }));
 
   // Flag to control device data fetching
   const shouldFetchDevice = useRef(true);
@@ -88,7 +94,7 @@ function Home({ setLayoutKey }) {
     loading: deviceLoading,
     error: deviceError,
     refresh: refreshDeviceData,
-  } = useDeviceData(selectedDevice, backendStartDate, backendEndDate);
+  } = useDeviceData(selectedDevice, appliedRange.start, appliedRange.end);
 
   useEffect(() => {
     if (deviceError) {
@@ -107,7 +113,7 @@ function Home({ setLayoutKey }) {
   const displayedCrossedKilometers = isSelectedDeviceAligned ? crossedKilometers : 0;
 
   const [SOSIsActive, setSOSIsActive] = useState(false);
-  const prevSosRef = useRef(null);
+  const prevSosByDeviceRef = useRef(new Map());
 
   console.log("the SOS in home is : " + SOSIsActive);
 
@@ -275,18 +281,24 @@ function Home({ setLayoutKey }) {
 
   //SOS button toggler (which changes the sos mode in the sidebar)
   useEffect(() => {
+    const deviceId = device?.device?.imsi;
     const isActive = Boolean(device?.mutual_monitoring_status);
 
-    // Alert only on a real OFF -> ON transition (not on initial load)
-    if (prevSosRef.current === false && isActive) {
-      toast.error('SOSが起動しました。デバイスの状態を確認してください。', {
-        toastId: 'sos-activated',
-      });
+    // Track OFF -> ON transitions per device, so switching devices or
+    // reloading the page doesn't look like a fresh activation of an
+    // already-ongoing SOS.
+    if (deviceId) {
+      const prevForDevice = prevSosByDeviceRef.current.get(deviceId);
+      if (prevForDevice === false && isActive) {
+        toast.error('SOSが起動しました。デバイスの状態を確認してください。', {
+          toastId: 'sos-activated',
+        });
+      }
+      prevSosByDeviceRef.current.set(deviceId, isActive);
     }
-    prevSosRef.current = isActive;
 
     setSOSIsActive(isActive);
-  }, [device?.mutual_monitoring_status]);
+  }, [device?.device?.imsi, device?.mutual_monitoring_status]);
 
   // Initial load and auto-refresh
   useEffect(() => {
@@ -401,10 +413,13 @@ function Home({ setLayoutKey }) {
     if (!startDate || !endDate) return;
 
     setIsDateRangeLoading(true);
-    shouldFetchDevice.current = true;
+    // Not setting shouldFetchDevice here: the explicit refresh below already fetches,
+    // and the flag would make the effect fetch a second time once appliedRange updates.
 
     try {
-      await refreshDeviceData();
+      const nextRange = { start: backendStartDate, end: backendEndDate };
+      setAppliedRange(nextRange);
+      await refreshDeviceData(nextRange);
       setShow(false);
     } finally {
       setIsDateRangeLoading(false);
@@ -546,9 +561,9 @@ function Home({ setLayoutKey }) {
                     type="button"
                     onClick={showBar}
                     aria-label="Open sidebar"
-                    className="absolute left-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-surface text-text shadow-lg lg:hidden"
+                    className="absolute left-4 top-4 z-20 flex h-11 items-center justify-center rounded-full bg-surface px-5 text-sm font-semibold text-text shadow-lg lg:hidden"
                 >
-                  <FaBars size={16} />
+                  メニュー
                 </button>
 
                 {deviceLoading && (
