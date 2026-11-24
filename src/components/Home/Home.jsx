@@ -1,8 +1,8 @@
 import React, {Suspense, useCallback, useState, useEffect, useRef, useMemo} from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './Home.css';
+import { FaTimes } from 'react-icons/fa';
 import { APIProvider } from '@vis.gl/react-google-maps';
-import 'react-datepicker/dist/react-datepicker.css';
 import Utils from '../utils/utils.js';
 import { checkActiveSimulations } from '../utils/simulationUtils';
 import MonitoringModal from './MonitoringModal/MonitoringModal.jsx';
@@ -34,6 +34,7 @@ function Home({ setLayoutKey }) {
   const [pageKey, setPageKey] = useState(Utils.unique());
   const [engine, setEngine] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isDateRangeLoading, setIsDateRangeLoading] = useState(false);
   const [currentRefreshInterval, setCurrentRefreshInterval] = useState(parseInt(INTERVAL || '10000', 10));
 
 
@@ -53,6 +54,8 @@ function Home({ setLayoutKey }) {
 
   // Flag to control device data fetching
   const shouldFetchDevice = useRef(true);
+  const isDateRangeLoadingRef = useRef(false);
+  const autoRefreshInFlightRef = useRef(false);
 
 
   const [showSimulationModal, setShowSimulationModal] = useState(false);
@@ -73,14 +76,27 @@ function Home({ setLayoutKey }) {
   const {
     device,
     movements,
+    crossedKilometers,
     range,
     loading: deviceLoading,
-    refresh: refreshDeviceData
+    refresh: refreshDeviceData,
   } = useDeviceData(selectedDevice, backendStartDate, backendEndDate);
+
+  const isSelectedDeviceAligned =
+      !selectedDevice?.imsi ||
+      !device?.device?.imsi ||
+      selectedDevice.imsi === device.device.imsi;
+
+  const displayedMovements = isSelectedDeviceAligned ? movements : [];
+  const displayedCrossedKilometers = isSelectedDeviceAligned ? crossedKilometers : 0;
 
   const [SOSIsActive, setSOSIsActive] = useState(false);
 
   console.log("the SOS in home is : " + SOSIsActive);
+
+  useEffect(() => {
+    isDateRangeLoadingRef.current = isDateRangeLoading;
+  }, [isDateRangeLoading]);
 
   // Handle Line authentication
   useEffect(() => {
@@ -281,17 +297,22 @@ function Home({ setLayoutKey }) {
   useEffect(() => {
     const interval = setInterval(async () => {
       if (!selectedDevice?.imsi) return;
+      if (isDateRangeLoadingRef.current) return;
+      if (autoRefreshInFlightRef.current) return;
 
       try {
         console.log(`🔄 Refreshing every ${currentRefreshInterval}ms`);
-        refreshDeviceData();
+        autoRefreshInFlightRef.current = true;
+        await refreshDeviceData();
       } catch (err) {
         console.error('Error refreshing last location:', err);
+      } finally {
+        autoRefreshInFlightRef.current = false;
       }
     }, currentRefreshInterval);
 
     return () => clearInterval(interval);
-  }, [selectedDevice, currentRefreshInterval]);
+  }, [selectedDevice, currentRefreshInterval, refreshDeviceData]);
 
   // Fetch IBC devices when user changes
   useEffect(() => {
@@ -335,13 +356,21 @@ function Home({ setLayoutKey }) {
 
 
 
-  const handleClick = () => {
+  const handleClick = async () => {
     console.log("Start Date (Raw):", startDate); // Check raw Date object
     console.log("Start Date (ISO):", startDate?.toISOString()); // ISO format
     console.log("Start Date (Locale):", startDate?.toString()); // Local time string
+    if (!startDate || !endDate) return;
+
+    setIsDateRangeLoading(true);
     shouldFetchDevice.current = true;
-    refreshDeviceData();
-    setShow(false);
+
+    try {
+      await refreshDeviceData();
+      setShow(false);
+    } finally {
+      setIsDateRangeLoading(false);
+    }
   };
 
   const showModal = useCallback((e) => {
@@ -423,95 +452,90 @@ function Home({ setLayoutKey }) {
 
   const showBar = () => setShow(!show);
 
+  const sidebarProps = {
+    users,
+    selectedUser,
+    selectedBike,
+    selectedDevice,
+    device,
+    engine,
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+    handleSelect: handleSelection,
+    handleClick,
+    showModal,
+    showEngModal,
+    handleSimulationModal,
+    activeSimulations,
+    stopSimulation,
+    sosActive: SOSIsActive,
+    allDevices,
+    onDeviceSelect: handleDeviceSelect,
+    crossedKilometers: displayedCrossedKilometers,
+    isDateRangeLoading,
+  };
 
-
-  // Add this function
   return (
     <div id="page-content" key={pageKey}>
       {!loading && (
-        <div className="hero-section full-screen has-map has-sidebar">
-          <div className="row">
-            <div className="search-responsive" onClick={showBar}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="40"
-                height="40"
-                fill="white"
-                className="bi bi-arrow-bar-right"
-                viewBox="0 0 16 16"
+        <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+          {/* Map */}
+          <div className="relative min-w-0 flex-1 bg-bg p-3">
+            <button
+                type="button"
+                onClick={showBar}
+                aria-label="Open sidebar"
+                className="absolute left-4 top-4 z-20 flex h-11 items-center justify-center rounded-full bg-surface px-5 text-sm font-semibold text-text shadow-lg lg:hidden"
+            >
+              メニュー
+            </button>
+
+            {!Utils.isEmptyObject(device) && (
+              <APIProvider
+                apiKey={API_KEY}
+                libraries={['marker']}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8m-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5"
+                <CutomMap
+                  device={device}
+                  movements={displayedMovements}
+                  key={`map-${selectedDevice?.imsi}`}
+                  range={range}
+                  showModal={showModal}
                 />
-              </svg>
-            </div>
-
-            <div className={`show-side-bar ${show ? 'show' : 'hide'}`}>
-              {<Sidebar
-                users={users}
-                selectedUser={selectedUser}
-                selectedBike={selectedBike}
-                selectedDevice={selectedDevice}
-                device={device}
-                engine={engine}
-                startDate={startDate}
-                endDate={endDate}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-                handleSelect={handleSelection}
-                handleClick={handleClick}
-                showModal={showModal}
-                showEngModal={showEngModal}
-                handleSimulationModal={handleSimulationModal}
-                activeSimulations={activeSimulations}
-                stopSimulation={stopSimulation}
-                sosActive={SOSIsActive}
-                allDevices={allDevices}
-                onDeviceSelect={handleDeviceSelect}
-              />}
-            </div>
-
-            <div className={'col col-12 col-md-9 map-col  map-col-fix '}>
-              {!Utils.isEmptyObject(device) && (
-                <APIProvider
-                  apiKey={API_KEY}
-                  libraries={['marker']}
-                >
-                  <CutomMap
-                    device={device}
-                    movements={movements}
-                    key={`map-${selectedDevice?.imsi}`}
-                    range={range}
-                    showModal={showModal}
-                  />
-                </APIProvider>
-              )}
-            </div>
-
-            {<Sidebar
-              users={users}
-              selectedUser={selectedUser}
-              selectedBike={selectedBike}
-              selectedDevice={selectedDevice}
-              device={device}
-              engine={engine}
-              startDate={startDate}
-              endDate={endDate}
-              setStartDate={setStartDate}
-              setEndDate={setEndDate}
-              handleSelect={handleSelection}
-              handleClick={handleClick}
-              showModal={showModal}
-              showEngModal={showEngModal}
-              handleSimulationModal={handleSimulationModal}
-              activeSimulations={activeSimulations}
-              stopSimulation={stopSimulation}
-              sosActive={SOSIsActive}
-              allDevices={allDevices}
-              onDeviceSelect={handleDeviceSelect}
-            />}
+              </APIProvider>
+            )}
           </div>
+
+          {/* Desktop sidebar */}
+          <div className="hidden w-96 shrink-0 overflow-y-auto border-l border-border bg-bg lg:block">
+            <Sidebar {...sidebarProps} />
+          </div>
+
+          {/* Mobile sidebar drawer */}
+          {show && (
+            <div className="fixed inset-x-0 bottom-0 top-16 z-30 lg:hidden">
+              <div
+                  className="absolute inset-0 bg-slate-950/50"
+                  onClick={showBar}
+              />
+              <div className="absolute inset-y-0 right-0 w-[85%] max-w-sm overflow-y-auto bg-bg shadow-2xl">
+                <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                  <span className="text-sm font-semibold text-text">メニュー</span>
+                  <button
+                      type="button"
+                      onClick={showBar}
+                      aria-label="Close sidebar"
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted hover:bg-surface-hover"
+                  >
+                    <FaTimes size={14} />
+                  </button>
+                </div>
+                <Sidebar {...sidebarProps} />
+              </div>
+            </div>
+          )}
 
           {showMonitoring && (
             <MonitoringModal

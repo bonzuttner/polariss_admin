@@ -1,0 +1,229 @@
+/* Minimal styles - Let the library handle calendar UI */
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+/* Input Trigger */
+.inputWrapper {
+  cursor: pointer;
+  background: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.inputWrapper:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.inputWrapperActive {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.inputContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.inputIcon {
+  color: #667eea;
+  font-size: 16px;
+}
+
+.inputText {
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+.inputActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clearButton {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clearButton:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.chevron {
+  color: #9ca3af;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.chevronRotated {
+  transform: rotate(180deg);
+}
+
+/* Calendar Overlay */
+.calendarOverlay {
+  position: absolute;
+  top: calc(100% + 8px);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  z-index: 9000;
+  width: 350px;
+}
+
+/*!* Shift 194px to the left on desktop screens *!*/
+/*@media (min-width: 768px) {*/
+/*  .calendarOverlay {*/
+/*    left: -194px;*/
+/*  }*/
+/*}*/
+
+.calendarContent {
+  padding: 20px;
+}
+
+/* Let react-day-picker handle most styling, just position it */
+.dayPicker {
+  margin: 0 auto;
+}
+
+/* Time Section */
+.timeSection {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.timeSectionHeader {
+  margin-bottom: 12px;
+}
+
+.timeSectionHeader h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.timePresets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.timePreset {
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timePreset:hover {
+  background: #f0f4ff;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.timeInputs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timeInputGroup {
+  flex: 1;
+}
+
+.timeInputGroup label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.timeSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: white;
+  cursor: pointer;
+}
+
+.timeSeparator {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-top: 24px;
+}
+
+/* Footer */
+.calendarFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.cancelButton,
+.applyButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton {
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #6b7280;
+}
+
+.cancelButton:hover {
+  background: #f3f4f6;
+}
+
+.applyButton {
+  background: #667eea;
+  color: white;
+  border: none;
+}
+
+.applyButton:hover {
+  background: #5a67d8;
+}

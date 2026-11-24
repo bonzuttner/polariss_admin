@@ -1,61 +1,69 @@
-function MainLayout(props) {
+import React from 'react';
+import { FaMoon, FaSun } from 'react-icons/fa';
+import { useTheme } from '../context/ThemeContext';
+import { DropdownMenu } from './common/DropdownMenu';
+
+function MainLayout({ children }) {
+  const { theme, toggleTheme } = useTheme();
+  const isLoggedIn = Boolean(localStorage.getItem('userId'));
+  const userName = localStorage.getItem('user-name') || 'Name';
+
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    window.location.href = '/login';
+  };
+
   return (
-    <div className="main-layout">
-      <header id="page-header">
-        <nav>
-          <div className="left">
-            <a href="/" className="brand">
-              <img
-                className="logo-image"
-                src="https://polarissdevapp.azurewebsites.net/img/logo/polariss_logo01.png"
-                alt=""
-              />
+    <div className="flex min-h-screen flex-col bg-bg text-text">
+      <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface px-4 sm:px-6">
+        <a href="/" className="flex items-center">
+          <img src="../../Assests/polaris_01.png" alt="Polaris" className="h-8 w-auto sm:h-9" />
+        </a>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label="Toggle color theme"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-text-muted transition hover:bg-surface-hover hover:text-text"
+          >
+            {theme === 'dark' ? <FaSun size={16} /> : <FaMoon size={16} />}
+          </button>
+
+          {isLoggedIn ? (
+            <DropdownMenu
+              trigger={
+                <button
+                  type="button"
+                  id="user-name"
+                  className="flex h-9 max-w-[9rem] items-center justify-center truncate rounded-full bg-primary px-3 text-xs font-semibold text-primary-fg transition hover:bg-primary-hover"
+                >
+                  {userName}
+                </button>
+              }
+            >
+              <DropdownMenu.Item asChild>
+                <a href="/setting" className="no-underline">
+                  管理画面
+                </a>
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item onSelect={handleLogout} className="text-danger">
+                ログオフ
+              </DropdownMenu.Item>
+            </DropdownMenu>
+          ) : (
+            <a
+              href="/login"
+              className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-fg transition hover:bg-primary-hover"
+            >
+              Sign In
             </a>
-          </div>
-          <div className="right">
-            {localStorage.getItem('userId') ? (
-              <div className="primary-nav has-mega-menu">
-                <ul className="navigation">
-                  <li className="active has-child">
-                    <a>{localStorage.getItem('user-name') || 'Name'}</a>
-                    <div className="wrapper">
-                      <div id="nav-homepages" className="nav-wrapper">
-                        <ul>
-                          <li>
-                            <a href="/setting">管理画面</a>
-                          </li>
-                          <li onClick={() => localStorage.removeItem('userId')}>
-                            <a href="/login">ログオフ</a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            ) : (
-              <div className="secondary-nav">
-                <a
-                  href="/login"
-                  data-modal-external-file="modal_sign_in.php"
-                  data-target="modal-sign-in"
-                >
-                  Sign In
-                </a>
-                <a
-                  href="#"
-                  className="promoted"
-                  data-modal-external-file="modal_register.php"
-                  data-target="modal-register"
-                >
-                  Register
-                </a>
-              </div>
-            )}
-          </div>
-        </nav>
+          )}
+        </div>
       </header>
-      <div>{props.children}</div>
+
+      <div className="flex-1">{children}</div>
     </div>
   );
 }

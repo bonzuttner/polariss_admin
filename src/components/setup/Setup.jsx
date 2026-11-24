@@ -5,6 +5,8 @@ import Api from '../../api/Api';
 import Profile from '../profile/Profile';
 import Bike from '../bike/Bike';
 import Device from '../device/Device';
+import styles from './Setup.module.css';
+
 function Setup(props) {
   const navigate = useNavigate();
   const fromRef = useRef();
@@ -64,27 +66,30 @@ function Setup(props) {
 
   return (
     <div className="setting-page">
-      {renderForm()}
-      <div className="modal-footer setup">
+      {renderForm()
+
+
+      }
+      <div style={{justifyContent:"center" ,gap:"50px"}} className="modal-footer setup">
         {currentForm !== 'profile' && (
           <button
             type="button"
-            className="btn btn-outline-primary"
+            className={`${styles.btn} ${styles.btnOutline} ${styles.btnMd}`}
             data-bs-dismiss="modal"
             onClick={() => changeForm('back')}
           >
             Back
           </button>
         )}
-        {/* {currentForm !== 'device' && (
+        {currentForm !== 'device' && (
           <button
             type="button"
-            className="btn btn-primary"
+            className={`${styles.btn} ${styles.btnPrimary} ${styles.btnMd}`}
             onClick={() => changeForm('next')}
           >
             Next
           </button>
-        )} */}
+        )}
       </div>
     </div>
   );

@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Modal, Button, Form, InputGroup, Badge, Card } from 'react-bootstrap';
 import { APIProvider, Map } from '@vis.gl/react-google-maps';
 import MiniMap from './MiniMap.jsx';
 import { DeviceService } from '../../api/deviceService.js';
 import { toast } from "react-toastify";
+import { calculateCrossedKilometers } from '../utils/movementDistance.js';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, show, device }) {
     const [startPoint, setStartPoint] = useState(null);
     const [endPoint, setEndPoint] = useState(null);
+    const [hoverPoint, setHoverPoint] = useState(null);
     const [speedKmph, setSpeedKmph] = useState(10);
     const [intervalMs, setIntervalMs] = useState(10000);
     const [isCreating, setIsCreating] = useState(false);
@@ -74,6 +76,23 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
 
     // helpers for pretty coords
     const fmt = (n) => (typeof n === 'number' ? n.toFixed(5) : '—');
+
+    const estimatedDistanceKm = useMemo(() => {
+        if (!startPoint) return null;
+
+        const target = endPoint || hoverPoint;
+        if (!target) return null;
+
+        return calculateCrossedKilometers([
+            { lat: startPoint[0], lon: startPoint[1] },
+            { lat: target[0], lon: target[1] }
+        ]);
+    }, [endPoint, hoverPoint, startPoint]);
+
+    const formattedEstimatedDistanceKm =
+        typeof estimatedDistanceKm === 'number'
+            ? estimatedDistanceKm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : '—';
 
     return (
         <Modal show={show} onHide={close} size="lg" centered>
@@ -175,6 +194,16 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                                     {endPoint ? `${fmt(endPoint[0])}, ${fmt(endPoint[1])}` : "pick on map"}
                                 </Badge>
                             </div>
+                            <div className="small">
+                                Distance:&nbsp;
+                                <Badge bg={startPoint && endPoint ? "info" : "secondary"} text={startPoint && endPoint ? "dark" : undefined}>
+                                    {startPoint && endPoint
+                                        ? `${formattedEstimatedDistanceKm} km`
+                                        : startPoint && hoverPoint
+                                            ? `~ ${formattedEstimatedDistanceKm} km`
+                                            : "select 2 points"}
+                                </Badge>
+                            </div>
                         </div>
                     </Card.Body>
                 </Card>
@@ -206,8 +235,16 @@ function SimulationModal({ selectedBike, userId, onSimulationStarted, onClose, s
                                     disableDefaultUI
                                 >
                                     <MiniMap
-                                        onStartChange={setStartPoint}
-                                        onEndChange={setEndPoint}
+                                        onStartChange={(point) => {
+                                            setStartPoint(point);
+                                            setEndPoint(null);
+                                            setHoverPoint(null);
+                                        }}
+                                        onEndChange={(point) => {
+                                            setEndPoint(point);
+                                            setHoverPoint(null);
+                                        }}
+                                        onHoverChange={setHoverPoint}
                                         device={device}
                                     />
                                 </Map>

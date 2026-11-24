@@ -1,0 +1,30 @@
+/* Google's InfoWindow renders its own DOM outside our component tree, so it
+   is themed here with the same design tokens (src/styles/tokens.css) used
+   everywhere else. */
+
+.gm-style-iw-c {
+  background-color: rgb(var(--token-surface)) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 30px rgba(var(--token-shadow) / 0.2) !important;
+  padding: 12px !important;
+}
+
+.gm-style-iw-d {
+  overflow: visible !important;
+  color: rgb(var(--token-text));
+}
+
+.gm-style-iw-t::after,
+.gm-style-iw-tc::after {
+  background: rgb(var(--token-surface)) !important;
+}
+
+.gm-ui-hover-effect {
+  top: 4px !important;
+  right: 4px !important;
+  opacity: 0.7;
+}
+
+.dark .gm-ui-hover-effect img {
+  filter: invert(1);
+}

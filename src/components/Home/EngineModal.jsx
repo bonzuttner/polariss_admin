@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
 import Api from '../../api/Api';
+import Dialog from '../common/Dialog.jsx';
+import { Button } from '../common/Button.jsx';
 
 function EngineModal({ engine, updateEngine }) {
   const [show, setShow] = useState(true);
@@ -26,29 +26,24 @@ function EngineModal({ engine, updateEngine }) {
   };
 
   return (
-    <Modal show={show} onHide={close} className={'monitoring-modal'}>
-      <Modal.Header closeButton>
-        <Modal.Title className={'fs-5'}>{`エンジン制御`}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p className="fs-6">
+    <Dialog open={show} onOpenChange={(open) => !open && close()} size="sm">
+      <Dialog.Header onClose={() => close()}>エンジン制御</Dialog.Header>
+      <Dialog.Body>
+        <p>
           {engine?.engineStatus === 'OFF'
             ? 'エンジン制御を開始しますか'
             : 'エンジン制御を停止しますか'}
         </p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="outline-primary" onClick={() => close()}>
+      </Dialog.Body>
+      <Dialog.Footer>
+        <Button variant="outline" onClick={() => close()}>
           閉じる
         </Button>
-        <Button
-          className="btn btn-danger btn-sm"
-          onClick={() => handleConfirm()}
-        >
+        <Button variant="danger" onClick={() => handleConfirm()}>
           {engine?.engineStatus === 'ON' ? 'OFF' : 'ON'}
         </Button>
-      </Modal.Footer>
-    </Modal>
+      </Dialog.Footer>
+    </Dialog>
   );
 }
 

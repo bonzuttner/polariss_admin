@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import styles from './Settings.module.css';
+import React, { useState } from "react";
+import styles from "./Settings.module.css";
 
 const SimpleDropdown = ({ items, selectedItem, onSelect, placeholder }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -22,28 +22,21 @@ const SimpleDropdown = ({ items, selectedItem, onSelect, placeholder }) => {
 
             {isOpen && (
                 <div className={styles.simpleDropdownMenu}>
-                    {items.map((item) => (
-                        <React.Fragment key={item.id}>
-                            <div
-                                className={`${styles.simpleDropdownItem} ${item.id === selectedItem?.id ? styles.selected : ''}`}
-                                onClick={() => handleSelect(item)}
-                            >
-                                {item.nickname || item.name1}
-                            </div>
-                            {item.admins2?.length > 0 && (
-                                <div className={styles.simpleSecondLevel}>
-                                    {item.admins2.map((admin2) => (
-                                        <div
-                                            key={admin2.id}
-                                            className={`${styles.simpleDropdownItem} ${admin2.id === selectedItem?.id ? styles.selected : ''}`}
-                                            onClick={() => handleSelect(admin2)}
-                                        >
-                                            {admin2.nickname || admin2.name1}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </React.Fragment>
+                    {items.map((item, idx) => (
+                        <div
+                            key={item.id}
+                            className={`${styles.simpleDropdownItem} ${
+                                item.id === selectedItem?.id ? styles.selected : ""
+                            }`}
+                            onClick={() => handleSelect(item)}
+                            style={{
+                                paddingLeft: `${item._level * 18}px`,
+                                whiteSpace: "pre",
+                                fontFamily: "monospace",
+                            }}
+                        >
+                            {item.treeLabel}
+                        </div>
                     ))}
                 </div>
             )}

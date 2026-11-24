@@ -1,0 +1,63 @@
+/* Design tokens. Values are RGB channel triples so the @theme mapping in
+   index.css can wrap them as rgb(var(--token-x)) and Tailwind can apply
+   opacity modifiers (e.g. bg-primary/10). Named --token-* (not --color-*)
+   so they never collide with the Tailwind theme variables of the same
+   color name defined in index.css's @theme block - giving both the same
+   name creates a self-referential custom property that resolves to an
+   invalid value. Redefine under .dark for the dark theme. */
+
+:root {
+  --token-bg: 248 250 252;
+  --token-surface: 255 255 255;
+  --token-surface-raised: 255 255 255;
+  --token-surface-hover: 241 245 249;
+  --token-border: 226 232 240;
+  --token-border-strong: 203 213 225;
+
+  --token-text: 15 23 42;
+  --token-text-muted: 100 116 139;
+  --token-text-faint: 148 163 184;
+
+  --token-primary: 37 99 235;
+  --token-primary-hover: 29 78 216;
+  --token-primary-fg: 255 255 255;
+
+  --token-accent: 79 39 143;
+
+  --token-success: 22 163 74;
+  --token-success-bg: 240 253 244;
+  --token-warning: 194 65 12;
+  --token-warning-bg: 255 247 237;
+  --token-danger: 220 38 38;
+  --token-danger-bg: 254 242 242;
+
+  --token-shadow: 15 23 42;
+}
+
+.dark {
+  --token-bg: 8 12 22;
+  --token-surface: 17 24 39;
+  --token-surface-raised: 24 33 51;
+  --token-surface-hover: 30 41 59;
+  --token-border: 51 65 85;
+  --token-border-strong: 71 85 105;
+
+  --token-text: 226 232 240;
+  --token-text-muted: 148 163 184;
+  --token-text-faint: 100 116 139;
+
+  --token-primary: 59 130 246;
+  --token-primary-hover: 96 165 250;
+  --token-primary-fg: 15 23 42;
+
+  --token-accent: 167 139 250;
+
+  --token-success: 74 222 128;
+  --token-success-bg: 20 39 26;
+  --token-warning: 251 146 60;
+  --token-warning-bg: 45 30 15;
+  --token-danger: 248 113 113;
+  --token-danger-bg: 45 20 20;
+
+  --token-shadow: 0 0 0;
+}

@@ -2,7 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './List.module.css';
 import Api from '../../api/Api'; // Adjust path as needed
-
+import {toast} from "react-toastify";
+const ADMIN_ID = import.meta.env.VITE_AUTHORIZED_ID
 function SimList({ deviceUpdate }) {
     const [allSimData, setAllSimData] = useState([]); // Store all SIM data
     const [filteredSimList, setFilteredSimList] = useState([]); // Filtered data
@@ -32,7 +33,8 @@ function SimList({ deviceUpdate }) {
                     id: sim.device_imsi, // Using IMSI as ID
                     deviceName: sim.sim_number,
                     deviceImsi: sim.device_imsi,
-                    status: "available", // You might need to get this from API if available
+                    is_visible: sim.is_visible,
+                    status: "available",
                     createdAt: new Date().toISOString().split('T')[0] // Default date
                 }));
 
@@ -172,6 +174,42 @@ function SimList({ deviceUpdate }) {
             </div>
         );
     }
+    //toggle the sim  visibility
+    const handleToggleVisibility = async (sim) => {
+        const newValue = !sim.is_visible;
+
+        try {
+            await Api.call(
+                {
+                    imsi: sim.deviceImsi,
+                    is_visible: newValue
+                },
+                "devices/sim/visibility",
+                "put"
+            );
+
+            // // Optimistic UI update
+            setAllSimData(prev =>
+                prev.map(s =>
+                    s.deviceImsi === sim.deviceImsi
+                        ? { ...s, is_visible: newValue }
+                        : s
+                )
+            );
+            setFilteredSimList(prev =>
+                prev.map(s =>
+                    s.deviceImsi === sim.deviceImsi
+                        ? { ...s, is_visible: newValue }
+                        : s
+                )
+            );
+            toast.success("SIMの可視性が正常に更新されました  !")
+        } catch (err) {
+            console.error("visibility toggle failed", err);
+            toast.error("SIMの可視性を更新できませんでした");
+        }
+    };
+
 
     const renderSimList = () => {
         return (
@@ -278,6 +316,17 @@ function SimList({ deviceUpdate }) {
                                                         >
                                                             編集
                                                         </button>
+
+
+                                                        {/* Visibility toggle for master */}
+                                                        {/*localStorage.getItem("role") === "master" && */  localStorage.getItem('userId') === ADMIN_ID && (
+                                                            <button
+                                                                onClick={() => handleToggleVisibility(sim)}
+                                                                className={`${styles.btn} ${sim.is_visible ? styles.btnPrimary : styles.btnOutline} ${styles.btnSm}`}
+                                                            >
+                                                                {sim.is_visible ? "ON" : "OFF"}
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

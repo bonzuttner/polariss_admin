@@ -5,6 +5,7 @@ import {
   Routes,
 } from 'react-router-dom';
 import './App.css';
+import { ThemeProvider } from './context/ThemeContext';
 import MainLayout from './components/MainLayout';
 import Settings from './components/settings/Settings';
 import SimManagement from './components/simManagement/SimManagement.jsx'
@@ -30,45 +31,47 @@ function App() {
   //   }
   // }, [location]);
   return (
-    <Router>
-      <MainLayout key={layoutKey}>
-        <Routes>
-          <Route
-            exact
-            path="/"
-            element={<Home setLayoutKey={setLayoutKey} />}
-          />
-          <Route exact path="/login" element={<LineLogin />} />
-          <Route exact path="/setting/:id" element={<Settings />} />
-          <Route exact path="/setting" element={<Settings />} />
-          <Route
-            exact
-            path="/setting/user-info"
-            element={<Settings type={'info'} />}
-          />
-          <Route path="/sim-list/:id" element={<SimManagement  />} />
+    <ThemeProvider>
+      <Router>
+        <MainLayout key={layoutKey}>
+          <Routes>
+            <Route
+              exact
+              path="/"
+              element={<Home setLayoutKey={setLayoutKey} />}
+            />
+            <Route exact path="/login" element={<LineLogin />} />
+            <Route exact path="/setting/:id" element={<Settings />} />
+            <Route exact path="/setting" element={<Settings />} />
+            <Route
+              exact
+              path="/setting/user-info"
+              element={<Settings type={'info'} />}
+            />
+            <Route path="/sim-list/:id" element={<SimManagement  />} />
 
-          <Route exact path="/setting/profile" element={<Profile />} />
-          <Route exact path="/setting/bike/:id" element={<Bike />} />
-          <Route exact path="/setting/bike" element={<Bike />} />
-          <Route exact path="/setting/device/:id" element={<Device />} />
-          <Route exact path="/setting/device" element={<Device />} />
-          <Route exact path="/setting/list" element={<List />} />
-          <Route exact path="/setup" element={<Setup />} />
-        </Routes>
-        <ToastContainer
-            position="bottom-left"
-            autoClose={2500}
-            hideProgressBar={true}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-        />
-      </MainLayout>
-    </Router>
+            <Route exact path="/setting/profile" element={<Profile />} />
+            <Route exact path="/setting/bike/:id" element={<Bike />} />
+            <Route exact path="/setting/bike" element={<Bike />} />
+            <Route exact path="/setting/device/:id" element={<Device />} />
+            <Route exact path="/setting/device" element={<Device />} />
+            <Route exact path="/setting/list" element={<List />} />
+            <Route exact path="/setup" element={<Setup />} />
+          </Routes>
+          <ToastContainer
+              position="bottom-left"
+              autoClose={2500}
+              hideProgressBar={true}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+          />
+        </MainLayout>
+      </Router>
+    </ThemeProvider>
   );
 }
 

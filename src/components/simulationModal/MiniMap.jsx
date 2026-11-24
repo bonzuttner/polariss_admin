@@ -2,11 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMap, AdvancedMarker, Pin, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { DeviceService } from '../../api/deviceService.js';
-const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
+const MiniMap = ({ onStartChange, onEndChange, onHoverChange, initialStart, device }) => {
     const map = useMap();
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const clickListenerRef = useRef(null);
+    const moveListenerRef = useRef(null);
+    const moveRafRef = useRef(null);
+    const latestMoveRef = useRef(null);
     //other devices markers set
     const [devices, setDevices] = useState([]);
     // default center  if the device doesnt exists
@@ -47,9 +50,11 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
                 if (!start) {
                     setStart(position);
                     onStartChange([position.lat(), position.lng()]);
+                    if (typeof onHoverChange === 'function') onHoverChange(null);
                 } else if (!end) {
                     setEnd(position);
                     onEndChange([position.lat(), position.lng()]);
+                    if (typeof onHoverChange === 'function') onHoverChange(null);
                 }
             }
         );
@@ -59,7 +64,46 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
                 google.maps.event.removeListener(clickListenerRef.current);
             }
         };
-    }, [map, start, end, onStartChange, onEndChange]);
+    }, [map, start, end, onStartChange, onEndChange, onHoverChange]);
+
+    // Track pointer position on the map while a start point is set but no end point yet,
+    // so the SimulationModal can show a live "estimated distance" before the user clicks.
+    useEffect(() => {
+        if (!map) return;
+        if (typeof onHoverChange !== 'function') return;
+
+        const shouldTrackHover = Boolean(start) && !end;
+
+        if (!shouldTrackHover) {
+            onHoverChange(null);
+            return;
+        }
+
+        moveListenerRef.current = google.maps.event.addListener(map, 'mousemove', (event) => {
+            if (!event?.latLng) return;
+            latestMoveRef.current = event.latLng;
+
+            if (moveRafRef.current) return;
+            moveRafRef.current = requestAnimationFrame(() => {
+                moveRafRef.current = null;
+                const pos = latestMoveRef.current;
+                if (!pos) return;
+                onHoverChange([pos.lat(), pos.lng()]);
+            });
+        });
+
+        return () => {
+            if (moveListenerRef.current) {
+                google.maps.event.removeListener(moveListenerRef.current);
+                moveListenerRef.current = null;
+            }
+            if (moveRafRef.current) {
+                cancelAnimationFrame(moveRafRef.current);
+                moveRafRef.current = null;
+            }
+            latestMoveRef.current = null;
+        };
+    }, [map, start, end, onHoverChange]);
 
     //get the devices
     useEffect(() => {
@@ -82,7 +126,9 @@ const MiniMap = ({ onStartChange, onEndChange, initialStart, device }) => {
     const clearMarkers = () => {
         setEnd(null);
         setStart(null);
+        onStartChange(null);
         onEndChange(null);
+        if (typeof onHoverChange === 'function') onHoverChange(null);
     };
 
 

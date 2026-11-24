@@ -13,7 +13,7 @@ function LineLogin() {
 
   const lineLogin = () => {
     const redirectUri = encodeURIComponent(location.origin);
-    window.location.href = `https://access.line.me/oauth2/v2.1/login?returnUri=%2Foauth2%2Fv2.1%2Fauthorize%2Fconsent%3Fresponse_type%3Dcode%26client_id%3D2007971928%26redirect_uri%3D${redirectUri}%26state%3DJqv_5Bdv5IKDahQqlqIeGtvXS6HKJMLMi_e3lmoLQAar_WbF_cRMkUXqyxMADZnqDojHezxqeyWQGsScdVxjsJK6C0HKVK4v-Q9Xnz0tpuaFcUVHiomhYph6GYfMt6Ojn7nQapbwMm1e0xLaRtfv44GqvfMeEq-5n8vV8hWWpaQ3hpmVwZ3ZgdB5fFR4kpNHusAqZ-fvIYc71zHbHcV1XTRW2Ig5952zUw_J_VsL7gc%26scope%3Dprofile%2520openid&loginChannelId=2008368200&loginState=u7tA4gvzKs2vkXFkeTzcKO#`;
+    window.location.href = `https://access.line.me/oauth2/v2.1/login?returnUri=%2Foauth2%2Fv2.1%2Fauthorize%2Fconsent%3Fresponse_type%3Dcode%26client_id%3D2007971928%26redirect_uri%3D${redirectUri}%26state%3DJqv_5Bdv5IKDahQqlqIeGtvXS6HKJMLMi_e3lmoLQAar_WbF_cRMkUXqyxMADZnqDojHezxqeyWQGsScdVxjsJK6C0HKVK4v-Q9Xnz0tpuaFcUVHiomhYph6GYfMt6Ojn7nQapbwMm1e0xLaRtfv44GqvfMeEq-5n8vV8hWWpaQ3hpmVwZ3ZgdB5fFR4kpNHusAqZ-fvIYc71zHbHcV1XTRW2Ig5952zUw_J_VsL7gc%26scope%3Dprofile%2520openid&loginChannelId=2007971928&loginState=u7tA4gvzKs2vkXFkeTzcKO#`;
   };
 
   return (

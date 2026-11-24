@@ -65,11 +65,12 @@ function Bike(props) {
 
     const path = id ? `bikes/${id}` : `bikes`;
     const request_type = id ? `put` : `post`;
+    console.log("the request", request_type);
     const userId =
         type === 'info'
             ? localStorage.getItem('userProfileId')
             : localStorage.getItem('userId');
-
+    console.log("the user id",userId);
     const authId = localStorage.getItem('userId');
     const payload = new FormData();
 
@@ -110,6 +111,7 @@ function Bike(props) {
         setError(response.data?.message || 'Error, Please try again!');
       }
     } catch (err) {
+      console.error(err);
       setError('An unexpected error occurred.');
     } finally {
       setLoading(false); // stop spinner
@@ -126,7 +128,7 @@ function Bike(props) {
 
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h4>顧客名  </h4>
+            <h4>顧客名   </h4>
           </div>
 
           <form className={styles.form}>
@@ -195,7 +197,7 @@ function Bike(props) {
                 ) : (
                     <button
                         type="button"
-                        className={`${styles.btn} ${styles.btnPrimary}`}
+                        className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`}
                         onClick={() => updateBike()}
                     >
                     更新

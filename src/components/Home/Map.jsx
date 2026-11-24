@@ -1,5 +1,5 @@
 // Refactored CutomMap.jsx with helper functions
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import {
   Map,
   useMap,
@@ -8,12 +8,14 @@ import {
   useAdvancedMarkerRef,
   Pin,
 } from '@vis.gl/react-google-maps';
+import { FaBicycle } from 'react-icons/fa';
 import { DeviceService } from '../../api/deviceService.js';
 import {
   getMarkerLabel,
   getMarkerPosition,
 } from "../utils/mapUtils.js";
 import { renderDeviceInfoWindow } from "./renderInfoWindow.jsx";
+import { useTheme } from '../../context/ThemeContext.jsx';
 
 // necessary hooks
 import { useFetchNearbyDevices } from "../../hooks/useFetchNearbyDevices.js";
@@ -22,6 +24,11 @@ import { useNearbyDeviceCircles } from "../../hooks/useNearbyDeviceCircles.js";
 import { useMapIdleListener } from "../../hooks/useMapIdleListner.js";
 import { usePanToDevice } from "../../hooks/usePanToDevice.js";
 
+function readCssColor(varName, fallback) {
+  if (typeof document === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return value ? `rgb(${value})` : fallback;
+}
 
 const SIMULATION_MODE = import.meta.env.VITE_SIMULATION_MODE === "true";
 const DEFAULT_CENTER = { lat: 36.2223633040231, lng: 137.81848964688243 };
@@ -49,6 +56,13 @@ export default function CutomMap(props) {
   const map = useMap();
   const maps = useMapsLibrary('maps');
   const [markerRef, marker] = useAdvancedMarkerRef();
+  const { theme } = useTheme();
+
+  const markerColors = useMemo(() => ({
+    background: readCssColor('--token-primary', '#4611a7'),
+    borderColor: readCssColor('--token-primary-fg', '#ffffff'),
+    glyphColor: readCssColor('--token-primary-fg', '#ffffff'),
+  }), [theme]);
 
   // Use the nearby device circles hook
   useNearbyDeviceCircles({ map, maps, nearbyDevices, device });
@@ -89,10 +103,12 @@ export default function CutomMap(props) {
 
   return (
     <Map
+      className="relative h-full w-full overflow-hidden rounded-2xl border border-border shadow-xl"
       defaultCenter={center}
       defaultZoom={zoom}
       gestureHandling={'greedy'}
       disableDefaultUI={false}
+      colorScheme={theme === 'dark' ? 'DARK' : 'LIGHT'}
       mapId="4504f8b37365c3d0"
       reuseMaps={true}
     >
@@ -102,8 +118,8 @@ export default function CutomMap(props) {
           ref={markerRef}
           title={markerLabel}
           onClick={() => setMarkerInfo(true)}>
-          <Pin background={'#4611a7'} borderColor={'white'} glyphColor={'white'}>
-            {markerLabel}
+          <Pin {...markerColors}>
+            <FaBicycle color={markerColors.glyphColor} size={14} />
           </Pin>
         </AdvancedMarker>
       )}
@@ -122,8 +138,8 @@ export default function CutomMap(props) {
             position={{ lat: loc.lat, lng: loc.lon }}
             title={markerLabel}
           >
-            <Pin background={'#4611a7'} borderColor={'white'} glyphColor={'white'}>
-              {markerLabel}
+            <Pin {...markerColors} scale={0.85}>
+              <FaBicycle color={markerColors.glyphColor} size={11} />
             </Pin>
           </AdvancedMarker>
         );
