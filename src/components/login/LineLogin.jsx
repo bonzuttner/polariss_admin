@@ -13,15 +13,8 @@ function LineLogin() {
 
 
   const lineLogin = () => {
-    const lineLoginUrl = import.meta.env.VITE_LINE_LOGIN_URL;
-    if (!lineLoginUrl) {
-      console.error('VITE_LINE_LOGIN_URL is not configured');
-      toast.error('ログイン機能が利用できません。しばらくしてからもう一度お試しください。');
-      return;
-    }
-    //setRedirecting(true);
-    const redirectUri = encodeURIComponent(location.origin);
-    window.location.href = lineLoginUrl.replace('{redirectUri}', redirectUri);
+      const redirectUri = encodeURIComponent(location.origin);
+    window.location.href = `https://access.line.me/oauth2/v2.1/login?returnUri=%2Foauth2%2Fv2.1%2Fauthorize%2Fconsent%3Fresponse_type%3Dcode%26client_id%3D2008384432%26redirect_uri%3D{redirectUri}%26state%3DJqv_5Bdv5IKDahQqlqIeGtvXS6HKJMLMi_e3lmoLQAar_WbF_cRMkUXqyxMADZnqDojHezxqeyWQGsScdVxjsJK6C0HKVK4v-Q9Xnz0tpuaFcUVHiomhYph6GYfMt6Ojn7nQapbwMm1e0xLaRtfv44GqvfMeEq-5n8vV8hWWpaQ3hpmVwZ3ZgdB5fFR4kpNHusAqZ-fvIYc71zHbHcV1XTRW2Ig5952zUw_J_VsL7gc%26scope%3Dprofile%2520openid&loginChannelId=2008384432&loginState=u7tA4gvzKs2vkXFkeTzcKO#`;
   };
 
   const botBasicId = import.meta.env.VITE_BOT_BASIC_ID;
