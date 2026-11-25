@@ -19,7 +19,7 @@ function LineLogin() {
       toast.error('ログイン機能が利用できません。しばらくしてからもう一度お試しください。');
       return;
     }
-    setRedirecting(true);
+    //setRedirecting(true);
     const redirectUri = encodeURIComponent(location.origin);
     window.location.href = lineLoginUrl.replace('{redirectUri}', redirectUri);
   };
