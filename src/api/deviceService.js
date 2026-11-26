@@ -98,4 +98,26 @@ export const DeviceService = {
             localStorage.getItem('userId')
             )
     },
+
+    getDeviceMileageLimit: async (imsi) => {
+        return Api.call({}, `deviceMileage/limit?imsi=${imsi}`, 'get', localStorage.getItem('userId'));
+    },
+
+    setDeviceMileageLimit: async ({ imsi, limitKm, trackingStartDate, alertThresholdPercent }) => {
+        return Api.call(
+            { imsi, limitKm, trackingStartDate, alertThresholdPercent },
+            'deviceMileage/limit',
+            'put',
+            localStorage.getItem('userId')
+        );
+    },
+
+    bulkSetDeviceMileageLimits: async (items) => {
+        return Api.call({ items }, 'deviceMileage/limit/bulk', 'put', localStorage.getItem('userId'));
+    },
+
+    getDeviceMileageUsage: async (imsis) => {
+        const imsiQuery = imsis && imsis.length ? `?imsis=${imsis.join(',')}` : '';
+        return Api.call({}, `deviceMileage/usage${imsiQuery}`, 'get', localStorage.getItem('userId'));
+    },
 };

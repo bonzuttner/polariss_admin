@@ -23,7 +23,8 @@ export default function DateTimePicker({
                                          placeholder = "Select date & time",
                                          timeStepMinutes = 15,
                                          desktopShift = 0, // NEW: Shift amount in pixels
-                                         shiftBreakpoint = 768 // NEW: Breakpoint for when to apply shift
+                                         shiftBreakpoint = 768, // NEW: Breakpoint for when to apply shift
+                                         dateOnly = false // NEW: hide the time-of-day selector
                                        }) {
   const [openState, setOpenState] = useState(false);
   const isControlled = typeof open !== "undefined";
@@ -145,7 +146,7 @@ export default function DateTimePicker({
           <div className={styles.inputContent}>
             <FaCalendarAlt className={styles.inputIcon} />
             <span className={styles.inputText}>
-            {value ? format(value, "yyyy-MM-dd HH:mm") : placeholder}
+            {value ? format(value, dateOnly ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm") : placeholder}
           </span>
           </div>
           <div className={styles.inputActions}>
@@ -193,6 +194,7 @@ export default function DateTimePicker({
                 />
 
                 {/* Time Selection */}
+                {!dateOnly && (
                 <div className={styles.timeSection}>
                   <div className={styles.timeSectionHeader}>
                     <h4>Select Time</h4>
@@ -249,6 +251,7 @@ export default function DateTimePicker({
                     </div>
                   </div>
                 </div>
+                )}
 
                 {/* Footer */}
                 <div className={styles.calendarFooter}>

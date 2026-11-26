@@ -6,6 +6,8 @@ import AssignUsersTab from "./AssignUsersTab.jsx";
 import DevicesTab from "./DevicesTab.jsx";
 import BikesTab from "./BikesTab.jsx";
 import ProfileTab from "./ProfileTab.jsx";
+import DeviceInfoTab from "./DeviceInfoTab.jsx";
+import BulkMileageTab from "./BulkMileageTab.jsx";
 
 function Settings(props) {
   const navigate = useNavigate();
@@ -167,6 +169,17 @@ function Settings(props) {
             />
         );
 
+      case 'device-info':
+        return (
+            <DeviceInfoTab
+                userDetail={userDetail}
+                componentType={componentType}
+            />
+        );
+
+      case 'bulk-mileage':
+        return <BulkMileageTab userDetail={userDetail} />;
+
       case 'assign-users':
         return (
             <AssignUsersTab
@@ -274,6 +287,28 @@ function Settings(props) {
                 デバイス情報
               </button>
             </li>
+
+            {componentType === 'info' && (
+                <li className={styles.navItem}>
+                  <button
+                      className={`${styles.navLink} ${selectedTab === 'device-info' ? styles.active : ''}`}
+                      onClick={() => handleTabClick('device-info')}
+                  >
+                    走行距離情報
+                  </button>
+                </li>
+            )}
+
+            {componentType === 'info' && (
+                <li className={styles.navItem}>
+                  <button
+                      className={`${styles.navLink} ${selectedTab === 'bulk-mileage' ? styles.active : ''}`}
+                      onClick={() => handleTabClick('bulk-mileage')}
+                  >
+                    一括距離制限設定
+                  </button>
+                </li>
+            )}
 
             {logedInRole !== 'user' && componentType === 'info' && (
                 <li className={styles.navItem}>
