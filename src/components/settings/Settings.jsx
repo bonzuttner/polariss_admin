@@ -253,11 +253,6 @@ function Settings(props) {
             </div>
         )}
 
-        <div className={styles.infoAlert}>
-          <p>{`・LoginUserID: ${localStorage.getItem('userId')}`}</p>
-          <p>{`・UserProfile.userID: ${userProfileId}`}</p>
-          <p>{`・action: Index`}</p>
-        </div>
 
         <div className={styles.tabsSection}>
           <ul className={styles.navTabs}>

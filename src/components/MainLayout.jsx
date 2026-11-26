@@ -17,7 +17,7 @@ function MainLayout({ children }) {
     <div className="flex min-h-screen flex-col bg-bg text-text">
       <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface px-4 sm:px-6">
         <a href="/" className="flex items-center">
-          <img src="../../Assests/polaris_01.png" alt="Polaris" className="h-8 w-auto sm:h-9" />
+          <img src="../../polaris_01.png" alt="Polaris" className="h-8 w-auto sm:h-9" />
         </a>
 
         <div className="flex items-center gap-2 sm:gap-3">
